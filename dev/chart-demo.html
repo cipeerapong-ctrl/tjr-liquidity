@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chart engine demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Dev page for the canvas engine (Task 7). Task 8's tokens replace these values site-wide. */
+  :root {
+    --ground: #070a0e; --panel: #0c1117; --line: #1b2430; --muted: #8794a3; --ink: #e6edf3;
+    --font-text: 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ground); color: var(--ink); font: 15px/1.5 var(--font-text); }
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 16px 64px; display: grid; gap: 28px; }
+  header h1 { font-size: 22px; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .bar b { font-family: var(--font-mono); font-size: 13px; color: #fbbf24; }
+  .bar span { font-size: 14px; }
+  .bar small { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+  .chart { height: clamp(280px, 40vw, 440px); background: #0a0e13; }
+  .ctrls { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line); }
+  button {
+    min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 4px; cursor: pointer;
+    border: 1px solid var(--line); background: #111821; color: var(--ink);
+    font: 600 13px var(--font-mono); transition: background-color .15s, border-color .15s;
+  }
+  button:hover { border-color: #2c3b4d; background: #16202b; }
+  button:focus-visible { outline: 2px solid #22d3ee; outline-offset: 2px; }
+  button[aria-pressed="true"] { border-color: #22d3ee; color: #22d3ee; }
+  .seg { display: inline-flex; gap: 0; }
+  .seg button { border-radius: 0; margin-left: -1px; }
+  .seg button:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+  .seg button:last-child { border-radius: 0 4px 4px 0; }
+  .out { padding: 8px 14px 12px; font: 12px/1.6 var(--font-mono); color: var(--muted); min-height: 44px; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Chart engine — dev check</h1>
+    <p>S01, S06 (sessions), S10 (timeframe switch) · overlays from <code>TJR.annotate</code> · hover = crosshair, click = bar + price, drag the cyan line on S06.</p>
+  </header>
+  <div id="charts"></div>
+</main>
+
+<script src="../assets/js/core/ns.js"></script>
+<script src="../assets/js/core/store.js"></script>
+<script src="../assets/js/scenario/rng.js"></script>
+<script src="../assets/js/scenario/swings.js"></script>
+<script src="../assets/js/scenario/gen.js"></script>
+<script src="../assets/js/scenario/sessions.js"></script>
+<script src="../assets/js/scenario/library.js"></script>
+<script src="../assets/js/scenario/annotate.js"></script>
+<script src="../assets/js/scenario/grade.js"></script>
+<script src="../assets/js/chart/scale.js"></script>
+<script src="../assets/js/chart/render.js"></script>
+<script src="../assets/js/chart/overlays.js"></script>
+<script src="../assets/js/chart/chart.js"></script>
+<script>
+(function () {
+  'use strict';
+  var TF_NAME = { 1: '1m', 5: '5m', 15: '15m', 60: '1H', 240: '4H', 1440: 'D' };
+  var host = document.getElementById('charts');
+
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function panel(id, opts) {
+    var def = TJR.scenarios.get(id), built = TJR.scenarios.safeBuild(def, 3, {});
+    var box = el('section', { 'class': 'panel', 'aria-label': id });
+    var bar = el('div', { 'class': 'bar' });
+    bar.appendChild(el('b', null, id));
+    bar.appendChild(el('span', null, def.title));
+    var meta = el('small', null, '');
+    bar.appendChild(meta);
+    var frame = el('div', { 'class': 'chart' });
+    var ctrls = el('div', { 'class': 'ctrls' });
+    var out = el('div', { 'class': 'out', 'aria-live': 'polite' }, 'hover / click the chart');
+    box.appendChild(bar); box.appendChild(frame); box.appendChild(ctrls); box.appendChild(out);
+    host.appendChild(box);
+    host.appendChild(el('div', { style: 'height:28px' }));
+
+    var ch = TJR.chart.create(frame, { label: id + ' chart' });
+    ch.setData(built);
+    ch.setOverlays(TJR.annotate(built, {}));
+    if (opts.line) ch.addLine(opts.line);
+
+    function showMeta() {
+      var i = ch.info();
+      meta.textContent = built.meta.instrument + ' · ' + TF_NAME[i.tf] + ' · bar ' + i.revealed + '/' + (i.bars - 1) + ' · seed ' + built.meta.seed;
+    }
+    function btn(label, fn, extra) {
+      var b = el('button', Object.assign({ type: 'button' }, extra || {}), label);
+      b.addEventListener('click', function () { fn(b); showMeta(); });
+      return b;
+    }
+    var playBtn = btn('Play', function () {
+      var i = ch.info();
+      if (i.playing) { ch.pause(); playBtn.textContent = 'Play'; return; }
+      var from = i.revealed >= i.bars - 1 ? Math.floor(i.bars * 0.15) : i.revealed;
+      playBtn.textContent = 'Pause';
+      ch.play({ from: from, barsPerSec: 14, onBar: showMeta }).then(function () { playBtn.textContent = 'Play'; showMeta(); });
+    });
+    ctrls.appendChild(playBtn);
+    ctrls.appendChild(btn('◀ Step', function () { ch.step(-1); playBtn.textContent = 'Play'; }, { 'aria-label': 'Step back' }));
+    ctrls.appendChild(btn('Step ▶', function () { ch.step(1); playBtn.textContent = 'Play'; }, { 'aria-label': 'Step forward' }));
+    ctrls.appendChild(btn('End', function () { ch.reveal(ch.info().bars - 1); playBtn.textContent = 'Play'; }));
+    ctrls.appendChild(btn('Flash sweep level', function () {
+      var t = built.truth.sweep && built.truth.sweep.levelId;
+      if (t) ch.flash(t);
+    }));
+    if (opts.tfs) {
+      var seg = el('div', { 'class': 'seg', role: 'group', 'aria-label': 'Timeframe' });
+      opts.tfs.forEach(function (tf) {
+        seg.appendChild(btn(TF_NAME[tf], function (b) {
+          ch.setTimeframe(tf);
+          Array.prototype.forEach.call(seg.children, function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+          playBtn.textContent = 'Play';
+        }, { 'aria-pressed': String(tf === built.meta.tf) }));
+      });
+      ctrls.appendChild(seg);
+    }
+
+    ch.on('hover', function (e) {
+      if (!e) return;
+      var k = e.candle;
+      out.textContent = 'bar ' + e.i + ' · ' + TJR.sessions.fmtET(e.t) + ' ET / ' + TJR.sessions.fmtThai(e.t) + ' TH · O ' +
+        TJR.util.fmtPrice(k.o) + ' H ' + TJR.util.fmtPrice(k.h) + ' L ' + TJR.util.fmtPrice(k.l) + ' C ' + TJR.util.fmtPrice(k.c);
+    });
+    ch.on('click', function (e) { out.textContent = 'click → bar ' + e.i + ' (base ' + e.baseFrom + '–' + e.baseTo + ') @ ' + TJR.util.fmtPrice(e.price); });
+    ch.on('drag', function (e) { out.textContent = 'drag ' + e.id + ' → ' + TJR.util.fmtPrice(e.price) + (e.done ? ' (done)' : ''); });
+    showMeta();
+    return ch;
+  }
+
+  var s06 = TJR.scenarios.safeBuild(TJR.scenarios.get('S06'), 3, {});
+  var asia = (s06.truth.sessions || []).filter(function (s) { return s.name === 'asia'; })[0];
+  // handles for poking the engine from the console while checking it (dev page only)
+  window.demoCharts = {
+    S01: panel('S01', {}),
+    S06: panel('S06', { line: asia ? { id: 'my-asia-high', price: asia.high + 6, label: 'ลากเส้นนี้', draggable: true } : null }),
+    S10: panel('S10', { tfs: [5, 15, 60, 240] })
+  };
+})();
+</script>
+</body>
+</html>
