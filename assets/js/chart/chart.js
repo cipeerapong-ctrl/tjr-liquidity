@@ -35,7 +35,7 @@
       base: [], series: [], meta: {}, baseTf: 5, tf: 5, tick: 0.25, at: function (b) { return b; },
       rev: -1, partial: null, partialEnd: -1,
       view: { from: 0, to: 0 }, viewSet: false,
-      src: [], ov: [], lines: [], shown: {}, anims: {},
+      src: [], ov: [], lines: [], shown: {}, sweptSeen: {}, anims: {},
       range: null, w: 0, h: 0, dpr: 1, fs: 11, th: R.readTheme(el, opts.theme),
       hover: null, drag: null, down: null, play: null,
       raf: null, lastTs: null, visible: true, reduced: false, dead: false,
@@ -123,12 +123,24 @@
     function lastBase(j) { return st.series === st.base ? j : j + 1 < n() ? firstBase(j + 1) - 1 : st.base.length - 1; }
     function baseRevealed() { return st.partial ? st.partialEnd : lastBase(Math.max(0, st.rev)); }
 
+    // Visibility and swept state of a mapped overlay. While the last bar on screen is a partly revealed
+    // roll-up (TF switched mid-replay), the mapped indices cannot tell the known part of that bar from the
+    // rest, so the overlay is judged by its source (base) indices against the last revealed base bar.
+    var srcOf = new Map();                                 // mapped overlay -> source overlay (base indices)
+    function visible(m) {
+      if (!O.isVisible(m, st.rev)) return false;
+      return !st.partial || O.isVisible(srcOf.get(m) || m, st.partialEnd);
+    }
+    function swept(m) {
+      return st.partial ? O.isSwept(srcOf.get(m) || m, st.partialEnd) : O.isSwept(m, st.rev);
+    }
+
     // ---------------------------------------------------------------- price range + layout
     function targetRange() {
       var lo = Infinity, hi = -Infinity, a = Math.max(0, st.view.from), b = Math.min(st.view.to, st.rev);
       for (var i = a; i <= b; i++) { var k = get(i); if (k.l < lo) lo = k.l; if (k.h > hi) hi = k.h; }
       st.ov.forEach(function (o) {
-        if (!O.isVisible(o, st.rev)) return;
+        if (!visible(o)) return;
         [o.price, o.low, o.high, o.a && o.a.price, o.b && o.b.price].forEach(function (p) {
           if (typeof p === 'number' && isFinite(p)) { if (p < lo) lo = p; if (p > hi) hi = p; }
         });
@@ -192,7 +204,7 @@
         function (s) { return ctx.measureText(s).width; }, box.left, box.right) : [];
       R.grid(ctx, th, plabs, tlabs, box);
 
-      var ovs = { rev: st.rev, box: box, fs: fs, axes: axes, dragId: st.drag && st.drag.id, prog: function (id) {
+      var ovs = { rev: st.rev, box: box, fs: fs, axes: axes, dragId: st.drag && st.drag.id, vis: visible, swept: swept, prog: function (id) {
         var a = st.anims[id];
         if (!a) return { inP: 1, flashP: null };
         return { inP: a.inT0 == null ? 1 : clamp((t - a.inT0) / O.DRAW_IN, 0, 1),
@@ -220,28 +232,29 @@
     // ---------------------------------------------------------------- reveal + animation bookkeeping
     function anim(id, key, t) { (st.anims[id] = st.anims[id] || {})[key] = t; }
 
-    // Recompute which overlays are on screen. Newly visible ones draw in and levels whose sweep bar was
-    // just reached flash, but only when moving forward with motion allowed.
-    function refreshShown(animate, prev) {
+    // Recompute which overlays are on screen and which levels read as swept. When moving forward with
+    // motion allowed, newly visible overlays draw in and newly swept levels flash.
+    function refreshShown(animate) {
       var t = now(), go = animate && !st.reduced;
-      var shown = {};
+      var shown = {}, gone = {};
       st.ov.forEach(function (o) {
-        var v = O.isVisible(o, st.rev);
+        var v = visible(o), s = v && o.type === 'level' && swept(o);
         if (v && go && !st.shown[o.id]) anim(o.id, 'inT0', t);
-        if (v && go && o.type === 'level' && o.state === 'swept' && o.to != null && prev < o.to && o.to <= st.rev) anim(o.id, 'flT0', t);
+        if (s && go && !st.sweptSeen[o.id]) anim(o.id, 'flT0', t);
         if (!v && st.anims[o.id]) delete st.anims[o.id];
-        shown[o.id] = v;
+        shown[o.id] = v; gone[o.id] = s;
       });
-      st.shown = shown;
+      st.shown = shown; st.sweptSeen = gone;
     }
 
+    // Forward = more base bars known than before (also true when a partly revealed roll-up completes).
     function setRev(i, animate) {
       if (!n()) return;
-      var prev = st.rev;
+      var before = baseRevealed();
       st.rev = clamp(Math.round(i), 0, n() - 1);
       st.partial = null;
       follow();
-      refreshShown(animate && st.rev > prev, prev);
+      refreshShown(animate && baseRevealed() > before);
       invalidate();
     }
 
@@ -375,7 +388,11 @@
       if (c.id == null) c.id = 'ov' + (++seq);
       return c;
     }
-    function remap() { st.ov = O.mapBars(st.src, st.base, st.series); }
+    function remap() {
+      st.ov = O.mapBars(st.src, st.base, st.series);
+      srcOf = new Map();
+      st.ov.forEach(function (m, k) { srcOf.set(m, st.src[k]); });
+    }
 
     var api = {
       setData: function (d) {
@@ -384,7 +401,7 @@
         var cs0 = (d && d.candles) || [], meta = (d && d.meta) || {};
         st.base = cs0; st.series = cs0; st.meta = meta;
         st.baseTf = meta.tf || 5; st.tf = st.baseTf; st.tick = meta.tick || 0.25;
-        st.src = []; st.ov = []; st.lines = []; st.shown = {}; st.anims = {};
+        st.src = []; st.ov = []; st.lines = []; st.shown = {}; st.sweptSeen = {}; st.anims = {};
         st.rev = cs0.length - 1; st.partial = null; st.range = null;
         st.hover = null; st.drag = null; st.down = null; st.viewSet = false;
         st.th = R.readTheme(el, opts.theme);
@@ -412,7 +429,7 @@
         }
         st.hover = null; st.range = null; st.anims = {}; st.viewSet = false;
         fitView(); follow();
-        refreshShown(false, st.rev);
+        refreshShown(false);
         invalidate();
         return api;
       },
@@ -454,7 +471,7 @@
         st.src = (list || []).map(withId);
         remap();
         st.anims = {};
-        refreshShown(false, st.rev);
+        refreshShown(false);
         invalidate();
         return api;
       },
@@ -464,8 +481,9 @@
         st.src = st.src.filter(function (x) { return x.id !== c.id; }).concat([c]);
         remap();
         var m = st.ov[st.ov.length - 1];
-        if (O.isVisible(m, st.rev) && !st.reduced) anim(c.id, 'inT0', now());
-        st.shown[c.id] = O.isVisible(m, st.rev);
+        if (visible(m) && !st.reduced) anim(c.id, 'inT0', now());
+        st.shown[c.id] = visible(m);
+        st.sweptSeen[c.id] = st.shown[c.id] && m.type === 'level' && swept(m);
         invalidate();
         return c.id;
       },
@@ -513,7 +531,10 @@
           tf: st.tf, baseTf: st.baseTf, bars: n(), revealed: st.rev, playing: !!st.play, reduced: st.reduced,
           view: { from: st.view.from, to: st.view.to }, width: st.w, height: st.h,
           overlays: st.ov.map(copy), lines: st.lines.map(copy),
-          visible: st.ov.filter(function (o) { return O.isVisible(o, st.rev); }).map(function (o) { return o.id; }),
+          visible: st.ov.filter(function (o) { return visible(o); }).map(function (o) { return o.id; }),
+          swept: st.ov.filter(function (o) { return o.type === 'level' && visible(o) && swept(o); })
+            .map(function (o) { return o.id; }),
+          priceRange: targetRange(),
           animating: Object.keys(st.anims).filter(function (id) {
             var a = st.anims[id];
             return (a.inT0 != null && t - a.inT0 < O.DRAW_IN) || (a.flT0 != null && t - a.flT0 < O.FLASH);

@@ -160,7 +160,7 @@
   // ------------------------------------------------------------------ per type
 
   function drawLevel(ctx, sc, th, o, st, pr, place) {
-    var box = st.box, col = kindColor(th, o.kind), swept = isSwept(o, st.rev);
+    var box = st.box, col = kindColor(th, o.kind), swept = st.swept ? st.swept(o) : isSwept(o, st.rev);
     var x0 = Math.max(box.left, o.from != null ? sc.x(o.from) : box.left);
     var x1 = swept ? sc.x(o.to) : (o.to == null || o.to >= st.rev ? box.right : sc.x(o.to));
     x1 = Math.min(box.right, x1);
@@ -286,10 +286,12 @@
 
   var ORDER = { box: 0, zone: 1, trend: 2, level: 3, marker: 4, label: 5 };
 
-  // st: {rev, box, fs, prog(id) -> {inP 0..1, flashP 0..1|null}}. layer 'under' = box and zone shading
-  // (drawn beneath the candles), 'over' = their labels and everything else; omitted = both.
+  // st: {rev, box, fs, prog(id) -> {inP 0..1, flashP 0..1|null}, vis?(o), swept?(o)}. vis/swept replace
+  // isVisible/isSwept against st.rev (the chart passes judges that know a partly revealed roll-up).
+  // layer 'under' = box and zone shading (drawn beneath the candles), 'over' = their labels and everything
+  // else; omitted = both.
   function draw(ctx, sc, th, list, st, layer) {
-    var vis = list.filter(function (o) { return isVisible(o, st.rev); });
+    var vis = list.filter(function (o) { return st.vis ? st.vis(o) : isVisible(o, st.rev); });
     vis.sort(function (a, b) { return (ORDER[a.type] || 0) - (ORDER[b.type] || 0); });
     ctx.save();
     ctx.beginPath();

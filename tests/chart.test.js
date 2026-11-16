@@ -383,6 +383,57 @@
     });
   });
 
+  // A rolled-up bar that is only partly revealed (TF switched mid-replay) must not show anything its
+  // unrevealed base bars hold: overlays, swept states and the price range are judged by base bar.
+  function s10At742(tf, overlays) {
+    var b = build('S10'), out = {};
+    withEnv({}, function (env) {
+      var ch = TJR.chart.create(env.el, {});
+      ch.setData(b);
+      ch.setOverlays(overlays || TJR.annotate(b, {}));
+      ch.reveal(742);
+      out.base = ch.info();
+      ch.setTimeframe(tf);
+      out.rolled = ch.info();
+      ch.step(1);
+      out.stepped = ch.info();
+      ch.destroy();
+    });
+    return out;
+  }
+
+  test('chart.setTimeframe mid-bucket shows no overlay or sweep the revealed base bars do not hold', () => {
+    var b = build('S10'), ov = TJR.annotate(b, {});
+    var sweepBar = ov.filter(function (o) { return o.id === 'sweep'; })[0].bar;
+    eq(sweepBar, 743, 'S10 seed 3 sweeps at base bar 743');
+    var at = TJR.chart.overlays.indexer(b.candles, TJR.gen.rollup(b.candles, 5, 15));
+    eq(at(743), at(742), 'precondition: 742 and 743 share one 15m bar');
+    var r = s10At742(15);
+    ok(r.base.visible.indexOf('sweep') < 0 && r.base.swept.length === 0, '5m at 742: no sweep yet');
+    eq(r.rolled.visible.slice().sort(), r.base.visible.slice().sort(), '15m shows exactly what 5m showed at bar 742');
+    eq(r.rolled.swept, [], 'no level drawn swept before its sweep bar');
+  });
+
+  test('chart: the price range of a partly revealed rolled-up bar ignores overlays still in the future', () => {
+    // S10's sweep high equals an earlier high, so add a marker in the unrevealed part of the same 15m bar,
+    // priced far outside everything known at bar 742
+    var b = build('S10');
+    var all = TJR.annotate(b, {}).concat([{ id: 'future', type: 'marker', bar: 743, price: 30800, shape: 'dot', appearAt: 743 }]);
+    var known = all.filter(function (o) { return TJR.chart.overlays.isVisible(o, 742); });
+    var withAll = s10At742(15, all).rolled.priceRange, withKnown = s10At742(15, known).rolled.priceRange;
+    ok(withAll && isFinite(withAll.lo) && isFinite(withAll.hi), 'info().priceRange is reported');
+    eq(withAll, withKnown, 'future overlays must not widen the range');
+  });
+
+  test('chart: stepping past the sweep at 15m still draws the sweep in and flashes the swept levels', () => {
+    var r = s10At742(15);
+    ['Q1', 'Q2', 'Q3'].forEach(function (id) {
+      ok(r.stepped.swept.indexOf(id) >= 0, id + ' swept after the step');
+      ok(r.stepped.animating.indexOf(id) >= 0, id + ' flashes (it was already on screen, so this is the flash)');
+    });
+    ok(r.stepped.visible.indexOf('sweep') >= 0 && r.stepped.animating.indexOf('sweep') >= 0, 'sweep marker draws in');
+  });
+
   test('chart: a draggable line moves with the pointer and reports drag; a tap reports click', () => {
     withEnv({ w: 390, h: 300 }, function (env) {
       var ch = TJR.chart.create(env.el, {}), drags = [], clicks = [], b = build('S06');
