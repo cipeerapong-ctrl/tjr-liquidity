@@ -290,7 +290,7 @@
     var p = sc.pt(name), e = extra || {};
     var l = { id: id, kind: kind, label: e.label || (LABEL[kind] ? LABEL[kind][p.side] : id), price: p.price, bar: p.i,
               side: p.side, known: e.known != null ? e.known : p.k + 2, sweptAt: null,
-              resistance: e.resistance || null };
+              resistance: null, resistanceAfter: null };      // set by finish (resistanceOf)
     if (e.group) l.group = e.group;
     if (e.session) l.session = e.session;
     return l;
@@ -301,6 +301,21 @@
     return { name: name, from: w[0], to: w[1], high: hi, low: lo };
   }
   function mpt(sc, name) { var p = sc.pt(name); return { bar: p.i, price: p.price, type: p.side }; }
+
+  // The levels price reversed away from: on the swept level's side, taken between the sweep and the confirm swing.
+  function reversedFrom(levels, side, from, to) {
+    return levels.filter(function (l) { return l.side === side && l.sweptAt != null && l.sweptAt >= from && l.sweptAt <= to; });
+  }
+  // Controller ruling (fix round 1): resistance = the state before the level is swept: 'low' for a level of a
+  // stacked group (untaken stack, F8.1), else null. resistanceAfter = 'high' for a level price reversed away from
+  // with a confirmed reversal (F8.6: the trade has a confirmBar), else = resistance.
+  function resistanceOf(levels, sweepSide, sweepBar, confirmBar) {
+    var away = confirmBar != null ? reversedFrom(levels, sweepSide, sweepBar, confirmBar) : [];
+    return levels.map(function (l) {
+      var before = l.group ? 'low' : null;
+      return [before, away.indexOf(l) >= 0 ? 'high' : before];
+    });
+  }
 
   // Assemble the built scenario. o: {levels, sweepIds, structure:[[name, longTag]], side, target (level id),
   // outcome, sessions, times, near:[a,b], poke:[name, levelId], htf, notes(truth) -> [[bar, fact, text]]}
@@ -339,6 +354,9 @@
       var tl = o.levels.filter(function (l) { return l.id === o.target; })[0];
       target = { price: tl.price, levelId: tl.id };
     }
+    resistanceOf(o.levels, first.side, sweep.bar, confirmBar).forEach(function (r, i) {
+      o.levels[i].resistance = r[0]; o.levels[i].resistanceAfter = r[1];
+    });
     var stamped = cs.map(function (k, i) { return { t: o.times[i], o: k.o, h: k.h, l: k.l, c: k.c }; });
     var truth = {
       side: o.side || null, outcome: o.side ? o.outcome : null, levels: o.levels, sweep: sweep,
@@ -367,18 +385,37 @@
     return cs.length - 1;
   }
   function swept(T, id) { return T.levels.filter(function (l) { return l.id === id; })[0].sweptAt; }
-  // f: {sweep, confirm, entry, target: fact ids, more(T, cs) -> extra notes}
+  // Generic trade-note texts. Each one paraphrases every fact it may be cited with:
+  //   sweep  - long: F6.3 (do not blindly buy when a low is taken, drawdown); short: F6.4 (no blind sell above a
+  //            high, wait for confirmation; F6.3 only speaks of buying)
+  //   confirm - F6.5 / F6.6 / F7.14 (long), F6.8 / F6.9 (short): the new trend's structure forms
+  //   entry  - F6.5 / F6.6 / F6.8 / F6.9 / F7.14: entry on the pullback after the structure
+  //   target - F8.4: liquidity acts as the price target (where positions are closed)
+  var NOTE = {
+    sweep: { long: ['F6.3', 'ราคาลงกวาด low แล้ว — อย่าเพิ่งกด buy ทันที ถ้าราคายังลงต่อจะติด drawdown'],
+             short: ['F6.4', 'ราคาขึ้นกวาด high แล้ว — ไม่ sell เหนือ high แบบไม่คิด ต้องรอ confirmation ก่อน'] },
+    confirm: { long: 'HH เกิดแล้ว: เทรนด์ขาขึ้นใหม่เริ่มก่อตัว (confirmation)', short: 'LL เกิดแล้ว: เทรนด์ขาลงใหม่เริ่มก่อตัว (confirmation)' },
+    entry: 'ช่วง pullback หลังโครงสร้างยืนยัน = จุดเข้า (entry) ตามคลิป — จุดเข้าแบบเป๊ะ ๆ: คลิปไม่ได้ระบุ',
+    target: { long: 'ราคาวิ่งขึ้นถึง liquidity ด้านบน — liquidity เป็นเป้าราคา (ที่ปิดกำไร) ได้',
+              short: 'ราคาลงถึง liquidity ด้านล่าง — liquidity เป็นเป้าราคา (ที่ปิดกำไร) ได้' },
+    fail: ['F9.2', 'setup ล้ม: ราคากลับไปทะลุจุด sweep — วิธีจัดการเมื่อ confirmation ล้ม: คลิปไม่ได้ระบุ']
+  };
+  // f: {sweep, confirm, entry, target, more(T, cs) -> extra notes}. A slot is a fact id (that fact with the
+  // slot's generic text) or [fact, text] for a scenario-specific paraphrase (sweep: [fact, text] only, since its
+  // generic text belongs to F6.3 / F6.4). sweep defaults to F6.3 / F6.4,
+  // entry to the confirm fact, target to F8.4; confirm is required.
   function tradeNotes(f) {
     return function (T, cs) {
-      var L = T.side === 'long';
+      var side = T.side;
+      function slot(v, text) { return typeof v === 'string' ? [v, text] : v; }
+      var c = slot(f.confirm, NOTE.confirm[side]);
       var out = [
-        [T.sweep.bar, f.sweep || 'F6.3', L ? 'ราคาลงกวาด liquidity ใต้ low แล้ว — เป็นแค่โอกาส ยังไม่ใช่สัญญาณให้กด buy'
-                                            : 'ราคาขึ้นกวาด liquidity เหนือ high แล้ว — เป็นแค่โอกาส ยังไม่ใช่สัญญาณให้กด sell'],
-        [T.confirmBar, f.confirm, L ? 'HH เกิดแล้ว: เทรนด์ขาขึ้นใหม่เริ่มยืนยัน' : 'LL เกิดแล้ว: เทรนด์ขาลงใหม่เริ่มยืนยัน'],
-        [T.entryWindow.from, f.entry || f.confirm, 'ช่วง pullback หลังโครงสร้างยืนยัน = average entry ตามคลิป (จุดเข้าแบบเป๊ะ ๆ คลิปไม่ได้ระบุ)']
+        [T.sweep.bar].concat(f.sweep || NOTE.sweep[side]),
+        [T.confirmBar].concat(c),
+        [T.entryWindow.from].concat(slot(f.entry || c[0], NOTE.entry))
       ];
-      if (T.outcome === 'win') out.push([reachBar(cs, T), f.target || 'F8.4', L ? 'ราคาวิ่งขึ้นถึงเป้า liquidity ด้านบน' : 'ราคาลงถึงเป้า liquidity ด้านล่าง']);
-      else out.push([failBar(cs, T), 'F9.2', 'setup ล้ม: ราคากลับไปทะลุจุด sweep — คลิปไม่ได้บอกวิธีจัดการเมื่อ confirmation ล้ม']);
+      if (T.outcome === 'win') out.push([reachBar(cs, T)].concat(slot(f.target || 'F8.4', NOTE.target[side])));
+      else out.push([failBar(cs, T)].concat(NOTE.fail));
       return out.concat(f.more ? f.more(T, cs) : []);
     };
   }
@@ -404,7 +441,7 @@
     reverse(sc, q, { shape: 'A', outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
-    var g = { group: 'lows', resistance: 'low' };
+    var g = { group: 'lows' };
     return finish(d, seed, sc, {
       levels: [lev(sc, 'L1', 'stack', 'L1', g), lev(sc, 'L2', 'stack', 'L2', g), lev(sc, 'L3', 'stack', 'L3', g), lev(sc, 'T', 'liq', 'T')],
       sweepIds: ['L1', 'L2', 'L3'], structure: [['H0', 'H'], ['SW', 'L'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
@@ -436,14 +473,15 @@
     reverse(sc, q, { shape: 'B', outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
-    var g = { group: 'lows', resistance: 'low' };
+    var g = { group: 'lows' };
     return finish(d, seed, sc, {
       levels: ['L1', 'L2', 'L3', 'L4'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'T', 'liq', 'T')]),
       sweepIds: ['L1', 'L2', 'L3', 'L4'], structure: [['SW', 'L'], ['H1', 'H'], ['HH', 'HH'], ['P', 'HL']],
       side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, sc.B('a4') + 4),
       near: ['L3', 'L4'], poke: ['L4', 'L3'],
-      notes: tradeNotes({ sweep: 'F5.4', confirm: 'F6.6', more: function (T) {
-        return [[T.sweep.bar + 1, 'F6.6', 'ราคาลงลึกจนน่ากลัว ไม่ต้องกด buy — เรายังไม่รู้ว่า buy orders จะถูกเติมไหม']];
+      notes: tradeNotes({ confirm: 'F6.6', more: function (T) {
+        return [[T.sweep.bar + 1, 'F6.6', 'ราคาลงลึกจนน่ากลัว ไม่ต้องกด buy — เรายังไม่รู้ว่า buy orders จะถูกเติมไหม'],
+                [T.confirmBar, 'F5.4', 'ย้อนดู: การทิ้งตัวแรงที่กิน low ทีละตัว ก็เพื่อดันราคาขึ้นต่อ']];
       } })
     });
   }
@@ -465,13 +503,13 @@
     reverse(sc, q, { shape: 'B', outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
-    var g = { group: 'highs', resistance: 'low' };
+    var g = { group: 'highs' };
     return finish(d, seed, sc, {
       levels: [lev(sc, 'SH1', 'stack', 'L1', g), lev(sc, 'SH2', 'stack', 'L2', g), lev(sc, 'T', 'liq', 'T')],
       sweepIds: ['SH1', 'SH2'], structure: [['SW', 'L'], ['H1', 'H'], ['HH', 'HH'], ['P', 'HL']],
       side: 'short', target: 'T', outcome: outcome, times: nyTimes(r, n, sc.B('SW')),
       near: ['L1', 'L2'], poke: ['A1', 'T'],
-      notes: tradeNotes({ confirm: 'F6.8', entry: 'F6.9', target: 'F6.9' })
+      notes: tradeNotes({ confirm: 'F6.8', entry: 'F6.9' })
     });
   }
 
@@ -499,7 +537,7 @@
     sc.keep(sc.B('lh') + 2, END, null, 'lh');
     var n = sc.bar + 2;
     sc.run(n);
-    var g = { group: 'lows', resistance: 'low' };
+    var g = { group: 'lows' };
     return finish(d, seed, sc, {
       levels: ['L1', 'L2', 'L3'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }),
       sweepIds: ['L1', 'L2', 'L3'], structure: [['SW', 'L'], ['h', 'H'], ['LL', 'LL'], ['lh', 'LH'], ['LL2', 'LL']],
@@ -718,7 +756,9 @@
       sweepIds: ['london-low'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
       side: 'long', target: 'london-high', outcome: outcome, times: day.times,
       sessions: [['asia', A], ['london', Lw], ['ny', day.ny]], near: ['LoL', 'LoL2'], poke: ['LoL2', 'london-low'],
-      notes: tradeNotes({ sweep: 'F7.14', confirm: 'F7.14', target: 'F7.13' })
+      notes: tradeNotes({ sweep: ['F7.14', 'London low โดนกวาด — ไม่ได้แปลว่าให้กด buy ทันที ต้องรอสัญญาณว่าขาขึ้นกำลังก่อตัว'],
+                             confirm: 'F7.14',
+                             target: ['F7.12', 'ราคาขึ้นไปเก็บ London high — high/low ของ session ก่อนหน้าเป็นแม่เหล็ก liquidity'] })
     });
   }
 
@@ -741,15 +781,17 @@
     reverse(sc, q, { shape: 'B', outcome: outcome, target: 'T', run: [20, 40] });
     sc.fill(1, sc.B('SW') - 8, Q3 + 0.8, T - 0.8);
     sc.run(n);
-    var g = function (x) { return { group: 'htf4', resistance: 'low', known: x[2][1] + 1 }; };
+    var g = function (x) { return { group: 'htf4', known: x[2][1] + 1 }; };
     return finish(d, seed, sc, {
       levels: Q.map(function (x) { return lev(sc, x[0], 'htf', x[0], g(x)); })
         .concat([lev(sc, 'T', 'htf', 'T', { known: bucket(0, 2)[1] + 1 })]),
       sweepIds: ['Q1', 'Q2', 'Q3'], structure: [['SW', 'L'], ['H1', 'H'], ['HH', 'HH'], ['P', 'HL']],
       side: 'short', target: 'T', outcome: outcome, times: times, htf: 240,
       near: ['Q3', 'PK'], poke: ['PK', 'Q3'],
-      notes: tradeNotes({ sweep: 'F7.6', confirm: 'F7.6', entry: 'F7.6', target: 'F7.5', more: function (T) {
-        return [[T.sweep.bar, 'F7.4', 'HTF liquidity ของ TJR = high/low ของ 1H หรือ 4H; หาจุดเข้าบน 5m']];
+      notes: tradeNotes({ confirm: 'F6.8',
+        entry: ['F7.6', 'ทะลุ 4H highs หลายตัวแล้วเริ่มกลับตัวบน 5m — เข้าบน LTF เพื่อขี่ move ใหญ่ของ HTF ได้ทั้งขา'],
+        more: function (T) {
+        return [[T.sweep.bar, 'F7.4', 'HTF liquidity ของ TJR = high/low ของ 1H หรือ 4H; หาจุดเข้าบน 5m หรือ 1m']];
       } })
     });
   }
@@ -818,7 +860,7 @@
     sc.keep(sc.B('SH3') + 2, sc.B('P') + 1, null, 'SH3');
     var n = sc.bar + 2;
     sc.run(n);
-    var g = { group: 'highs', resistance: 'low' };
+    var g = { group: 'highs' };
     return finish(d, seed, sc, {
       levels: ['SH1', 'SH2', 'SH3'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'LQ', 'liq', 'LQ')]),
       sweepIds: ['LQ'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
@@ -853,13 +895,16 @@
     reverse(sc, q, { shape: 'C', outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
-    var g = { group: 'trend', resistance: 'low', label: 'trendline low' };
+    var g = { group: 'trend', label: 'trendline low' };
     return finish(d, seed, sc, {
       levels: ['L1', 'L2', 'L3'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'T', 'liq', 'T')]),
       sweepIds: ['L1', 'L2', 'L3'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
       side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, s),
       near: ['L3', 'L3b'], poke: ['L3b', 'L3'],
-      notes: tradeNotes({ sweep: 'F8.3', confirm: 'F6.5', target: 'F8.4' })
+      notes: tradeNotes({ confirm: 'F6.5', more: function (T) {
+        var last = Math.max(swept(T, 'L1'), swept(T, 'L2'), swept(T, 'L3'));
+        return [[last, 'F8.3', 'trendline liquidity: lows ที่ยกตัวและยังไม่เคยโดนเก็บ — ราคาวิ่งเก็บทั้งแถวเพื่อเติม buy orders']];
+      } })
     });
   }
 
@@ -886,14 +931,16 @@
     sc.keep(sc.B('SH3') + 2, sc.B('P') + 1, null, 'SH3');
     var n = sc.bar + 2;
     sc.run(n);
-    var gh = { group: 'highs', resistance: 'low' }, gl = { group: 'lows', resistance: 'high' };
+    var gh = { group: 'highs' }, gl = { group: 'lows' };
     return finish(d, seed, sc, {
       levels: ['SH1', 'SH2', 'SH3'].map(function (nm) { return lev(sc, nm, 'stack', nm, gh); })
         .concat([lev(sc, 'LA', 'liq', 'LA', gl), lev(sc, 'LB', 'liq', 'LB', gl)]),
       sweepIds: ['LA', 'LB'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
       side: 'long', target: 'SH1', outcome: outcome, times: nyTimes(r, n, s),
       near: ['LA', 'LB'], poke: ['LB', 'LA'],
-      notes: tradeNotes({ sweep: 'F8.8', confirm: 'F8.8', entry: 'F8.7', target: 'F8.4', more: function (T) {
+      notes: tradeNotes({ confirm: ['F8.8', 'HH ยืนยันขาขึ้นหลังเก็บ lows — มองไปที่ stacked highs (low-resistance) ด้านบน'],
+        entry: ['F8.7', 'เทรดไปทาง low-resistance (stacked highs) และออกห่างจาก high-resistance (low ที่เพิ่งโดนกวาด)'],
+        more: function (T) {
         return [[T.confirmBar, 'F8.6', 'กลับตัวแรงจากจุด sweep → low ที่โดนกวาดกลายเป็น high-resistance']];
       } })
     });
@@ -965,6 +1012,24 @@
     return null;
   }
 
+  // Build that never hands a page a broken chart: an unlucky seed (build throws, or check() is non-empty) is
+  // replaced by the next seed of a fixed Lehmer sequence, up to SAFE_TRIES seeds. Deterministic for (def, seed,
+  // opts); the result's meta.seed is the seed actually used, so def.build(meta.seed, opts) rebuilds it. Throws
+  // only if every try fails. Lab pages (and the "สุ่มกราฟใหม่" button) build through this or random().
+  var SAFE_TRIES = 12;
+  function nextSeed(s) { var x = (s * 48271) % 2147483647; return x > 0 ? x : 1; }
+  function safeBuild(def, seed, opts) {
+    var s = seed, last = '';
+    for (var a = 0; a < SAFE_TRIES; a++, s = nextSeed(s)) {
+      try {
+        var b = def.build(s, opts), errs = check(b);
+        if (!errs.length) return b;
+        last = errs[0];
+      } catch (x) { last = x && x.message; }
+    }
+    throw new Error('scenarios.safeBuild: ' + def.id + ' has no clean chart in ' + SAFE_TRIES + ' seeds from ' + seed + ': ' + last);
+  }
+
   // A fresh chart for a lab mode. Replay: about one setup in four fails (D4), drawn from the fail-capable ones.
   function random(rng, mode) {
     var defs = LIST.filter(function (d) { return d.lab[mode]; });
@@ -974,7 +1039,7 @@
       var nf = defs.filter(function (d) { return d.outcomes.indexOf('fail') >= 0; }).length;
       if (rng.chance(Math.min(1, 0.25 * defs.length / nf))) opts.outcome = 'fail';
     }
-    return { def: def, built: def.build(seed, opts) };
+    return { def: def, built: safeBuild(def, seed, opts) };
   }
 
   // ---------------------------------------------------------------- check
@@ -1070,6 +1135,21 @@
     } else if (side !== 'long' && side !== 'short') e.push('side ' + side);
     else if (!sl) e.push('a trade needs a sweep');
     else tradeCheck(e, cs, T, sl, typed, side === 'long');
+    // resistance (controller ruling): a stacked group is >= 2 levels on one side; resistance is 'low' for its
+    // levels (untaken stack) and null otherwise; resistanceAfter is 'high' for the levels the confirmed reversal
+    // moved away from, else equal to resistance
+    var gs = {};
+    levels.forEach(function (l) { if (l.group) (gs[l.group] = gs[l.group] || []).push(l); });
+    Object.keys(gs).forEach(function (g) {
+      if (gs[g].length < 2 || gs[g].some(function (l) { return l.side !== gs[g][0].side; })) e.push('group ' + g + ': not a stack of same-side levels');
+    });
+    if (sl) {
+      resistanceOf(levels, sl.side, sweep.bar, side != null ? T.confirmBar : null).forEach(function (r, i) {
+        var l = levels[i];
+        if (l.resistance !== r[0]) e.push('level ' + l.id + ': resistance ' + l.resistance + ' != ' + r[0]);
+        if (l.resistanceAfter !== r[1]) e.push('level ' + l.id + ': resistanceAfter ' + l.resistanceAfter + ' != ' + r[1]);
+      });
+    }
     (T.notes || []).forEach(function (x, i) {
       if (!inBar(x.bar) || !/^F\d+\.\d+$/.test(x.fact) || typeof x.text !== 'string') e.push('note ' + i + ': bad');
     });
@@ -1085,10 +1165,13 @@
     if (ci < 0) { e.push('no ' + ct + ' after the sweep'); return; }
     var c = pts[ci];
     if (T.confirmBar !== c.bar) e.push('confirmBar ' + T.confirmBar + ' != ' + ct + ' bar ' + c.bar);
-    // every HL (long) / LH (short) after the sweep holds beyond the swept level
+    // every HL (long) / LH (short) after the sweep holds beyond the whole swept stack: the highest (long) / lowest
+    // (short) same-side level taken between the sweep and the confirm swing, not just the deepest one
+    var edge = sl.price;
+    reversedFrom(T.levels, sl.side, sb, c.bar).forEach(function (l) { edge = L ? Math.max(edge, l.price) : Math.min(edge, l.price); });
     pts.forEach(function (p) {
-      if (p.tag === pt && p.bar > sb && (L ? !(p.price > sl.price) : !(p.price < sl.price))) {
-        e.push(pt + ' at ' + p.bar + ' does not hold beyond the swept level ' + sl.price);
+      if (p.tag === pt && p.bar > sb && (L ? !(p.price > edge) : !(p.price < edge))) {
+        e.push(pt + ' at ' + p.bar + ' does not hold beyond the swept levels (' + edge + ')');
       }
     });
     // the confirm swing is the first break of the H (L) before it
@@ -1143,5 +1226,5 @@
     }
   }
 
-  TJR.scenarios = { list: LIST, get: get, random: random, check: check };
+  TJR.scenarios = { list: LIST, get: get, random: random, safeBuild: safeBuild, check: check };
 })(typeof window !== 'undefined' ? window : globalThis);

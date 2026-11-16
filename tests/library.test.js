@@ -181,4 +181,124 @@
     }
     ok(fails >= 8 && wins > fails, 'fail share ~ 1 in 4 of fail-capable draws: ' + fails + ' fail / ' + wins + ' win');
   });
+
+  // ---- fix round 1 ----
+
+  // levels on the swept side taken between the sweep and the confirm swing (the stack price reversed from)
+  const reversedFrom = (T) => {
+    const sl = T.levels.find((l) => l.id === T.sweep.levelId);
+    return T.levels.filter((l) => l.side === sl.side && l.sweptAt != null && l.sweptAt >= T.sweep.bar && l.sweptAt <= T.confirmBar);
+  };
+
+  test('check: an HL / LH inside the swept stack (above its deepest level) is caught', () => {
+    for (const [id, pt] of [['S01', 'HL'], ['S10', 'LH']]) {
+      let seen = 0;
+      for (let s = 1; s <= 40; s++) {
+        const b = build(id, s), T = b.truth, long = T.side === 'long';
+        const stack = reversedFrom(T), sl = T.levels.find((l) => l.id === T.sweep.levelId);
+        const edge = long ? Math.max(...stack.map((l) => l.price)) : Math.min(...stack.map((l) => l.price));
+        if (edge === sl.price) continue;               // the sweep level is already the stack edge
+        seen++;
+        const p = T.structure.find((q) => q.tag === pt && q.bar > T.sweep.bar);
+        p.price = edge;                                 // inside the stack: beyond the deepest level, not beyond all
+        ok(S.check(b).some((x) => x.indexOf(pt + ' at ' + p.bar + ' does not hold beyond') === 0),
+          id + ' seed ' + s + ': ' + pt + ' at the stack edge must be reported');
+      }
+      ok(seen >= 5, id + ': found ' + seen + ' seeds whose sweep level is not the stack edge');
+    }
+  });
+
+  test('notes: the generic sweep note cites F6.3 (long) / F6.4 (short); scenario facts get their own notes', () => {
+    const sweepFacts = { long: 'F6.3', short: 'F6.4' };
+    let generic = null;
+    for (const d of S.list.filter((x) => x.outcomes.length)) {
+      for (const outcome of d.outcomes) {
+        const b = d.build(5, { outcome }), T = b.truth;
+        const atSweep = T.notes.filter((n) => n.bar === T.sweep.bar).map((n) => n.fact);
+        const want = d.id === 'S09' ? 'F7.14' : sweepFacts[T.side];
+        ok(atSweep.includes(want), d.id + ' ' + outcome + ': sweep note cites ' + want + ' (has ' + atSweep.join(',') + ')');
+        if (d.id === 'S01') generic = T.notes.find((n) => n.bar === T.sweep.bar && n.fact === 'F6.3').text;
+      }
+    }
+    ok(generic, 'S01 generic sweep text');
+    for (const id of IDS) {
+      for (const outcome of S.get(id).outcomes.length ? S.get(id).outcomes : [undefined]) {
+        build(id, 5, outcome).truth.notes.forEach((n) => {
+          if (n.text === generic) eq(n.fact, 'F6.3', id + ': the generic sweep text is only ever F6.3');
+        });
+      }
+    }
+    for (const [id, f] of [['S02', 'F5.4'], ['S10', 'F7.6'], ['S13', 'F8.3'], ['S14', 'F8.8']]) {
+      const ns = build(id, 5).truth.notes.filter((n) => n.fact === f);
+      ok(ns.length > 0, id + ' has a note citing ' + f);
+      ns.forEach((n) => ok(n.text !== generic, id + ' ' + f + ' note says what ' + f + ' says, not the generic sweep text'));
+    }
+    const facts = (id) => build(id, 5).truth.notes.map((n) => n.fact);
+    ok(facts('S09').includes('F7.12') && !facts('S09').includes('F7.13'), 'S09 target note cites F7.12');
+    ok(!facts('S10').includes('F7.5') && facts('S10').includes('F8.4'), 'S10 target note cites F8.4');
+    for (const id of IDS) {
+      const cited = new Set(build(id, 5).truth.notes.map((n) => n.fact));
+      S.get(id).facts.forEach((f) => ok(cited.has(f), id + ': def fact ' + f + ' is cited by a note'));
+    }
+  });
+
+  test('resistance: before the sweep (low = untaken stack); resistanceAfter: high once price reverses away', () => {
+    const by = (b) => Object.fromEntries(b.truth.levels.map((l) => [l.id, [l.resistance, l.resistanceAfter]]));
+    for (const outcome of ['win', 'fail']) {
+      const r = by(build('S01', 5, outcome));
+      ['L1', 'L2', 'L3'].forEach((id) => eq(r[id], ['low', 'high'], 'S01 ' + outcome + ' ' + id));
+      eq(r.T, [null, null], 'S01 ' + outcome + ' liquidity high T');
+    }
+    const r14 = by(build('S14', 5));
+    ['LA', 'LB'].forEach((id) => eq(r14[id], ['low', 'high'], 'S14 swept lows: low before, high after'));
+    ['SH1', 'SH2', 'SH3'].forEach((id) => eq(r14[id], ['low', 'low'], 'S14 stacked highs'));
+    eq(by(build('S12', 5)).LQ, [null, 'high'], 'S12 single swept low: high after the reversal');
+    eq(by(build('S04', 5)).L1, ['low', 'low'], 'S04 no reversal: resistanceAfter = resistance');
+    eq(by(build('S07', 5))['london-low'], [null, null], 'S07 no trade: null');
+    for (const id of IDS) {
+      build(id, 9).truth.levels.forEach((l) => {
+        ok(l.resistance === (l.group ? 'low' : null), id + ' ' + l.id + ' resistance');
+        ok(l.resistanceAfter === 'high' || l.resistanceAfter === l.resistance, id + ' ' + l.id + ' resistanceAfter');
+      });
+    }
+    const bad = (id, fn, what) => { const b = build(id, 5); fn(b.truth.levels); ok(S.check(b).length > 0, what + ' should be caught'); };
+    bad('S14', (ls) => { ls.find((l) => l.id === 'LA').resistance = 'high'; }, 'S14 swept low marked high before the sweep');
+    bad('S01', (ls) => { ls.find((l) => l.id === 'T').resistanceAfter = 'high'; }, 'S01 untouched target marked high');
+    bad('S01', (ls) => { ls.find((l) => l.id === 'L2').resistanceAfter = 'low'; }, 'S01 reversed-from low kept low');
+    bad('S04', (ls) => { ls.find((l) => l.id === 'L1').resistanceAfter = 'high'; }, 'S04 no reversal marked high');
+  });
+
+  test('safeBuild / random: an unlucky seed (throws or fails check) is replaced by the next seed', () => {
+    ok(typeof S.safeBuild === 'function', 'scenarios.safeBuild exists');
+    const real = S.get('S01');
+    const seeds = [];
+    const flaky = { id: 'SX', build: (seed, opts) => { seeds.push(seed); if (seeds.length < 3) throw new Error('unlucky'); return real.build(seed, opts); } };
+    const b = S.safeBuild(flaky, 7, { outcome: 'fail' });
+    eq(seeds.length, 3, 'two throws, then a clean build');
+    eq(new Set(seeds).size, 3, 'each retry uses a new seed');
+    eq(seeds[0], 7, 'first try uses the given seed');
+    eq(S.check(b), [], 'result passes check');
+    eq(b.meta.seed, seeds[2], 'meta.seed is the seed that built the chart');
+    eq(b.truth.outcome, 'fail', 'opts pass through');
+    eq(JSON.stringify(S.safeBuild(real, 7, { outcome: 'fail' })), JSON.stringify(real.build(7, { outcome: 'fail' })), 'a clean seed is used as is');
+    let calls = 0;
+    const dirty = { id: 'SY', build: (seed) => { calls++; const x = real.build(seed); if (calls === 1) x.truth.confirmBar -= 1; return x; } };
+    eq(S.check(S.safeBuild(dirty, 3)), [], 'a build that fails check is retried');
+    eq(calls, 2, 'one retry after the failed check');
+    let threw = false;
+    try { S.safeBuild({ id: 'SZ', build: () => { throw new Error('always'); } }, 1); } catch (e) { threw = /SZ/.test(e.message); }
+    ok(threw, 'gives up with an error after a bounded number of tries');
+    // random goes through the same guard: make the first build of every def throw
+    const saved = S.list.map((d) => d.build);
+    try {
+      S.list.forEach((d, i) => { let n = 0; d.build = (seed, opts) => { if (n++ === 0) throw new Error('unlucky first'); return saved[i](seed, opts); }; });
+      const rng = TJR.rng.make(4);
+      for (let i = 0; i < 6; i++) {
+        const r = S.random(rng, 'replay');
+        eq(S.check(r.built), [], 'random recovers (' + r.def.id + ')');
+      }
+    } finally {
+      S.list.forEach((d, i) => { d.build = saved[i]; });
+    }
+  });
 })();
