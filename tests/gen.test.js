@@ -208,6 +208,50 @@
     eq(g[0].h, 106, 'bar 0 high is outside the rule and keeps its wick');
   });
 
+  // Adjacent rules (fix round 1): a rule's chain repair at from-1 / to+1 must not drag that bar
+  // out of the earlier rule that covers it ("stacked levels" = a series of guards).
+  const ADJ_A = { from: 10, to: 49, maxHigh: 30010 }, ADJ_B = { from: 50, to: 120, minLow: 29995 };
+  const ADJ_C = { from: 121, to: 200, maxHigh: 30040 };
+  const breaches = (g, rules) => {
+    const out = [];
+    rules.forEach((r, ri) => {
+      for (let i = r.from; i <= r.to; i++) {
+        if (r.maxHigh != null && !(g[i].h < r.maxHigh)) out.push('rule ' + ri + ' bar ' + i + ' h ' + g[i].h + ' >= ' + r.maxHigh);
+        if (r.minLow != null && !(g[i].l > r.minLow)) out.push('rule ' + ri + ' bar ' + i + ' l ' + g[i].l + ' <= ' + r.minLow);
+      }
+    });
+    return out;
+  };
+  const long = (seed) => build(seed, WP, Object.assign({}, OPTS, { bars: 250 }));
+
+  test('gen.guard: adjacent rules - the later rule\'s chain-in keeps bar from-1 inside the earlier rule (seed 266)', () => {
+    const g = G.guard(long(266), [ADJ_A, ADJ_B]);
+    eq(breaches(g, [ADJ_A, ADJ_B]), [], 'bar 49 must stay under 30010');
+    eq(G.validate(g, 0.25), []);
+  });
+
+  test('gen.guard: adjacent rules - the later rule\'s chain-out keeps bar to+1 inside the earlier rule (seed 176)', () => {
+    const g = G.guard(long(176), [ADJ_B, ADJ_A]);
+    eq(breaches(g, [ADJ_A, ADJ_B]), [], 'bar 50 must stay over 29995');
+    eq(G.validate(g, 0.25), []);
+  });
+
+  test('gen.guard: adjacent rules, seeds 1..300, both orders and a three-rule stack -> every rule holds, valid', () => {
+    for (let s = 1; s <= 300; s++) {
+      const cs = long(s);
+      for (const rules of [[ADJ_A, ADJ_B], [ADJ_B, ADJ_A], [ADJ_A, ADJ_B, ADJ_C], [ADJ_C, ADJ_B, ADJ_A]]) {
+        const g = G.guard(cs, rules);
+        eq(breaches(g, rules), [], 'seed ' + s + ' rules ' + JSON.stringify(rules.map((r) => r.from)));
+        eq(G.validate(g, 0.25), [], 'seed ' + s + ' validate');
+      }
+    }
+  });
+
+  test('gen.guard: adjacent rules with no price both allow at the joint throw a clear error', () => {
+    throws(() => G.guard(long(1), [{ from: 10, to: 49, maxHigh: 29990 }, { from: 50, to: 120, minLow: 30000 }]),
+      /bar 49|bar 50|joint|both/i, 'contradictory neighbours');
+  });
+
   // ---------- stamp ----------
 
   test('gen.stamp: adds t = start + i * tf minutes, does not mutate', () => {

@@ -267,14 +267,29 @@
     return f;
   }
 
-  function applyFold(cs, from, to, cap, side, depth, tick) {
+  function coverBody(k) { k.h = Math.max(k.h, k.o, k.c); k.l = Math.min(k.l, k.o, k.c); }
+
+  // The price where candle a closes and candle a+1 opens: clamp v into `lim` and write it to both.
+  function joint(cs, a, v, lim, ruleNo) {
+    if (lim.lo > lim.hi) {
+      throw new Error('gen.guard: rule ' + ruleNo + ' meets an earlier rule at bar ' + a + '/' + (a + 1) +
+        ' and no price there is allowed by both');
+    }
+    v = clamp(v, lim.lo, lim.hi);
+    cs[a].c = v;
+    cs[a + 1].o = v;
+    coverBody(cs[a]);
+    coverBody(cs[a + 1]);
+  }
+
+  // Fold candles from..to against one cap. The two chain joints (from-1|from, to|to+1) are then
+  // clamped into this rule's band and the band of the latest earlier rule covering the outside
+  // bar (`outside(i)`), so a guard never drags a neighbouring guarded bar out of its own rule.
+  function applyFold(cs, from, to, cap, side, depth, tick, band, outside, ruleNo) {
     var f = makeFold(cap, side, depth, tick);
-    // chain into the range: candle from-1 closes where candle `from` opens
-    if (from > 0) {
-      var p = cs[from - 1];
-      p.c = f(p.c);
-      p.h = Math.max(p.h, p.o, p.c);
-      p.l = Math.min(p.l, p.o, p.c);
+    function both(i) {
+      var o = outside(i);
+      return { lo: Math.max(band.lo, o.lo), hi: Math.min(band.hi, o.hi) };
     }
     for (var i = from; i <= to; i++) {
       var k = cs[i];
@@ -292,34 +307,42 @@
       k.o = o;
       k.c = c;
     }
-    // chain out of the range: candle to+1 opens where candle `to` now closes
-    if (to + 1 < cs.length) {
-      var nx = cs[to + 1];
-      nx.o = cs[to].c;
-      nx.h = Math.max(nx.h, nx.o, nx.c);
-      nx.l = Math.min(nx.l, nx.o, nx.c);
-    }
+    // chain in: candle `from` opened at f(old close of from-1); candle from-1 must close there too
+    if (from > 0) joint(cs, from - 1, cs[from].o, both(from - 1), ruleNo);
+    // chain out: candle to+1 opens where candle `to` now closes
+    if (to + 1 < cs.length) joint(cs, to, cs[to].c, both(to + 1), ruleNo);
   }
 
   // rules: [{from, to, maxHigh?, minLow?, tick?}] applied in order; later rules win on overlap.
-  // Touches candles from..to, plus the close of from-1 and the open of to+1 to keep the chain.
+  // Touches candles from..to, plus the close of from-1 and the open of to+1 to keep the chain;
+  // those two stay inside the latest earlier rule that covers them (adjacent guards = stacked
+  // levels), and a joint no price can satisfy throws.
   function guard(candles, rules) {
     var cs = candles.map(copy);
-    (rules || []).forEach(function (r) {
+    var done = [];   // processed rules as {from, to, lo, hi}
+    function outside(i) {
+      for (var d = done.length - 1; d >= 0; d--) {
+        if (i >= done[d].from && i <= done[d].to) return done[d];
+      }
+      return { lo: -Infinity, hi: Infinity };
+    }
+    (rules || []).forEach(function (r, ruleNo) {
       var tick = r.tick > 0 ? r.tick : DEFAULTS.tick;
       var from = Math.max(0, r.from), to = Math.min(cs.length - 1, r.to);
       if (from > to) return;
       var capHi = r.maxHigh != null ? below(r.maxHigh, tick) : Infinity;
       var capLo = r.minLow != null ? above(r.minLow, tick) : -Infinity;
       if (capLo > capHi) throw new Error('gen.guard: minLow ' + r.minLow + ' leaves no room under maxHigh ' + r.maxHigh);
+      var band = { lo: capLo, hi: capHi };
       var ranges = [];
       for (var i = from; i <= to; i++) ranges.push(cs[i].h - cs[i].l);
       var depth = Math.max(4 * tick, median(ranges));
       // a band (both caps): each fold stays in its half; under two ticks wide it is a hard clamp
       if (isFinite(capHi) && isFinite(capLo)) depth = Math.min(depth, (capHi - capLo) / 2);
       if (depth < tick) depth = 0;
-      if (isFinite(capHi)) applyFold(cs, from, to, capHi, 1, depth, tick);
-      if (isFinite(capLo)) applyFold(cs, from, to, capLo, -1, depth, tick);
+      if (isFinite(capHi)) applyFold(cs, from, to, capHi, 1, depth, tick, band, outside, ruleNo);
+      if (isFinite(capLo)) applyFold(cs, from, to, capLo, -1, depth, tick, band, outside, ruleNo);
+      done.push({ from: from, to: to, lo: capLo, hi: capHi });
     });
     return cs;
   }
