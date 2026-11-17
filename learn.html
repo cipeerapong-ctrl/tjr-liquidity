@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand" data-tone="dark" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>บทเรียน liquidity 8 บท จากคลิป TJR | Liquidity</title>
+<meta name="description" content="เรียนระบบ liquidity ในคลิป 49 นาทีของ TJR ทีละบท มีกราฟจำลองเล่นได้ เวลาในคลิปกำกับ และคำถามตรวจความเข้าใจบทละ 2 ข้อ">
+<meta property="og:type" content="website">
+<meta property="og:title" content="บทเรียน liquidity 8 บท จากคลิป TJR">
+<meta property="og:description" content="อ่านทีละบทตามลำดับในคลิป พร้อมกราฟเล่นได้และคำถามตรวจความเข้าใจ">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1c1c1c">
+<!-- <link rel="canonical" href="https://[the site's domain]/"> : no domain yet -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/pages/learn.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+</head>
+<body>
+<!--
+  software · TJR Liquidity course page (Task 10), an app screen with long content (spec 10)
+  deal: the home page's (Task 8/9): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
+        close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
+  page: sticky module rail + 8 module sections (#m1..#m8) + the F9 block. A module = a short Thai explanation with
+        timestamp chips, a live engine chart (created near the screen, at most 4 at once), the clip's caution
+        where there is one, and a 2-question self-check (TJR.store keys learn.m1..m8).
+  moment: none dealt on this page: its motion is the charts themselves and a one-time heading wipe per module.
+-->
+<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html" aria-current="page">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div></div></header></noscript>
+<main class="app learn" id="top">
+  <div class="wrap">
+    <header class="learn-head">
+      <h1>บทเรียน liquidity 8 บท จากคลิป TJR 49 นาที</h1>
+      <p class="t-lead">อ่านทีละบทตามลำดับในคลิป แต่ละบทมีกราฟจำลองที่เล่นได้ ทุกข้อมีเวลาในคลิปกำกับ ส่วนที่คลิปไม่ได้พูด เราติดป้ายไว้ ไม่เติมเอง</p>
+      <a class="btn btn--primary" href="#m1">อ่านบทที่ 1</a>
+    </header>
+    <div class="learn-shell">
+      <nav class="rail" aria-label="สารบัญบทเรียน">
+        <p class="rail__now" data-k="now-mod" aria-hidden="true"></p>
+        <p class="rail__count"><b data-k="done">0</b><span>/ 8 บทที่ตอบถูกครบ</span></p>
+        <ol class="rail__list">
+          <li><a href="#m1" data-m="1"><span class="rail__n">01</span><span class="rail__t">Liquidity คืออะไร</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m2" data-m="2"><span class="rail__n">02</span><span class="rail__t">ระบุ High / Low แบบ TJR</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m3" data-m="3"><span class="rail__n">03</span><span class="rail__t">ทำไม liquidity อยู่เหนือ High / ใต้ Low</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m4" data-m="4"><span class="rail__n">04</span><span class="rail__t">ฝั่ง Smart Money</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m5" data-m="5"><span class="rail__n">05</span><span class="rail__t">ตัวอย่างทุก timeframe</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m6" data-m="6"><span class="rail__n">06</span><span class="rail__t">Confirmation และจุดเข้า</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m7" data-m="7"><span class="rail__n">07</span><span class="rail__t">Significant liquidity targets</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m8" data-m="8"><span class="rail__n">08</span><span class="rail__t">Low- vs High-resistance liquidity</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+        </ol>
+        <div class="rail__bar" aria-hidden="true"></div>
+      </nav>
+      <div class="learn-body">
+    <section class="module" id="m1" data-m="1" aria-labelledby="m1-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 1</p>
+        <h2 id="m1-h">Liquidity คืออะไร</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=15" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 00:15">00:15</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <ul class="facts">
+            <li><p>Liquidity คือ orders ที่วางรออยู่บนกราฟ</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=45" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 00:45">00:45</a></span></li>
+            <li><p>TJR เรียกมันว่า cookies ตลาดต้องมี liquidity ถึงทำงานได้ เหมือนคนที่ต้องการคุกกี้</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=60" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 01:00">01:00</a></span></li>
+            <li><p>ทุกเทรดของเขาตั้งอยู่บน liquidity เพราะไม่มี liquidity ตลาดก็ขยับไม่ได้</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=90" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 01:30">01:30</a></span></li>
+            <li><p>Liquidity sweep คือช่วงที่ liquidity นั้นถูกเก็บออก orders ที่นอนรออยู่ถูกปลุก แล้วตลาดเติมฝั่ง buy หรือ sell</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=90" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 01:30">01:30</a></span></li>
+            <li><p>มีสองระดับที่ไม่เหมือนกัน คือ smart money (เงินก้อนใหญ่ที่ขยับตลาด) กับ retail (เรา) ต้องรู้ว่าแต่ละระดับวางอยู่ตรงไหน</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=105" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 01:45">01:45</a></span></li>
+            <li><p>กฎแกนของคลิป: liquidity อยู่เหนือ high และใต้ low ง่ายแค่นั้น คนชอบทำให้ซับซ้อนเกินจริง</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=135" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 02:15">02:15</a></span></li>
+          </ul></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m1a" aria-label="กราฟจำลอง S01 ที่ราคาเก็บ liquidity ใต้ low แล้วกลับตัว">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="ann" aria-pressed="true">อ่านกราฟ</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="chips" data-k="chips"></span></div>
+        </figure></div>
+      </div>
+      <div class="check" data-m="1" role="group" aria-labelledby="m1-ck">
+      <div class="check__bar">
+        <h3 id="m1-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="45" data-why="liquidity คือ orders ที่วางรออยู่ ตลาดใช้มันขยับ">
+          <p class="q__t" id="m1-q0">ในคลิป liquidity หมายถึงอะไร</p>
+          <div class="q__opts" role="group" aria-labelledby="m1-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">ปริมาณซื้อขายรวมต่อวัน</button><button type="button" class="opt" data-i="1" aria-pressed="false">orders ที่วางรออยู่บนกราฟ</button><button type="button" class="opt" data-i="2" aria-pressed="false">เงินทุนที่เหลือในบัญชีเทรด</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="135" data-why="liquidity อยู่เหนือ high และใต้ low">
+          <p class="q__t" id="m1-q1">ตามกฎแกนของคลิป liquidity อยู่ตรงไหน</p>
+          <div class="q__opts" role="group" aria-labelledby="m1-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">เหนือ low และใต้ high</button><button type="button" class="opt" data-i="1" aria-pressed="false">เหนือ high และใต้ low</button><button type="button" class="opt" data-i="2" aria-pressed="false">กลางระหว่าง high กับ low</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m2" data-m="2" aria-labelledby="m2-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 2</p>
+        <h2 id="m2-h">ระบุ High / Low แบบ TJR</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=315" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 05:15">05:15</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <ul class="facts">
+            <li><p>High คือราคาขึ้นแล้วลง: แท่งขึ้น (bullish) ตามด้วยแท่งลง (bearish) จุด high คือปลายไส้บนสุดของสองแท่งนี้</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=315" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 05:15">05:15</a></span></li>
+            <li><p>Low กลับกัน: แท่งลงตามด้วยแท่งขึ้น จุด low คือปลายไส้ล่างสุดของสองแท่ง</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=315" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 05:15">05:15</a></span></li>
+            <li><p>เขาบอกว่ามีคนสับสนเรื่องนี้จริง ๆ</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=345" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 05:45">05:45</a></span></li>
+            <li><p>แท่ง doji (เปิดเท่าปิด) ไม่มีในคำอธิบาย เว็บนี้จึงไม่นับเป็นส่วนของคู่ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          </ul>
+          <p class="hint">ชี้เมาส์ที่คู่แท่งใดก็ได้ในกราฟ (บนมือถือให้แตะ) คู่ที่เข้ากฎจะถูกไฮไลต์ ส่วนปุ่มด้านล่างกราฟใช้เลื่อนทีละคู่</p></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m2a" aria-label="กราฟจำลองให้ลองชี้คู่แท่งเทียน">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title">ลองชี้ทีละคู่แท่ง</span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div><div class="chart-frame__ohlc" data-k="read" aria-live="polite">ชี้ที่คู่แท่งเทียนเพื่อดูผล</div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="prev">◀ คู่ก่อนหน้า</button><button class="ctrl" type="button" data-act="next">คู่ถัดไป ▶</button><button class="ctrl" type="button" data-act="jump">ไปจุด High/Low ถัดไป</button><button class="ctrl" type="button" data-act="all" aria-pressed="false">แสดงทุกจุดที่เข้ากฎ</button></div>
+        </figure></div>
+      </div>
+      <div class="check" data-m="2" role="group" aria-labelledby="m2-ck">
+      <div class="check__bar">
+        <h3 id="m2-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="315" data-why="high คือแท่งขึ้นแล้วตามด้วยแท่งลง">
+          <p class="q__t" id="m2-q0">คู่แท่งแบบไหนทำให้เกิด high</p>
+          <div class="q__opts" role="group" aria-labelledby="m2-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">แท่งลงตามด้วยแท่งขึ้น</button><button type="button" class="opt" data-i="1" aria-pressed="false">แท่งขึ้นตามด้วยแท่งลง</button><button type="button" class="opt" data-i="2" aria-pressed="false">แท่งขึ้นสองแท่งติดกัน</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="2" data-sec="315" data-why="low คือปลายไส้ล่างสุดของสองแท่ง">
+          <p class="q__t" id="m2-q1">จุด low วัดที่ตำแหน่งไหนของสองแท่ง</p>
+          <div class="q__opts" role="group" aria-labelledby="m2-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">ราคาปิดของแท่งแรก</button><button type="button" class="opt" data-i="1" aria-pressed="false">ราคาเปิดของแท่งที่สอง</button><button type="button" class="opt" data-i="2" aria-pressed="false">ปลายไส้ล่างสุดของสองแท่ง</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m3" data-m="3" aria-labelledby="m3-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 3</p>
+        <h2 id="m3-h">ทำไม liquidity อยู่เหนือ High / ใต้ Low</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=360" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 06:00">06:00</a></span>
+      </header>
+      <div class="module__grid module__grid--flip">
+        <div class="module__text">
+          <ul class="facts">
+            <li><p>ขาขึ้นคือ higher high กับ higher low ขาลงคือ lower high กับ lower low</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=375" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 06:15">06:15</a></span></li>
+            <li><p>ถ้าตลาดขาขึ้นจะกลับตัว ต้องขึ้นไปเก็บ high ก่อน จะเป็น high ปัจจุบันหรือ high เก่าก็ได้</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=405" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 06:45">06:45</a></span></li>
+            <li><p>เหนือ high มี buy orders ของ retail สองกลุ่ม: คนที่กด buy ตอนราคาทะลุ high หวังให้ขึ้นต่อ และคนที่ short ตอนย่อ โดย stop-loss ของ short วางอยู่เหนือ high (stop ของ short คือคำสั่ง buy)</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=450" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 07:30">07:30</a></span></li>
+            <li><p>ใต้ low มี sell orders สองกลุ่ม: คนที่ short ตอนราคาหลุด low และคนที่ซื้อตอนย่อโดย stop-loss อยู่ใต้ low</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=585" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 09:45">09:45</a></span></li>
+            <li><p>สองกลุ่มบน high ในขาขึ้น และสองกลุ่มใต้ low ในขาลง คือ retail liquidity</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=630" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 10:30">10:30</a></span></li>
+          </ul></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m3a" aria-label="กราฟจำลอง S01 ที่ซ้อนกลุ่ม orders เหนือ high และใต้ low">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title">S01 · orders ที่วางรออยู่</span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="replay">ซ้อน orders ใหม่</button><button class="ctrl" type="button" data-act="sweep">ดูตอนราคากวาด</button></div>
+        </figure></div>
+      </div>
+      <div class="check" data-m="3" role="group" aria-labelledby="m3-ck">
+      <div class="check__bar">
+        <h3 id="m3-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="450" data-why="เหนือ high คือ buy ของคนทะลุ high และ stop-loss ของคนที่ short">
+          <p class="q__t" id="m3-q0">ในขาขึ้น เหนือ high มี orders แบบไหน</p>
+          <div class="q__opts" role="group" aria-labelledby="m3-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">sell orders สองกลุ่ม</button><button type="button" class="opt" data-i="1" aria-pressed="false">buy orders สองกลุ่ม</button><button type="button" class="opt" data-i="2" aria-pressed="false">ไม่มี order วางอยู่</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="0" data-sec="450" data-why="stop ของ short วางเหนือ high และมันคือคำสั่ง buy">
+          <p class="q__t" id="m3-q1">stop-loss ของคนที่ short ตอนย่อ วางอยู่ตรงไหนและเป็นคำสั่งฝั่งใด</p>
+          <div class="q__opts" role="group" aria-labelledby="m3-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">เหนือ high เป็นคำสั่ง buy</button><button type="button" class="opt" data-i="1" aria-pressed="false">เหนือ high เป็นคำสั่ง sell</button><button type="button" class="opt" data-i="2" aria-pressed="false">ใต้ low เป็นคำสั่ง sell</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m4" data-m="4" aria-labelledby="m4-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 4</p>
+        <h2 id="m4-h">ฝั่ง Smart Money</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=675" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 11:15">11:15</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <ul class="facts">
+            <li><p>เรื่องหุ้น Apple สมัยก่อน: จะซื้อต้องมีคนยอมขายให้ โบรกเกอร์ทำให้เป็นดิจิทัลแล้ว แต่ยังต้องมีคู่ฝั่งตรงข้ามอยู่ดี</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=675" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 11:15">11:15</a></span></li>
+            <li><p>คนที่อยากดันราคาลงต้องเติม order จำนวนมหาศาล จึงต้องให้ retail เข้าไปฝั่งตรงข้าม</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=765" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 12:45">12:45</a></span></li>
+            <li><p>ราคาทะลุ high กระตุ้น buy ของ retail ทั้งสองกลุ่ม market maker จึงมีโอกาสเติม sell ก้อนใหญ่แล้วดันราคากลับ</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=810" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 13:30">13:30</a></span></li>
+            <li><p>ทะลุ low ก็กลับกัน: sell ของ retail ถูกกระตุ้น แล้วเกิดโอกาสเติม buy ก้อนใหญ่</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=900" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 15:00">15:00</a></span></li>
+            <li><p>เขาอยากเทรดฝั่ง smart money และเทรดที่จุดกลับตัว เกิดได้ทุก timeframe เช่น daily และ 4 ชั่วโมง</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=870" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 14:30">14:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=990" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 16:30">16:30</a></span></li>
+          </ul>
+          <aside class="note"><p class="note__t">ข้อควรจำ</p><p>ราคาทะลุ high ไม่ได้แปลว่า market maker จะกลับตัวทุกครั้ง มันแค่เปิดโอกาส ส่วนสัญญาณอื่นที่บอกว่าเมื่อไหร่เขาใช้โอกาสนั้น เป็นเรื่องใน confluence ของช่องเขา <span class="badge-gap">คลิปไม่ได้ระบุ</span> <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=945" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 15:45">15:45</a></span></p></aside></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m4a" aria-label="กราฟจำลอง S03 ที่ราคาทะลุ high แล้วกลับตัวลง">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">ES</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง</span><ol class="phase" aria-hidden="true"><li data-phase="sweep">sweep</li><li data-phase="confirm">confirmation</li><li data-phase="entry">entry</li></ol>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="ann" aria-pressed="true">อ่านกราฟ</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="chips" data-k="chips"></span></div>
+        </figure></div>
+      </div>
+      <div class="check" data-m="4" role="group" aria-labelledby="m4-ck">
+      <div class="check__bar">
+        <h3 id="m4-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="945" data-why="การทะลุ high เปิดโอกาสให้กลับตัว ไม่ได้รับประกัน">
+          <p class="q__t" id="m4-q0">ราคาทะลุ high แล้ว market maker จะกลับตัวเสมอไหม</p>
+          <div class="q__opts" role="group" aria-labelledby="m4-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">กลับตัวทุกครั้ง</button><button type="button" class="opt" data-i="1" aria-pressed="false">ไม่เสมอไป เป็นแค่โอกาส</button><button type="button" class="opt" data-i="2" aria-pressed="false">ไม่เคยกลับตัว</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="765" data-why="order ก้อนใหญ่ต้องมีคนอีกฝั่งยอมรับ">
+          <p class="q__t" id="m4-q1">ทำไมคนที่จะดันราคาลงต้องให้ retail เข้าฝั่งตรงข้าม</p>
+          <div class="q__opts" role="group" aria-labelledby="m4-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">เพราะ retail เป็นคนกำหนดราคา</button><button type="button" class="opt" data-i="1" aria-pressed="false">เพราะต้องมีคู่ค้าไว้รับ order ก้อนใหญ่</button><button type="button" class="opt" data-i="2" aria-pressed="false">เพราะ retail ใช้ indicator ตัวเดียวกัน</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m5" data-m="5" aria-labelledby="m5-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 5</p>
+        <h2 id="m5-h">ตัวอย่างทุก timeframe</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1050" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 17:30">17:30</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <p class="sim-note"><span class="sim-tag">จำลอง</span> ทุกกราฟในบทนี้เว็บสร้างขึ้นเอง รูปทรงเลียนแบบเหตุการณ์ที่คลิปเล่า ไม่ใช่กราฟในคลิป และไม่ใช่ราคาจริง</p>
+          <ol class="cases">
+            <li class="case is-on" data-case="tariff">
+              <h3>Monthly NQ · ข่าว tariff</h3>
+              <p>ราคาร่วงแรงตามข่าวที่ฟังดูน่ากลัว retail ตกใจ ส่วน smart money เห็นเป็นโอกาสซื้อที่ดีที่สุด ราคากวาด low แล้วดีดกลับขึ้น</p>
+              <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1050" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 17:30">17:30</a></span>
+              <button class="ctrl" type="button" aria-pressed="true">ดูบนกราฟ</button>
+            </li>
+            <li class="case" data-case="crash">
+              <h3>2020 · วิกฤตไวรัส</h3>
+              <p>TJR เรียกว่าเป็น liquidity sweep ธรรมดา retail ขายที่ก้น smart money ซื้อ และเขาบอกว่า Nasdaq ตอนนี้อยู่ราว 3 เท่า</p>
+              <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1125" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 18:45">18:45</a></span>
+              <button class="ctrl" type="button" aria-pressed="false">ดูบนกราฟ</button>
+            </li>
+            <li class="case" data-case="S05">
+              <h3>Daily NQ · equal highs</h3>
+              <p>high ที่สูงใกล้กัน (แนวคิดขั้นสูง) ราคาวิ่งทะลุจนทุกคนแห่ซื้อ แล้วร่วง จากนั้นฝั่ง low ก็เป็นแบบเดียวกันก่อนราคาขึ้น ต้องใกล้กันแค่ไหนถึงนับ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p>
+              <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1170" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 19:30">19:30</a></span>
+              <button class="ctrl" type="button" aria-pressed="false">ดูบนกราฟ</button>
+            </li>
+            <li class="case" data-case="S02">
+              <h3>Timeframe เล็ก · 15 นาที และ 5 นาที</h3>
+              <p>ราคาทิ้งตัวแรงกิน low ทีละตัวเพื่อดันราคาขึ้น 15 นาทีและ 5 นาทีก็เกิดแบบเดียวกัน: ราคาลงใต้ low แล้วพุ่งขึ้น หรือขึ้นเหนือ high แล้วร่วง</p>
+              <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1215" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 20:15">20:15</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1245" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 20:45">20:45</a></span>
+              <button class="ctrl" type="button" aria-pressed="false">ดูบนกราฟ</button>
+            </li>
+          </ol>
+          <aside class="note"><p class="note__t">ข้อควรจำ</p><p>ไม่ใช่ทุกครั้งที่ราคาขึ้นเหนือ high แล้วจะร่วง ไม่งั้นตลาดก็แค่ไซด์เวย์ ตลาดมีแค่โอกาสกลับตัว <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1230" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 20:30">20:30</a></span></p>
+            <p>Liquidity มีอยู่ทุกที่ ไม่ต้องรู้ว่า high หรือ low ตัวไหนจะเป็นจุดกลับตัว รู้แค่ว่ามีโอกาส แล้วค่อยเพิ่ม confluence <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1290" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 21:30">21:30</a></span></p></aside></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m5a" aria-label="กราฟจำลองสำหรับตัวอย่างหลาย timeframe">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง · ไม่ใช่กราฟในคลิป</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button></div>
+        </figure></div>
+      </div>
+      <div class="check" data-m="5" role="group" aria-labelledby="m5-ck">
+      <div class="check__bar">
+        <h3 id="m5-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="0" data-sec="1125" data-why="TJR มองว่าเป็น sweep ธรรมดา retail ขายที่ก้น smart money ซื้อ">
+          <p class="q__t" id="m5-q0">คลิปอธิบายวิกฤตไวรัสปี 2020 ว่าอย่างไร</p>
+          <div class="q__opts" role="group" aria-labelledby="m5-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">เป็น liquidity sweep ธรรมดา ที่ retail ขายที่ก้น และ smart money ซื้อ</button><button type="button" class="opt" data-i="1" aria-pressed="false">เป็นเหตุการณ์ที่ liquidity หายไปจากตลาด</button><button type="button" class="opt" data-i="2" aria-pressed="false">เป็นข้อยกเว้นที่กฎ liquidity ใช้ไม่ได้</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="1230" data-why="ถ้าร่วงทุกครั้ง ตลาดก็จะไซด์เวย์ มันมีแค่โอกาส">
+          <p class="q__t" id="m5-q1">ราคาขึ้นเหนือ high แล้วตลาดจะร่วงทุกครั้งไหม</p>
+          <div class="q__opts" role="group" aria-labelledby="m5-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">ร่วงทุกครั้ง</button><button type="button" class="opt" data-i="1" aria-pressed="false">ไม่ มีแค่โอกาสกลับตัว</button><button type="button" class="opt" data-i="2" aria-pressed="false">ร่วงเฉพาะบน timeframe รายวัน</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m6" data-m="6" aria-labelledby="m6-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 6</p>
+        <h2 id="m6-h">Confirmation และจุดเข้า</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1305" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 21:45">21:45</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <h3>อย่ากดทันที</h3>
+          <ul class="facts">
+            <li><p>ราคาดันลงใต้ low เขาไม่ได้คิดอะไรมาก อาจมี sell orders ถูกกระตุ้นจนราคาขึ้น เรามีโอกาสเท่านั้น</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1320" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:00">22:00</a></span></li>
+            <li><p>ทุกเทรดของเขาเริ่มที่ liquidity sweep เพราะพยายามจับ low และ high ของแต่ละ move แต่ไม่ซื้อใต้ low หรือขายเหนือ high แบบไม่คิด เพราะต้องมี confirmation</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:15">23:15</a></span></li>
+          </ul>
+          <aside class="note"><p class="note__t">ข้อควรจำ</p><p>อย่ากด buy ทันทีที่ low โดนเก็บ ถ้าราคาลงต่อ คุณจะติด drawdown ไปนาน <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:30">22:30</a></span></p></aside>
+          <p class="hint">กด ลอง buy ตอนโดน sweep แล้วดูตัวเลข drawdown ในกราฟจำลองนี้</p></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m6a" aria-label="กราฟจำลอง S04 ที่ซื้อทันทีตอน sweep แล้วราคาลงต่อ">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="buy">ลอง buy ตอนโดน sweep</button><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="score-pill" data-tone=""><span class="score-pill__label">drawdown</span><span class="score-pill__value" data-k="dd">0</span></span><span class="chips" data-k="chips"></span></div>
+        </figure></div>
+      </div>
+      <div class="module__sub">
+      <div class="module__grid module__grid--flip">
+        <div class="module__text">
+          <h3>รอ confirmation</h3>
+          <ul class="facts">
+            <li><p>จะรู้ได้อย่างไรว่าตลาดใช้โอกาสนั้น: ถ้าใช่ มันจะเริ่มเทรนด์ใหม่จากตรงนั้น เราจึงรอ confirmation</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:30">22:30</a></span></li>
+            <li><p>Long: หลัง low ถูกเก็บ ต้องเห็น high, low, แล้ว higher low และ higher high จุดเข้าเฉลี่ยอยู่ช่วงหลัง higher low ตัวอย่างที่สองราคาลงไกลจนน่ากลัว ไม่ต้องกด buy ก็ได้ ให้ตอบสนองต่อสิ่งที่ smart money ทำ</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1440" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:00">24:00</a></span></li>
+            <li><p>Short กลับกัน: ราคาขึ้นเหนือ high แล้วเกิด high, low, lower low และ lower high คือเทรนด์ขาลงเริ่มต้น</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 25:30">25:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1575" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 26:15">26:15</a></span></li>
+            <li><p>ระบบจริงของ TJR ต่างออกไป มีกฎเข้มและ rulebook ซึ่งอยู่ในคลิป strategy ของเขา แต่ทุกอย่างเริ่มที่ liquidity และตำแหน่ง trigger เป๊ะ ๆ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:45">24:45</a></span></li>
+            <li><p>การบ้านจากเขา: เปิดกราฟเอง หาจุดที่ราคาทะลุ high แล้วกลับตัว และทะลุ low แล้วกลับตัว</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1575" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 26:15">26:15</a></span></li>
+          </ul>
+          <a class="btn btn--secondary" href="scenarios.html">ฝึกหา sweep ในสถานการณ์</a></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m6b" aria-label="กราฟจำลองที่แสดง confirmation ฝั่ง long และ short">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง</span><ol class="phase" aria-hidden="true"><li data-phase="sweep">sweep</li><li data-phase="confirm">confirmation</li><li data-phase="entry">entry</li></ol>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><div class="ctrl-group" role="group" aria-label="เลือกสถานการณ์"><button class="ctrl" type="button" data-sc="S01" aria-pressed="true">Long</button><button class="ctrl" type="button" data-sc="S03" aria-pressed="false">Short</button></div><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="ann" aria-pressed="true">อ่านกราฟ</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="chips" data-k="chips"></span></div>
+        </figure></div>
+      </div>
+      </div>
+      <div class="check" data-m="6" role="group" aria-labelledby="m6-ck">
+      <div class="check__bar">
+        <h3 id="m6-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="1350" data-why="ต้องรอ confirmation ว่าตลาดใช้โอกาสนั้นจริง">
+          <p class="q__t" id="m6-q0">ราคาเก็บ low แล้ว ตามคลิปควรทำอะไร</p>
+          <div class="q__opts" role="group" aria-labelledby="m6-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">กด buy ทันที</button><button type="button" class="opt" data-i="1" aria-pressed="false">รอเห็นเทรนด์ขาขึ้นใหม่ก่อตัว (confirmation)</button><button type="button" class="opt" data-i="2" aria-pressed="false">กด sell ตามแรงลง</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="1410" data-why="ขาขึ้นต้องเห็น high, low, higher low แล้ว higher high">
+          <p class="q__t" id="m6-q1">ลำดับ swing ไหนยืนยันเทรนด์ขาขึ้น</p>
+          <div class="q__opts" role="group" aria-labelledby="m6-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">high, low, lower low, lower high</button><button type="button" class="opt" data-i="1" aria-pressed="false">high, low, higher low, higher high</button><button type="button" class="opt" data-i="2" aria-pressed="false">low, lower low, lower high</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m7" data-m="7" aria-labelledby="m7-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 7</p>
+        <h2 id="m7-h">Significant liquidity targets</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1620" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 27:00">27:00</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <h3>เป้าหมายใหญ่ และ timeframe สูง</h3>
+          <ul class="facts">
+            <li><p>Significant liquidity target คือบริเวณที่ตลาดน่าจะวิ่งไปหา เพราะมี liquidity เยอะ ได้แก่ high/low ของ timeframe สูง, ของแต่ละ session (New York, London, Asia) และของช่วงข่าว</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1635" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 27:15">27:15</a></span></li>
+            <li><p>News high/low คือแท่งใหญ่ตอนข่าวที่ขึ้นแล้วลง เป็นเรื่องขั้นสูง ใช้ไม่บ่อย ให้โฟกัส HTF และ session</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1665" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 27:45">27:45</a></span></li>
+            <li><p>TJR เทรด timeframe เล็ก หาจุดเข้าบน 5 นาทีหรือ 1 นาที ส่วน HTF ของเขาคือ high/low ของ 1 ชั่วโมงหรือ 4 ชั่วโมง</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 28:30">28:30</a></span></li>
+            <li><p>เขาอยากเทรดจาก sweep ของ HTF เพราะ move ใหญ่กว่ามาก high ของ 5 นาทีที่แตกแล้วเกิดขาลงน่าจะอยู่ไม่นาน HTF มีน้ำหนักกว่า</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1755" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 29:15">29:15</a></span></li>
+            <li><p>ตัวอย่าง: ราคาทะลุ 4H high หลายตัว คาดว่าจะมี move ระดับ HTF พอ timeframe เล็กเริ่มกลับตัวคือจุดเข้าที่ดี และการเข้าบน timeframe เล็กทำให้ขี่ move HTF ได้ทั้งก้อน</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1785" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 29:45">29:45</a></span></li>
+          </ul></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m7a" aria-label="กราฟจำลองที่เทียบ high ของ timeframe สูงกับ high ของ 5 นาที">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><div class="ctrl-group" role="group" aria-label="เลือกสถานการณ์"><button class="ctrl" type="button" data-sc="S10" aria-pressed="true">กวาด 4H high</button><button class="ctrl" type="button" data-sc="S11" aria-pressed="false">high ของ 5m</button></div><div class="ctrl-group" role="group" aria-label="Timeframe"><button class="ctrl" type="button" data-tf="5" aria-pressed="true">5m</button><button class="ctrl" type="button" data-tf="60" aria-pressed="false">1H</button><button class="ctrl" type="button" data-tf="240" aria-pressed="false">4H</button></div><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="ann" aria-pressed="true">อ่านกราฟ</button><span class="chips" data-k="chips"></span></div>
+        </figure></div>
+      </div>
+      <div class="module__sub module__sub--table">
+        <h3>Session ใน ET และเวลาไทย</h3>
+        <div class="sess-wrap">
+          <table class="sess">
+            <thead><tr><th scope="col">Session</th><th scope="col">เวลา ET</th><th scope="col" data-k="h-summer">เวลาไทย · US ออมแสง</th><th scope="col" data-k="h-winter">เวลาไทย · US มาตรฐาน</th></tr></thead>
+            <tbody data-k="sess-body"></tbody>
+          </table>
+        </div>
+        <noscript><p>ตารางนี้คำนวณด้วย JavaScript จาก TJR.sessions</p></noscript>
+        <p class="sess-note" data-k="dst-note"></p>
+        <p class="sess-live" data-k="now"></p>
+        <p class="sess-rules">ช่วง ET ตามที่คลิปบอก: New York 9:30–17:00 (pre-market เริ่ม 8:30) London เริ่ม 3:00 และปิดทางการ 11:00 แต่ TJR ตัดที่ 8:30 เมื่อ NY pre-market เริ่ม Asia 18:00–3:00 ส่วน 17:00–18:00 เทรดไม่ได้ (spread hour) <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></span>
+          เวลาไทยและช่วง daylight saving ของ US <span class="badge-gap">คลิปไม่ได้ระบุ</span> ตารางนี้เว็บคำนวณเองจากกฎ DST ของ US</p>
+      </div>
+      <div class="module__sub">
+      <div class="module__grid module__grid--flip">
+        <div class="module__text">
+          <h3>Session ขยับตลาดอย่างไร</h3>
+          <ul class="facts">
+            <li><p>เงินใหม่ของแต่ละ session อยากขยับตลาดไปทางของตัวเอง Asia ขยับ London เข้ามาเก็บ Asia NY เข้ามาเก็บ London เพราะจะไปทางไหนต้องเก็บ high หรือ low ก่อน</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2025" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 33:45">33:45</a></span></li>
+            <li><p>เขาใช้ indicator session high/low ของตัวเอง ถ้าไม่มีก็มาร์กเอง: high และ low ของ Asia กับ London</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1965" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 32:45">32:45</a></span></li>
+            <li><p>ตัวอย่างวันหนึ่ง: Asia ไม่ค่อยขยับ London เก็บ Asia low แล้วขึ้น พอ NY เปิด ราคาลงเก็บ London low แล้วทำ move ของวัน เขาว่าไม่ใช่เรื่องบังเอิญ เกิดเกือบทุกวัน</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2085" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 34:45">34:45</a></span></li>
+            <li><p>เขาเทรดเฉพาะตอน NY open เพราะเทรดดัชนีสหรัฐ ตอนนั้นเขามาร์ก high/low ของ session ก่อนหน้าทั้งหมดเป็นแม่เหล็ก liquidity</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></li>
+            <li><p>อีกสองตัวอย่าง: NY pre-market เก็บ London low แล้ว NY ขึ้นทั้งวัน และวันจันทร์ที่ NY open พุ่งเหนือ London high แล้วทิ่มใต้ London low ก่อนขึ้น</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2205" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:45">36:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2295" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 38:15">38:15</a></span></li>
+          </ul>
+          <aside class="note"><p class="note__t">ข้อควรจำ</p><p>เก็บ London low ไม่ได้แปลว่ากด buy ทันที ต้องเห็นสัญญาณขาขึ้นบน timeframe เล็ก เช่น low, high, higher low, higher high, higher low อีกครั้ง แล้วจึงเข้า ระบบจริงของเขามี confluence มากกว่านี้ <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2250" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 37:30">37:30</a></span></p></aside></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m7b" aria-label="กราฟจำลองวัน session ที่แสดงกล่อง Asia, London และ New York">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><div class="ctrl-group" role="group" aria-label="เลือกสถานการณ์"><button class="ctrl" type="button" data-sc="S06" aria-pressed="true">วัน A</button><button class="ctrl" type="button" data-sc="S07" aria-pressed="false">วัน B</button><button class="ctrl" type="button" data-sc="S08" aria-pressed="false">วันจันทร์</button><button class="ctrl" type="button" data-sc="S09" aria-pressed="false">เข้าใน 1m</button></div><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="ann" aria-pressed="true">อ่านกราฟ</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="chips" data-k="chips"></span></div>
+        </figure></div>
+      </div>
+      </div>
+      <div class="check" data-m="7" role="group" aria-labelledby="m7-ck">
+      <div class="check__bar">
+        <h3 id="m7-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="1875" data-why="ปิดทางการ 11:00 แต่เขาตัดที่ 8:30 เมื่อ NY pre-market เริ่ม">
+          <p class="q__t" id="m7-q0">TJR ตัด London session ที่กี่โมงตามเวลา ET</p>
+          <div class="q__opts" role="group" aria-labelledby="m7-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">3:00 เมื่อ Asia จบ</button><button type="button" class="opt" data-i="1" aria-pressed="false">8:30 เมื่อ NY pre-market เริ่ม</button><button type="button" class="opt" data-i="2" aria-pressed="false">11:00 ตามเวลาทางการ</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="0" data-sec="1755" data-why="move หลัง HTF ใหญ่กว่า และ high ของ 5 นาทีที่แตกมักอยู่ไม่นาน">
+          <p class="q__t" id="m7-q1">ทำไมเขาให้น้ำหนัก sweep ของ HTF มากกว่า high ของ 5 นาที</p>
+          <div class="q__opts" role="group" aria-labelledby="m7-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">เพราะ move หลัง sweep ของ HTF ใหญ่กว่ามาก</button><button type="button" class="opt" data-i="1" aria-pressed="false">เพราะ 5 นาทีไม่มี liquidity</button><button type="button" class="opt" data-i="2" aria-pressed="false">เพราะคลิปห้ามเทรดบน 5 นาที</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m8" data-m="8" aria-labelledby="m8-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 8</p>
+        <h2 id="m8-h">Low- vs High-resistance liquidity</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 39:45">39:45</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <ul class="facts">
+            <li><p>Low-resistance liquidity คือ high หรือ low ที่เรียงซ้อนกันและยังไม่ถูกเก็บ เหมือนกองคุกกี้ บางคนเรียก trendline liquidity</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 39:45">39:45</a></span></li>
+            <li><p>Market maker เห็น stacked highs เป็น buy orders หลายชุดที่ทริกเกอร์เมื่อราคาดันขึ้น จึงมองหาและเก็บมัน stacked lows ก็เหมือนกัน</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2445" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 40:45">40:45</a></span></li>
+            <li><p>ลากเส้น trendline ใต้ low ที่ยังไม่ถูกเก็บได้ ราคามักวิ่งไปเก็บ เติม buy แล้วขึ้นต่อ</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2520" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:00">42:00</a></span></li>
+            <li><p>มันเป็นเป้าราคาได้ด้วย: ออเดอร์ที่เข้าไว้ด้านล่างต้องปิดตรงที่มีคนยอมซื้อ คือเหนือ stacked highs ราคาจึงมักวิ่งไปเก็บเพื่อ take profit</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:45">42:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2655" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 44:15">44:15</a></span></li>
+            <li><p>High-resistance liquidity คือ high ล่าสุด หรือจุด sweep ที่ราคากำลังเคลื่อนออกมา เมื่อ low-resistance ถูกเก็บแล้วราคากลับตัวชัด มันกลายเป็น high-resistance การกลับไปตรงนั้นต้องใช้แรงมาก</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2700" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 45:00">45:00</a></span></li>
+            <li><p>กฎ: เทรดเข้าหา low-resistance และออกจาก high-resistance หลังเก็บ high แล้วราคาลง ต้องเก็บ low ก่อนจึงค่อยคิดถึง long ไปหา high เหล่านั้น</p><span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2790" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 46:30">46:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2835" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 47:15">47:15</a></span></li>
+            <li><p>stacked กี่ตัวและห่างกันเท่าไรถึงนับ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          </ul></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m8a" aria-label="กราฟจำลองที่แสดง stacked highs และ lows เป็นเป้าราคา">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title"></span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><div class="ctrl-group" role="group" aria-label="เลือกสถานการณ์"><button class="ctrl" type="button" data-sc="S12" aria-pressed="true">Stacked highs</button><button class="ctrl" type="button" data-sc="S13" aria-pressed="false">Trendline</button><button class="ctrl" type="button" data-sc="S14" aria-pressed="false">High-resistance</button></div><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="ann" aria-pressed="true">อ่านกราฟ</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="chips" data-k="chips"></span></div>
+        </figure></div>
+      </div>
+      <div class="check" data-m="8" role="group" aria-labelledby="m8-ck">
+      <div class="check__bar">
+        <h3 id="m8-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="2385" data-why="low-resistance คือชุด high/low ที่ซ้อนกันและยังไม่ถูกเก็บ">
+          <p class="q__t" id="m8-q0">low-resistance liquidity คืออะไร</p>
+          <div class="q__opts" role="group" aria-labelledby="m8-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">high ล่าสุดที่ราคาเพิ่งกลับตัวจากมัน</button><button type="button" class="opt" data-i="1" aria-pressed="false">high หรือ low ที่เรียงซ้อนกันและยังไม่ถูกเก็บ</button><button type="button" class="opt" data-i="2" aria-pressed="false">ระดับราคาที่เทรดยาก</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="2700" data-why="กลายเป็น high-resistance แล้วเทรดไปหา low-resistance">
+          <p class="q__t" id="m8-q1">low ที่เพิ่งถูกเก็บแล้วราคากลับตัวชัด กลายเป็นอะไร และควรเทรดไปทางไหน</p>
+          <div class="q__opts" role="group" aria-labelledby="m8-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">low-resistance และเทรดกลับเข้าหามัน</button><button type="button" class="opt" data-i="1" aria-pressed="false">high-resistance และเทรดไปหา stacked highs ที่ยังไม่ถูกเก็บ</button><button type="button" class="opt" data-i="2" aria-pressed="false">ไม่มีผลต่อการเทรด</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="limits" id="limits" aria-labelledby="limits-h">
+      <div class="limits__text">
+        <h2 id="limits-h">ที่คลิปนี้ไม่ได้สอน</h2>
+        <p class="t-lead">TJR บอกเองว่า liquidity เป็นแค่ชิ้นหนึ่งของระบบ เขาใช้ confluence อื่นร่วมด้วย ได้แก่ market structure break, fair value gap และ inverse fair value gap ซึ่งสำคัญไม่น้อยกว่า liquidity และคลิปนี้ไม่ได้ลงรายละเอียด <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></p>
+        <p>เว็บนี้จึงไม่เติมเรื่องเหล่านี้เอง ทุกข้อด้านล่างคือสิ่งที่ไม่มีในคลิป</p>
+        <a class="btn btn--secondary" href="playbook.html">เปิด Playbook 7 ขั้น</a>
+      </div>
+      <dl class="limits__list">
+        <div><dt>Stop-loss</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>ขนาด position</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>ความเสี่ยงต่อเทรด</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>Take-profit นอกจากเป้า stacked highs <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:45">42:45</a></dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>Win rate</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>ผล backtest</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>กฎกรองข่าว</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>ทำอย่างไรเมื่อ confirmation ล้ม</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+      </dl>
+    </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/js/core/ns.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/scenario/rng.js"></script>
+<script src="assets/js/scenario/swings.js"></script>
+<script src="assets/js/scenario/gen.js"></script>
+<script src="assets/js/scenario/sessions.js"></script>
+<script src="assets/js/scenario/library.js"></script>
+<script src="assets/js/scenario/annotate.js"></script>
+<script src="assets/js/scenario/grade.js"></script>
+<script src="assets/js/chart/scale.js"></script>
+<script src="assets/js/chart/render.js"></script>
+<script src="assets/js/chart/overlays.js"></script>
+<script src="assets/js/chart/chart.js"></script>
+<script src="assets/js/core/layout.js"></script>
+<script src="assets/js/core/motion.js"></script>
+<script src="assets/js/pages/learn.js"></script>
+</body>
+</html>
