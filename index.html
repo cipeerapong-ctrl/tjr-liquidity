@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand" data-tone="dark" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liquidity: บทเรียนระบบ liquidity จากคลิป TJR เป็นภาษาไทย</title>
+<meta name="description" content="เรียนระบบ liquidity ในคลิป 49 นาทีของ TJR เป็น 8 บท บนกราฟจำลองที่ยุ่งเหมือนตลาดจริง ทุกข้อมีเวลาในคลิปกำกับ">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Liquidity อยู่เหนือ High และใต้ Low">
+<meta property="og:description" content="บทเรียน 8 บทจากคลิป liquidity ของ TJR พร้อมกราฟเล่นได้และแบบฝึก">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1c1c1c">
+<!-- <link rel="canonical" href="https://[the site's domain]/"> : no domain yet -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/pages/home.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+</head>
+<body>
+<!--
+  software · TJR Liquidity home (Task 9)
+  deal: hero centred (deal.mjs --type software --has ui) · palette charcoal-room-sage, Geist + IBM Plex Sans Thai
+        (Task 8: a night terminal, the sage quiet so the chart's green, red and amber stay loudest) ·
+        nav-centre · footer-dark · close-word · rhythm surface-pairs (#course and #practice on the surface band) ·
+        buttons tonal · mark ring · lit ground sand · radius sharp
+  moment: the pinned 3-step walkthrough (#core, data-scroll-moment, spec 7.1 and 10). moments.mjs dealt
+        line-carries-colour, which avoids pinned chapters; the spec asks for the pinned walkthrough and a
+        six-section page carries one moment, so the walkthrough is it (GSAP ScrollTrigger + a sticky stage).
+  screens at 1440x900: hero 1 · core 2 · course 1 · practice 1 · limits 1 · closing 1
+-->
+<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html" aria-current="page">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div></div></header></noscript>
+<main id="top">
+
+  <!-- 1 · hero: the clip's one rule, the live chart under it -->
+  <section class="hero hero--centred" data-enter aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text">
+      <div class="hero__c">
+        <a class="pill" href="https://youtu.be/Vulini8xbB0" target="_blank" rel="noopener"><span>คลิป TJR · 49:07</span><span class="muted">ดูต้นฉบับ</span></a>
+        <h1 id="hero-h">Liquidity อยู่เหนือ High และใต้ Low</h1>
+        <p class="hero__lead">กฎแกนของคลิป <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=135" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 02:15">02:15</a> เว็บนี้สอนเฉพาะระบบในคลิป liquidity ของ TJR ทุกข้อมีเวลาในคลิปกำกับ ส่วนที่คลิปไม่ได้พูด เราติดป้ายไว้ ไม่เติมเอง</p>
+        <div class="btn-row"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a><a class="btn btn--secondary" href="scenarios.html">ดู 14 สถานการณ์</a></div>
+      </div>
+      <div class="hero__window">
+        <figure class="ly-piece chart-frame hero-chart" data-ui="chart" data-hero-chart aria-label="กราฟจำลอง: ราคากวาด liquidity แล้วกลับตัว เล่นวนด้วยกราฟใหม่ทุกรอบ">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span>
+            <span class="chart-frame__tf">5m</span>
+            <span class="chart-frame__title" data-k="title">กราฟจำลอง</span>
+            <ol class="phase" aria-hidden="true">
+              <li data-phase="sweep">sweep</li>
+              <li data-phase="confirm">confirmation</li>
+              <li data-phase="entry">entry</li>
+            </ol>
+            <span class="chart-frame__meta" data-k="time"></span>
+            <button class="ctrl ctrl--icon" type="button" data-k="pause" aria-pressed="false" aria-label="Pause chart animation">
+              <svg viewBox="0 0 14 14" aria-hidden="true"><path class="i-pause" d="M3.5 2.5h2.2v9H3.5zM8.3 2.5h2.2v9H8.3z" fill="currentColor"/><path class="i-play" d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg>
+            </button>
+          </div>
+          <div class="chart-frame__canvas hero-chart__canvas"></div>
+        </figure>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 2 · core: sweep, confirmation, entry on one chart (the page's moment) -->
+  <section id="core" class="core" data-scroll-moment style="--h: 2" aria-labelledby="core-h">
+    <div class="wrap">
+      <div class="core__stage">
+        <div class="core__text">
+          <div class="section-head">
+            <h2 id="core-h">ทุกเทรดในคลิปเดิน 3 ขั้น</h2>
+            <p>ตัวอย่างขาขึ้นหนึ่งตัว ดูทีละขั้นบนกราฟเดียวกัน</p>
+          </div>
+          <ol class="core__steps">
+            <li class="core-step" data-step="0">
+              <div class="core-step__body">
+                <h3><span class="core-step__n">1</span>Sweep: ราคากวาด liquidity</h3>
+                <p>ราคาลงทะลุ low ที่ซ้อนกัน คำสั่ง sell ที่รออยู่ถูกเติม ตลาดได้แค่โอกาสกลับตัว กดซื้อตรงนี้เลยอาจติด drawdown ยาว</p>
+                <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:30">22:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:15">23:15</a></p>
+              </div>
+              <div class="core-step__chart" data-core-still="0"></div>
+            </li>
+            <li class="core-step" data-step="1">
+              <div class="core-step__body">
+                <h3><span class="core-step__n">2</span>Confirmation: แนวโน้มใหม่ต้องเกิดก่อน</h3>
+                <p>ขาขึ้นต้องเห็น high, low แล้ว higher low และ higher high ฝั่ง short กลับกัน: high, low, lower low แล้ว lower high</p>
+                <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 25:30">25:30</a></p>
+              </div>
+              <div class="core-step__chart" data-core-still="1"></div>
+            </li>
+            <li class="core-step" data-step="2">
+              <div class="core-step__body">
+                <h3><span class="core-step__n">3</span>Entry: เข้าตอนราคาย่อ</h3>
+                <p>คลิปชี้จุดเข้าเฉลี่ยที่การย่อหลัง higher high ระบบจริงของ TJR มีกฎละเอียดกว่านี้ ซึ่งไม่ได้อยู่ในคลิป</p>
+                <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1425" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:45">23:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:45">24:45</a><span class="badge-gap">จุดเข้าจริงคลิปไม่ได้ระบุ</span></p>
+              </div>
+              <div class="core-step__chart" data-core-still="2"></div>
+            </li>
+          </ol>
+        </div>
+        <figure class="chart-frame core__live" data-ui="chart" aria-label="กราฟตัวอย่าง S01: กวาด stacked lows แล้วกลับตัวขึ้น เดินตามการเลื่อนหน้า">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym">NQ</span>
+            <span class="chart-frame__tf">5m</span>
+            <span class="chart-frame__title">S01 · กวาด stacked lows แล้วกลับตัวขึ้น</span>
+            <span class="chart-frame__meta" data-k="step">ขั้น 1 / 3</span>
+          </div>
+          <div class="core__rail" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="chart-frame__canvas core__canvas"></div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · course map: eight modules in the clip's order (surface band, 1 of 2) -->
+  <section id="course" class="ground-surface" style="--h: 1" aria-labelledby="course-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="course-h">บทเรียน 8 บท เรียงตามคลิป</h2>
+        <p>แต่ละบทคือหนึ่งช่วงของคลิป กดเวลาในการ์ดเพื่อเปิดตรงจุดนั้น</p>
+      </div>
+      <div class="tl" role="img" aria-label="เส้นเวลาของคลิป 49:07 แบ่งเป็น 8 บท และช่วงท้ายที่บอกว่าไม่ได้สอนอะไร">
+        <div class="tl__bar">
+          <span class="tl__seg" data-m="1" style="--d: 315">1</span>
+          <span class="tl__seg" data-m="2" style="--d: 45">2</span>
+          <span class="tl__seg" data-m="3" style="--d: 315">3</span>
+          <span class="tl__seg" data-m="4" style="--d: 375">4</span>
+          <span class="tl__seg" data-m="5" style="--d: 255">5</span>
+          <span class="tl__seg" data-m="6" style="--d: 315">6</span>
+          <span class="tl__seg" data-m="7" style="--d: 765">7</span>
+          <span class="tl__seg" data-m="8" style="--d: 495">8</span>
+          <span class="tl__seg tl__seg--gap" data-m="9" style="--d: 67"></span>
+        </div>
+        <div class="tl__ticks" aria-hidden="true"><span>00:00</span><span style="--at: 20.36">10:00</span><span style="--at: 40.72">20:00</span><span style="--at: 61.08">30:00</span><span style="--at: 81.44">40:00</span><span>49:07</span></div>
+      </div>
+      <ol class="grid mods">
+        <li class="card mod span-3" data-m="1" style="--d: 315"><div class="mod__fig"><span class="mod__n">01</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><path class="g-l" d="M4 13H156M4 53H156"/><path class="g-p" d="M6 40L22 28L34 36L50 18L66 34L82 24L98 47L114 32L130 42L154 30"/><g class="g-o"><circle cx="44" cy="6" r="2.2"/><circle cx="52" cy="6" r="2.2"/><circle cx="60" cy="6" r="2.2"/><circle cx="92" cy="59" r="2.2"/><circle cx="100" cy="59" r="2.2"/><circle cx="108" cy="59" r="2.2"/></g></svg></div><h3><a class="mod__link" href="learn.html#m1">Liquidity คืออะไร</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=15" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 00:15">00:15</a><span class="mod__len">5 นาที</span></p></li>
+        <li class="card mod span-3" data-m="2" style="--d: 45"><div class="mod__fig"><span class="mod__n">02</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><path class="g-wu" d="M44 10V46M116 22V58"/><path class="g-wd" d="M60 14V50M100 18V54"/><rect class="g-u" x="39" y="18" width="10" height="22"/><rect class="g-d" x="55" y="20" width="10" height="20"/><rect class="g-d" x="95" y="24" width="10" height="22"/><rect class="g-u" x="111" y="30" width="10" height="20"/><path class="g-m" d="M30 10H74M86 58H130"/></svg></div><h3><a class="mod__link" href="learn.html#m2">ระบุ High / Low แบบ TJR</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=315" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 05:15">05:15</a><span class="mod__len">1 นาที</span></p></li>
+        <li class="card mod span-3" data-m="3" style="--d: 315"><div class="mod__fig"><span class="mod__n">03</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><path class="g-l" d="M62 16H156M118 50H156"/><path class="g-p" d="M6 44L28 24L44 34L62 16L80 40L100 30L118 50L136 36L154 42"/><g class="g-bu"><rect x="84" y="4" width="16" height="6" rx="1"/><rect x="104" y="4" width="16" height="6" rx="1"/></g><g class="g-bd"><rect x="122" y="55" width="14" height="6" rx="1"/><rect x="140" y="55" width="14" height="6" rx="1"/></g></svg></div><h3><a class="mod__link" href="learn.html#m3">ทำไม liquidity อยู่เหนือ High / ใต้ Low</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=360" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 06:00">06:00</a><span class="mod__len">5 นาที</span></p></li>
+        <li class="card mod span-3" data-m="4" style="--d: 375"><div class="mod__fig"><span class="mod__n">04</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><path class="g-l" d="M30 22H112"/><path class="g-p" d="M4 46L30 22L46 38L62 30L80 40L98 32L112 10L124 30L138 46L156 56"/><path class="g-ad" d="M146 18V34M140 28l6 6 6-6"/></svg></div><h3><a class="mod__link" href="learn.html#m4">ฝั่ง Smart Money</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=675" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 11:15">11:15</a><span class="mod__len">6 นาที</span></p></li>
+        <li class="card mod span-3" data-m="5" style="--d: 255"><div class="mod__fig"><span class="mod__n">05</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><path class="g-g" d="M54 6V58M106 6V58"/><path class="g-l" d="M6 42H28M58 40H76M110 38H124"/><path class="g-p" d="M6 26L16 42L22 32L30 52L40 22L48 12M58 30L65 40L70 34L76 47L86 26L100 18M110 32L115 38L119 34L124 44L134 28L154 22"/></svg></div><h3><a class="mod__link" href="learn.html#m5">ตัวอย่างทุก timeframe</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1050" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 17:30">17:30</a><span class="mod__len">4 นาที</span></p></li>
+        <li class="card mod span-3" data-m="6" style="--d: 315"><div class="mod__fig"><span class="mod__n">06</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><path class="g-l" d="M4 46H40"/><path class="g-p" d="M4 30L18 46L26 38L40 57L58 30L72 42L96 18L110 30L154 6"/><circle class="g-u" cx="72" cy="42" r="2.6"/><circle class="g-u" cx="96" cy="18" r="2.6"/><circle class="g-e" cx="110" cy="30" r="4.2"/></svg></div><h3><a class="mod__link" href="learn.html#m6">Confirmation และจุดเข้า</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1305" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 21:45">21:45</a><span class="mod__len">5 นาที</span></p></li>
+        <li class="card mod span-3" data-m="7" style="--d: 765"><div class="mod__fig"><span class="mod__n">07</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><rect class="g-s" x="4" y="22" width="40" height="18"/><rect class="g-s" x="48" y="14" width="44" height="34"/><path class="g-l" d="M24 40H64M70 48H104"/><path class="g-p" d="M4 30L14 24L24 36L34 26L44 38L56 46L66 16L80 30L92 26L100 54L116 34L132 20L156 8"/></svg></div><h3><a class="mod__link" href="learn.html#m7">Significant liquidity targets</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1620" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 27:00">27:00</a><span class="mod__len">13 นาที</span></p></li>
+        <li class="card mod span-3" data-m="8" style="--d: 495"><div class="mod__fig"><span class="mod__n">08</span><svg viewBox="-16 -18 192 88" aria-hidden="true"><path class="g-x" d="M6 52H40"/><path class="g-l" d="M66 12H156M86 18H156M106 24H156"/><path class="g-p" d="M4 36L18 52L30 40L52 46L66 12L78 34L86 18L96 38L106 24L118 50L130 44L142 56L154 46"/><path class="g-au" d="M148 40V26M142 32l6-6 6 6"/></svg></div><h3><a class="mod__link" href="learn.html#m8">Low- vs High-resistance liquidity</a></h3><p class="mod__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 39:45">39:45</a><span class="mod__len">8 นาที</span></p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 4 · practice: the three doors (surface band, 2 of 2) -->
+  <section id="practice" class="ground-surface" style="--h: 1" aria-labelledby="practice-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="practice-h">ฝึกอ่าน liquidity ด้วย 3 เครื่องมือ</h2>
+        <p>ทุกกราฟสุ่มขึ้นใหม่จาก seed จึงไม่มีรอบไหนเหมือนรอบก่อน</p>
+      </div>
+      <div class="grid doors">
+        <article class="card door">
+          <h3>14 สถานการณ์จากคลิป</h3>
+          <p>เล่นกราฟทีละแท่ง เปิดคำอธิบายบนกราฟ แล้วสุ่มกราฟใหม่ได้ทุกครั้ง</p>
+          <a class="card__link" href="scenarios.html">ดูสถานการณ์<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h8M5 2.5 8.5 6 5 9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <div class="panel">
+            <div class="stage">
+              <div class="at-rise fit door__frag">
+                <div class="chart-frame door-chart" data-ui="chart" aria-hidden="true">
+                  <div class="chart-frame__bar"><span class="chart-frame__sym">NQ</span><span class="chart-frame__tf">5m</span><span class="chart-frame__title">S08 · NY open</span></div>
+                  <div class="chart-frame__canvas door-chart__canvas"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="card door">
+          <h3>Playbook 7 ขั้น</h3>
+          <p>เช็กลิสต์ตามลำดับในคลิป พร้อมนาฬิกา session เวลา ET กับเวลาไทย</p>
+          <a class="card__link" href="playbook.html">เปิด Playbook<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h8M5 2.5 8.5 6 5 9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <div class="panel">
+            <div class="stage stage--fade-b">
+              <div class="at-rise fit door__frag">
+                <div class="mock mock--checks" data-ui="checklist" aria-hidden="true">
+                  <p class="mock__head"><span>Playbook</span><span class="mock__count">1 / 7</span></p>
+                  <p class="mock__row is-done"><i></i>มาร์ก high / low ของ Asia และ London</p>
+                  <p class="mock__row"><i></i>รอราคา sweep ระดับที่มาร์กไว้</p>
+                  <p class="mock__row"><i></i>Stop-loss <span class="badge-gap">คลิปไม่ได้ระบุ</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="card door">
+          <h3>แบบฝึก 4 โหมด</h3>
+          <p>Replay, Spot, Sessions และ Quiz ให้คะแนนตามขั้นตอนในคลิป ไม่ใช่กำไรขาดทุน</p>
+          <a class="card__link" href="lab.html">เริ่มแบบฝึก<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h8M5 2.5 8.5 6 5 9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <div class="panel">
+            <div class="stage">
+              <div class="at-rise fit door__frag">
+                <div class="mock mock--replay" data-ui="replay" aria-hidden="true">
+                  <p class="mock__head"><span>Replay · แท่งที่ 61</span><span class="mock__count">streak 4</span></p>
+                  <p class="mock__q">low ถูกกวาดแล้ว ตอนนี้คุณจะทำอะไร</p>
+                  <p class="mock__choices"><span class="mock__btn">Long</span><span class="mock__btn">Short</span><span class="mock__btn is-on">รอ</span></p>
+                  <p class="mock__verdict"><b>ถูกขั้นตอน</b> ยังไม่มี higher high</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · limits: what the clip does not teach (F9) -->
+  <section id="limits" style="--h: 1" aria-labelledby="limits-h">
+    <div class="wrap grid limits">
+      <div class="span-5 limits__text">
+        <h2 id="limits-h">8 เรื่องที่คลิปนี้ไม่ได้สอน</h2>
+        <p class="t-lead">TJR บอกเองว่า liquidity เป็นแค่ชิ้นหนึ่งของระบบ เขาใช้ confluence อื่นร่วมด้วย เช่น market structure break และ fair value gap ซึ่งคลิปนี้ไม่ได้ลงรายละเอียด <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></p>
+        <p>เว็บนี้จึงไม่เติมเรื่องเหล่านี้เอง ทุกที่ที่มันโผล่ขึ้น คุณจะเห็นป้าย <span class="badge-gap">คลิปไม่ได้ระบุ</span></p>
+      </div>
+      <div class="limits__visual">
+        <div class="panel panel--ticket">
+          <div class="ticket" data-ui="ticket">
+            <p class="ticket__head"><span class="chart-frame__sym">NQ</span><span>Order ticket</span><span class="ticket__side">Long</span></p>
+            <dl class="ticket__rows">
+              <div><dt>Stop-loss</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+              <div><dt>ขนาด position</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+              <div><dt>ความเสี่ยงต่อเทรด</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+              <div><dt>Take-profit นอกจากเป้า stacked highs <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:45">42:45</a></dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+              <div><dt>Win rate</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+              <div><dt>ผล backtest</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+              <div><dt>กฎกรองข่าว</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+              <div><dt>ทำอย่างไรเมื่อ confirmation ล้ม</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/js/core/ns.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/scenario/rng.js"></script>
+<script src="assets/js/scenario/swings.js"></script>
+<script src="assets/js/scenario/gen.js"></script>
+<script src="assets/js/scenario/sessions.js"></script>
+<script src="assets/js/scenario/library.js"></script>
+<script src="assets/js/scenario/annotate.js"></script>
+<script src="assets/js/scenario/grade.js"></script>
+<script src="assets/js/chart/scale.js"></script>
+<script src="assets/js/chart/render.js"></script>
+<script src="assets/js/chart/overlays.js"></script>
+<script src="assets/js/chart/chart.js"></script>
+<script src="assets/js/core/layout.js"></script>
+<script src="assets/js/core/motion.js"></script>
+<script src="assets/js/pages/home.js"></script>
+</body>
+</html>

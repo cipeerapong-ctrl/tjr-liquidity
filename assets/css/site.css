@@ -40,12 +40,22 @@
 .closing__cta.close--word { container-type: inline-size; }
 .close--word > .close__word { font-size: min(calc(100cqi / 3.65), 30svh); }
 @media (max-width: 639px) { .close--word > .close__word { font-size: calc(100cqi / 3.65); } }
+/* the kit clips the name on both axes; its descenders (q, y) run under the .86 line, so only the sides clip */
+.close--word > .close__word { overflow-x: clip; overflow-y: visible; }
 .footer__brand .footer__mark { font-size: 48px; }
 .footer__source-line, .footer__source-note { font-size: var(--t-small); line-height: 1.6; }
 .footer__source-line { color: var(--ink); }
 .footer__source-note { color: var(--muted); margin-top: var(--s-2); }
+/* a tablet: the name and its line across, then the two link columns and the source in one row */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .footer .grid > .footer__col { grid-column: auto / span 3; }
+  .footer .grid > .footer__source { grid-column: auto / span 6; }
+}
 @media (max-width: 639px) {
   .footer__brand .footer__mark { font-size: 30px; }
+  /* under a close-word the brand block holds only its one line, which the name above already says: on a
+     phone it goes, so the close and the links stay one screen (844px) */
+  footer.closing .footer__brand:not(:has(.footer__mark)) { display: none; }
   .footer .footer__source { grid-column: 1 / -1; }
   .footer__source-line a { display: inline-flex; align-items: center; min-height: 44px; }
 }

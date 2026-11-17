@@ -1,0 +1,343 @@
+/*
+  TJR Liquidity: the home page (Task 9). Page CSS only for what sits inside a visual or the kit lacks
+  (layout-v4.md): the hero's chart window, the pinned walkthrough's stage, the clip timeline and module
+  tiles, the door fragments and the order ticket. Tokens: assets/css/tokens.css; components: site.css.
+  Nothing here moves with the scroll except #core (the page's one moment, data-scroll-moment), and only
+  while home.js marks it .is-live (GSAP ScrollTrigger loaded, motion allowed, a window 620px tall or more).
+*/
+
+/* ================================================================ 1 · hero: the live chart window */
+/* the window's piece is the chart frame across the frame's width (spec 7.1: a full-width live chart),
+   standing on the lit sand ground and ending where the frame's fade begins, so no candle, level or label
+   is ever inside the fade. The fade is the frame's last 40px here, not its last 18% (as the kit does on a
+   phone): the chart needs the height, and the fade only ever covers sand */
+.hero--centred .hero__window {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+}
+.hero--centred .hero__window > .hero-chart {
+  top: var(--s-5); bottom: 40px; width: calc(100% - 2 * var(--s-6));
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 48px -28px rgb(0 0 0 / .55), 0 2px 6px rgb(0 0 0 / .18);
+}
+.hero-chart .chart-frame__bar { flex: none; min-height: 52px; padding-block: var(--s-1); }
+.hero-chart .chart-frame__title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-chart .chart-frame__meta { margin-left: 0; }
+.hero-chart__canvas { flex: 1 1 0; height: auto; min-height: 0; }
+.hero-chart__canvas > canvas { transition: opacity 280ms var(--ease, ease); }
+.hero-chart.is-swapping .hero-chart__canvas > canvas { opacity: 0; }
+/* the terminal's glass: faint scanlines and a vignette, in the hero only (spec 10) */
+.hero-chart__canvas::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom, rgb(255 255 255 / .022) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 50% 40%, transparent 60%, rgb(0 0 0 / .28));
+}
+
+/* the three phases of the clip's trade, lit as the playback reaches them */
+.phase { display: flex; gap: var(--s-1); margin: 0 0 0 auto; padding: 0; list-style: none; }
+.phase li {
+  --pc: var(--c-axis);
+  display: inline-flex; align-items: center; height: 24px; padding: 0 var(--s-2);
+  border: 1px solid color-mix(in oklab, var(--c-text) 14%, transparent); border-radius: var(--r-sm);
+  font: 500 var(--t-label)/1 var(--font-mono); color: var(--c-axis); white-space: nowrap;
+}
+.phase [data-phase="sweep"] { --pc: var(--c-liq); }
+.phase [data-phase="confirm"] { --pc: var(--c-bull); }
+.phase [data-phase="entry"] { --pc: var(--c-entry); }
+.phase li.is-on { color: var(--c-text); border-color: var(--pc); background: color-mix(in oklab, var(--pc) 18%, transparent); }
+html:not([data-motion="off"]) .phase li { transition: color 240ms var(--ease, ease), border-color 240ms var(--ease, ease), background-color 240ms var(--ease, ease); }
+
+/* the loop's pause: an icon control, 44px, the icon swaps with aria-pressed */
+.ctrl--icon { padding: 0; width: 44px; }
+.ctrl--icon .i-play { display: none; }
+.ctrl--icon[aria-pressed="true"] .i-pause { display: none; }
+.ctrl--icon[aria-pressed="true"] .i-play { display: inline; }
+
+@media (max-width: 1279px) { .hero-chart .chart-frame__title { display: none; } }
+@media (max-width: 639px) {
+  .hero--centred .hero__window { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); }
+  .hero--centred .hero__window > .hero-chart { top: var(--s-4); bottom: 28px; }
+  .hero-chart .chart-frame__meta { display: none; }
+  .hero-chart .chart-frame__bar { gap: var(--s-2); padding-inline: var(--s-3) var(--s-1); }
+  .phase li { padding: 0 6px; }
+  .phase [data-phase="confirm"] { font-size: 0; }
+  .phase [data-phase="confirm"]::after { content: "confirm"; font-size: var(--t-label); }
+  .hero .pill > .muted { display: none; }
+}
+
+/* the hero's words wait for the Thai and Latin faces on file:// (home.js runs the kit's entrance there;
+   over http the kit's own motion.js does) */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .hero.is-holding :is(.pill, h1, .hero__lead, .btn-row) { opacity: 0; }
+}
+
+/* ================================================================ 2 · #core: sweep, confirmation, entry */
+.core__steps { list-style: none; margin: 0; padding: 0; }
+.core-step__body { display: grid; gap: var(--s-3); align-content: start; }
+/* the page's h3s keep one size per screen width, within 1.15 of each other (the module tiles 15-17px, the doors
+   the kit's 18px card title): 19px here, 18 on a tablet, 17 on a phone */
+.core-step h3 { display: flex; align-items: center; gap: var(--s-3); font-size: 19px; line-height: 1.35; font-weight: 500; }
+.core-step p { margin: 0; color: var(--ink); line-height: 1.7; max-width: 46ch; }
+.core-step .chips { color: var(--ink); }
+.core-step__n {
+  display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: var(--r-sm);
+  font: 600 var(--t-small)/1 var(--font-mono); color: var(--bg); background: var(--ink);
+}
+.core-step[data-step="0"] { --sc: var(--c-liq); }
+.core-step[data-step="1"] { --sc: var(--c-bull); }
+.core-step[data-step="2"] { --sc: var(--c-entry); }
+.core-step__n { background: var(--sc); color: var(--c-bg); }
+
+/* --- at rest (no GSAP, offline, reduced motion): three rows, each with its own still chart, nothing hidden */
+.core__live { display: none; }
+.core__stage, .core__text { display: flex; flex-direction: column; min-height: 0; }
+.core__stage { flex: 1 1 auto; }
+.core__text { flex: 1 1 auto; }
+.core__text > .section-head { margin-bottom: var(--s-6); }
+.core__steps { flex: 1 1 auto; display: grid; grid-auto-rows: minmax(0, 1fr); gap: var(--s-6); }
+.core-step { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); row-gap: var(--s-4); min-height: 0; }
+.core-step__body { grid-column: 1 / span 5; padding-top: var(--s-3); }
+.core-step__chart { grid-column: 6 / -1; min-height: 0; display: flex; }
+.core-step__chart > .chart-frame { flex: 1 1 auto; }
+.core-step__chart .chart-frame__canvas, .core__canvas { flex: 1 1 0; height: auto; min-height: 0; }
+@media (max-width: 1023px) {
+  .core-step h3 { font-size: 18px; }
+  .core__steps { grid-auto-rows: auto; gap: var(--s-7); }
+  .core-step__body, .core-step__chart { grid-column: 1 / -1; }
+  .core-step__chart { height: clamp(260px, 44vw, 380px); }
+}
+
+/* --- live (home.js adds .is-live): the stage stands still for the section's second screen while the
+   scroll walks the one chart through the three steps (ScrollTrigger, start top top, end bottom bottom) */
+.core.is-live .core-step__chart { display: none; }
+.core.is-live .core__stage {
+  position: sticky; top: var(--padt); height: calc(100vh - var(--padt) - var(--padb) - var(--bar)); height: calc(100svh - var(--padt) - var(--padb) - var(--bar));
+  flex: none; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter);
+}
+.core.is-live .core__text { grid-column: 1 / span 5; }
+.core.is-live .core__steps { display: flex; flex-direction: column; gap: var(--s-5); }
+.core.is-live .core-step { display: block; padding-left: var(--s-5); border-left: 2px solid var(--line); }
+.core.is-live .core-step__body { padding-top: 0; }
+.core.is-live .core-step.is-on { border-left-color: var(--sc); }
+.core.is-live .core-step:not(.is-on) h3 { color: var(--muted); }
+.core.is-live .core-step:not(.is-on) .core-step__n { background: color-mix(in oklab, var(--ink) 22%, transparent); color: var(--ink); }
+html:not([data-motion="off"]) .core.is-live .core-step :is(h3, .core-step__n, .core-step__body > *) { transition: opacity 260ms var(--ease, ease), color 260ms var(--ease, ease), background-color 260ms var(--ease, ease); }
+html:not([data-motion="off"]) .core.is-live .core-step { transition: border-color 260ms var(--ease, ease); }
+.core.is-live .core__live { display: flex; grid-column: 6 / -1; height: 100%; min-height: 0; }
+.core__live .chart-frame__meta { font-variant-numeric: tabular-nums; }
+/* a desktop: the step that is on is marked by its rule, its number and its heading in the ink; its words
+   stay in the ink on every step (body text at 7:1, never greyed or faded). On a wide, tall screen all three
+   stay open and fill the column beside the chart; at 1024-1279, or under 870px of height (a 1440 laptop
+   window), the steps that are off fold to their heading, so the column never runs past the stage */
+@media (min-width: 1024px) and (max-width: 1279px), (min-width: 1280px) and (max-height: 869px) {
+  .core.is-live .core-step:not(.is-on) .core-step__body > :not(h3) { display: none; }
+  html:not([data-motion="off"]) .core.is-live .core-step.is-on .core-step__body > :not(h3) { animation: core-open 320ms var(--ease, ease) both; }
+}
+@keyframes core-open { from { opacity: 0; translate: 0 6px; } }
+/* the progress rail under the bar: one segment a step, filled by the scroll (--f, 0 to 1) */
+.core__rail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; height: 3px; background: var(--p-surface); }
+.core__rail i { position: relative; overflow: hidden; background: color-mix(in oklab, var(--c-text) 10%, transparent); }
+.core__rail i::after { content: ""; position: absolute; inset: 0; transform-origin: left; transform: scaleX(var(--f, 0)); }
+.core__rail i:nth-child(1)::after { background: var(--c-liq); }
+.core__rail i:nth-child(2)::after { background: var(--c-bull); }
+.core__rail i:nth-child(3)::after { background: var(--c-entry); }
+
+/* a tablet and a phone: the heading, then the chart, then the step that is on (the steps share one cell) */
+@media (max-width: 1023px) {
+  .core.is-live .core__stage { display: flex; flex-direction: column; gap: var(--s-5); }
+  .core.is-live .core__text { display: contents; }
+  .core.is-live .core__text > .section-head { order: 1; margin-bottom: 0; }
+  .core.is-live .core__live { order: 2; flex: 1 1 auto; height: auto; min-height: 240px; }
+  .core.is-live .core__steps { order: 3; display: grid; flex: none; }
+  .core.is-live .core-step { grid-area: 1 / 1; border-left: 0; padding-left: 0; visibility: hidden; opacity: 0; }
+  .core.is-live .core-step.is-on { visibility: visible; opacity: 1; }
+  html:not([data-motion="off"]) .core.is-live .core-step { transition: opacity 260ms var(--ease, ease), visibility 0s linear 260ms; }
+  html:not([data-motion="off"]) .core.is-live .core-step.is-on { transition: opacity 260ms var(--ease, ease) 80ms, visibility 0s; }
+}
+@media (max-width: 639px) {
+  .core.is-live .core__text > .section-head p { display: none; }
+  .core-step h3 { font-size: 17px; }
+  .core.is-live .core__live .chart-frame__title { display: none; }
+}
+
+/* ================================================================ 3 · #course: the clip timeline, eight modules */
+.tl { flex: none; margin-bottom: var(--s-6); }
+.tl__bar { display: flex; gap: 2px; height: 48px; }
+.tl__seg {
+  flex: var(--d) 1 0; min-width: 0; display: flex; align-items: center; padding-left: var(--s-2);
+  border-radius: 2px; background: color-mix(in oklab, var(--ink) 8%, transparent);
+  font: 500 var(--t-label)/1 var(--font-mono); color: var(--muted); overflow: hidden;
+}
+.tl__seg--gap { background: repeating-linear-gradient(135deg, color-mix(in oklab, var(--ink) 18%, transparent) 0 1.5px, transparent 1.5px 6px); }
+html:not([data-motion="off"]) .tl__seg { transition: background-color var(--m-out, 120ms) var(--ease, ease), color var(--m-out, 120ms) var(--ease, ease); }
+.tl__ticks { position: relative; height: 26px; margin-top: var(--s-2); font: 400 var(--t-label)/26px var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl__ticks span { position: absolute; top: 0; left: calc(var(--at) * 1%); translate: -50% 0; }
+.tl__ticks span:first-child { translate: 0 0; }
+.tl__ticks span:last-child { left: auto; right: 0; translate: 0 0; }
+/* a module tile under the pointer or the keyboard lights its stretch of the clip */
+#course:has(.mod[data-m="1"]:is(:hover, :focus-within)) .tl__seg[data-m="1"],
+#course:has(.mod[data-m="2"]:is(:hover, :focus-within)) .tl__seg[data-m="2"],
+#course:has(.mod[data-m="3"]:is(:hover, :focus-within)) .tl__seg[data-m="3"],
+#course:has(.mod[data-m="4"]:is(:hover, :focus-within)) .tl__seg[data-m="4"],
+#course:has(.mod[data-m="5"]:is(:hover, :focus-within)) .tl__seg[data-m="5"],
+#course:has(.mod[data-m="6"]:is(:hover, :focus-within)) .tl__seg[data-m="6"],
+#course:has(.mod[data-m="7"]:is(:hover, :focus-within)) .tl__seg[data-m="7"],
+#course:has(.mod[data-m="8"]:is(:hover, :focus-within)) .tl__seg[data-m="8"] {
+  background: var(--accent); color: var(--accent-ink); transition-duration: var(--m-in, 150ms);
+}
+
+.mods { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(0, 1fr); }
+.card.mod { --c-pad: 16px; gap: var(--s-2); min-height: 0; }
+.card.mod > h3 { font-size: 17px; line-height: 1.4; font-weight: 500; }
+.mod__link { color: inherit; text-decoration: none; }
+.mod__link::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.card.mod > .mod__meta { display: flex; align-items: center; gap: var(--s-3); margin: 0; }
+.mod__meta .ts-chip { position: relative; z-index: 2; }
+.mod__len { font: 400 var(--t-label)/1 var(--font-mono); color: var(--muted); }
+
+/* the module's idea drawn as a tiny chart on the terminal's ground (what the module teaches, not a
+   screenshot): price in the chart's text colour, liquidity amber and dashed, buys green, sells red */
+.mod__fig {
+  position: relative; flex: 1 1 auto; min-height: 80px; overflow: hidden;
+  border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: linear-gradient(to bottom, var(--c-grid) 1px, transparent 1px) 0 12px / 100% 24px, var(--c-bg);
+}
+.mod__fig > .mod__n { position: absolute; top: 9px; left: 11px; z-index: 1; font: 500 var(--t-label)/1 var(--font-mono); color: var(--c-axis); }
+.mod__fig > svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  fill: none; stroke-linecap: round; stroke-linejoin: round; overflow: visible;
+}
+.mod__fig .g-p { stroke: var(--c-text); stroke-width: 1.6; }
+.mod__fig .g-l { stroke: var(--c-liq); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.mod__fig .g-m { stroke: var(--c-liq); stroke-width: 1.6; }
+.mod__fig .g-x { stroke: var(--c-axis); stroke-width: 1.2; stroke-dasharray: 2 3; }
+.mod__fig .g-g { stroke: var(--c-grid); stroke-width: 1; }
+.mod__fig .g-o, .mod__fig .g-o * { fill: var(--c-liq); stroke: none; }
+.mod__fig .g-u { fill: var(--c-bull); stroke: none; }
+.mod__fig .g-d { fill: var(--c-bear); stroke: none; }
+.mod__fig .g-e { fill: var(--c-entry); stroke: color-mix(in oklab, var(--c-entry) 40%, transparent); stroke-width: 5; paint-order: stroke; }
+.mod__fig .g-wu { stroke: var(--c-bull); stroke-width: 1.4; }
+.mod__fig .g-wd { stroke: var(--c-bear); stroke-width: 1.4; }
+.mod__fig .g-bu > * { fill: color-mix(in oklab, var(--c-bull) 75%, transparent); stroke: none; }
+.mod__fig .g-bd > * { fill: color-mix(in oklab, var(--c-bear) 75%, transparent); stroke: none; }
+.mod__fig .g-au { stroke: var(--c-bull); stroke-width: 1.8; }
+.mod__fig .g-ad { stroke: var(--c-bear); stroke-width: 1.8; }
+.mod__fig .g-s { fill: color-mix(in oklab, var(--c-session) 12%, transparent); stroke: color-mix(in oklab, var(--c-session) 55%, transparent); stroke-width: 1; }
+/* the glyph's levels thicken with the tile, as the clip stretch above it lights */
+html:not([data-motion="off"]) .mod__fig .g-l { transition: stroke-width var(--m-in, 150ms) var(--ease, ease); }
+.card.mod:is(:hover, :focus-within) .mod__fig .g-l { stroke-width: 2; }
+
+/* a tablet and a phone: each tile a picture beside its title and time (stacked, the eight run past a tablet's
+   screen; on a phone two narrow tiles a row would stand the picture in a tall, mostly empty panel).
+   A tablet: two tiles a row, four rows on one screen. A phone: one tile a row over two screens */
+@media (max-width: 1023px) {
+  .card.mod { display: grid; grid-template-columns: minmax(0, 9fr) minmax(0, 11fr); grid-template-rows: minmax(0, 1fr) auto; gap: var(--s-2) var(--s-4); }
+  .mod__fig { grid-column: 1; grid-row: 1 / span 2; min-height: 80px; }
+  .card.mod > h3 { grid-column: 2; grid-row: 1; align-self: start; font-size: 16px; line-height: 1.45; }
+  .card.mod > .mod__meta { grid-column: 2; grid-row: 2; flex-wrap: wrap; row-gap: var(--s-1); }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  #course .grid.mods > .mod { grid-column: auto / span 6; }
+  .card.mod { --c-pad: 12px; }
+}
+@media (max-width: 639px) {
+  #course { --hm: 2; }
+  .tl { display: none; }
+  .grid.mods { row-gap: var(--s-3); }
+  .card.mod { --c-pad: 12px; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); }
+  .card.mod > h3 { font-size: 16px; line-height: 1.5; }
+}
+
+/* ================================================================ 4 · #practice: three doors */
+.doors { flex: 1 1 auto; grid-auto-rows: minmax(0, 1fr); }
+@media (min-width: 1024px) { .grid.doors > .door { grid-column: auto / span 4; } }
+.door .card__link::after { content: ""; position: absolute; inset: 0; z-index: 3; }
+.door .panel { --p-h: 220px; }
+.door__frag { --fit-max: 360px; --ax: 24px; --ay: 32px; }
+/* the scenario door's chart: a small frame rising out of the panel */
+.door-chart { box-shadow: 0 18px 36px -24px rgb(0 0 0 / .6); }
+.door-chart .chart-frame__bar { min-height: 40px; }
+.door-chart__canvas { height: 220px; }
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .door-chart__canvas { height: 180px; }
+  .door .stage > .door__frag { --ax: 14px; --ay: 22px; }
+  .door .mock { padding: var(--s-3); font-size: 13px; }
+}
+/* the playbook and lab doors: their pages' UI drawn small (not controls: the card is the link) */
+.mock {
+  display: grid; gap: var(--s-2); padding: var(--s-4); border-radius: var(--r-lg);
+  background: var(--c-bg); color: var(--c-text); border: 1px solid var(--line-strong);
+  box-shadow: 0 18px 36px -24px rgb(0 0 0 / .6);
+  font-size: var(--t-small); line-height: 1.5;
+}
+.mock p { margin: 0; }
+.mock__head { display: flex; justify-content: space-between; align-items: center; padding-bottom: var(--s-2); border-bottom: 1px solid var(--line); font-weight: 500; }
+.mock__count { font: 500 var(--t-label)/1 var(--font-mono); color: var(--c-axis); }
+.mock__row { display: flex; align-items: center; gap: var(--s-3); min-height: 32px; color: var(--c-text); }
+.mock__row i { flex: none; width: 16px; height: 16px; border-radius: 3px; border: 1.5px solid color-mix(in oklab, var(--c-text) 45%, transparent); }
+.mock__row.is-done { color: var(--c-axis); }
+.mock__row.is-done i { border-color: var(--c-bull); background: var(--c-bull) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2 6.8 11 12 5.5' fill='none' stroke='%23141414' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.mock__row { flex-wrap: wrap; row-gap: var(--s-1); }
+.mock__row .badge-gap { margin-left: auto; }
+.mock__q { color: var(--c-text); }
+.mock__choices { display: flex; gap: var(--s-2); }
+.mock__btn {
+  flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; height: 36px; border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--c-text) 8%, transparent); font-weight: 500;
+}
+.mock__btn.is-on { background: color-mix(in oklab, var(--action) 22%, transparent); box-shadow: inset 0 0 0 1px var(--action); }
+.mock__verdict { color: var(--c-axis); }
+.mock__verdict b { color: var(--c-bull); font-weight: 500; margin-right: var(--s-1); }
+@media (min-width: 640px) and (max-width: 1023px) {
+  .doors > .door { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-auto-rows: min-content; column-gap: var(--s-6); align-content: start; }
+  .doors > .door > :not(.panel) { grid-column: 1; }
+  .doors > .door > .panel { grid-column: 2; grid-row: 1 / span 4; --p-h: 196px; margin: calc(var(--c-gap) - var(--c-pad)) calc(var(--c-gap) - var(--c-pad)) calc(var(--c-gap) - var(--c-pad)) 0; border-radius: calc(var(--c-r) - var(--c-gap)); }
+}
+@media (max-width: 639px) {
+  .door .panel { --p-h: 196px; }
+  .door-chart__canvas { height: 170px; }
+}
+
+/* ================================================================ 5 · #limits: the order ticket the clip leaves blank */
+.limits { align-content: stretch; grid-template-rows: minmax(0, 1fr); }
+.limits__text { display: grid; align-content: start; gap: var(--s-5); }
+.limits__text p { margin: 0; max-width: 46ch; }
+.limits__text p:not(.t-lead) { color: var(--muted); }
+.limits__visual { min-height: 0; display: flex; }
+@media (min-width: 1024px) { .limits__visual { grid-column: 6 / -1; } }
+.panel--ticket { flex: 1 1 auto; display: grid; place-items: center; padding: var(--s-6); border-radius: var(--r-md); min-height: 0; }
+.ticket {
+  position: relative; z-index: 1; width: min(100%, 560px);
+  background: var(--c-bg); color: var(--c-text); border: 1px solid var(--line-strong); border-radius: var(--r-lg);
+  box-shadow: 0 30px 60px -36px rgb(0 0 0 / .7);
+}
+.ticket__head {
+  display: flex; align-items: center; gap: var(--s-3); margin: 0; min-height: 52px; padding: var(--s-2) var(--s-5);
+  background: var(--p-surface); border-bottom: 1px solid var(--line); border-radius: var(--r-lg) var(--r-lg) 0 0;
+  font-weight: 500;
+}
+.ticket__side { margin-left: auto; font: 500 var(--t-label)/1 var(--font-mono); color: var(--c-bull); border: 1px solid color-mix(in oklab, var(--c-bull) 55%, transparent); border-radius: var(--r-sm); padding: 5px var(--s-2); }
+.ticket__rows { margin: 0; padding: var(--s-2) var(--s-5) var(--s-3); }
+.ticket__rows > div { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); min-height: 48px; padding: var(--s-2) 0; border-bottom: 1px dashed var(--line); }
+.ticket__rows > div:last-child { border-bottom: 0; }
+.ticket__rows dt { font-size: var(--t-small); line-height: 1.5; color: var(--c-text); }
+.ticket__rows dt .ts-chip { margin-left: var(--s-1); }
+.ticket__rows dd { margin: 0; flex: none; }
+@media (max-width: 1023px) {
+  .limits { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
+  .limits__visual { margin-top: var(--s-6); }
+}
+/* a phone: one screen, the ticket compact under the words (its rows say the badge the second line names,
+   so that line goes); over two screens the ticket would float in a tall, mostly empty panel */
+@media (max-width: 639px) {
+  #practice { --hm: 2; }
+  .limits__text { gap: var(--s-4); }
+  .limits__text p:not(.t-lead) { display: none; }
+  .limits__visual { margin-top: var(--s-5); }
+  .panel--ticket { padding: var(--s-3); }
+  .ticket__head { min-height: 44px; }
+  .ticket__rows dt .ts-chip { height: 44px; padding-inline: var(--s-3); }
+  .ticket__head, .ticket__rows { padding-inline: var(--s-4); }
+  .ticket__rows { padding-block: var(--s-1); }
+  .ticket__rows > div { min-height: 40px; padding-block: 6px; }
+}

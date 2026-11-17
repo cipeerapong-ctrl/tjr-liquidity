@@ -83,9 +83,15 @@
     }
   }
 
-  // Keeps movable labels (levels, boxes, zones) off each other and off the fixed structure tags:
-  // a rect that hits a placed one moves above it (or below, once it would leave the plot).
-  // place.add(rect) registers a fixed obstacle.
+  // Keeps movable labels (levels, boxes, zones) off each other and off the fixed structure tags.
+  // place(rect, opts) keeps the rect where it is when it is free; otherwise it tries, in order:
+  //   - the rect slid left along its own row, past each label it hits, while it stays right of
+  //     opts.minX (a level's label slides along its own level, never off its start);
+  //   - each of opts.alts (other spots, e.g. under the line), as given, then slid the same way;
+  //   - the old fallback: above the rect it hits (or below, once it would leave the plot).
+  // Close levels (a stack of lows a few ticks apart) so get their tags side by side on their own lines
+  // instead of a pile climbing over the candles. Returns the rect, moved in place. place.add(rect)
+  // registers a fixed obstacle.
   function placer(box) {
     var placed = [];
     function hit(r) {
@@ -95,7 +101,26 @@
       }
       return null;
     }
-    function place(r) {
+    function inside(r) { return r.x >= box.left && r.x + r.w <= box.right + 0.5 && r.y >= box.top && r.y + r.h <= box.bottom; }
+    function slide(r, minX) {
+      var s = { x: r.x, y: r.y, w: r.w, h: r.h }, q, n = 0;
+      while ((q = hit(s))) {
+        if (n++ >= 12) return null;
+        s.x = q.x - s.w - 2;
+        if (s.x < minX) return null;
+      }
+      return s;
+    }
+    function keep(r, s) { r.x = s.x; r.y = s.y; placed.push(r); return r; }
+    function place(r, opts) {
+      opts = opts || {};
+      var tries = [r].concat(opts.alts || []), minX = opts.minX != null ? Math.max(box.left, opts.minX) : null;
+      for (var i = 0; i < tries.length; i++) {
+        var c = tries[i], s;
+        if (i > 0 && !inside(c)) continue;
+        if (!hit(c)) return keep(r, c);
+        if (minX != null && (s = slide(c, minX))) return keep(r, s);
+      }
       var start = r.y, q, n = 0;
       while ((q = hit(r)) && n++ < 10) r.y = q.y - r.h - 2;
       if (r.y < box.top) {
@@ -115,7 +140,7 @@
     var w = ctx.measureText(text).width + 8, h = fs + 6;
     var left = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
     var r = { x: left, y: y - h, w: w, h: h };
-    if (opts.place) r = opts.place(r);
+    if (opts.place) r = opts.place(r, { minX: opts.minX, alts: opts.alts ? opts.alts(r) : null });
     ctx.save();
     ctx.globalAlpha *= 0.85;                               // background stays solid enough over candles
     ctx.fillStyle = th.bg;
@@ -179,7 +204,11 @@
     if (o.label && p > 0.6) {
       ctx.save();
       ctx.globalAlpha = Math.min(1, (p - 0.6) / 0.4);
-      pill(ctx, th, o.label, Math.max(box.left + 60, xe - 4), y - 3, 'right', col, st.fs, { place: place, strike: swept, dim: swept ? 0.7 : 1 });
+      // above the line at its right end; taken: slid left along the line, then under the line
+      pill(ctx, th, o.label, Math.max(box.left + 60, xe - 4), y - 3, 'right', col, st.fs, {
+        place: place, strike: swept, dim: swept ? 0.7 : 1, minX: x0 + 2,
+        alts: function (r) { return [{ x: r.x, y: y + 3, w: r.w, h: r.h }]; }
+      });
       ctx.restore();
     }
     if (pr.flashP != null) sweptTag(ctx, th, xe, y, col, st.fs, pr.flashP, box);
@@ -356,6 +385,6 @@
   chart.overlays = {
     DRAW_IN: DRAW_IN, FLASH: FLASH,
     isVisible: isVisible, isSwept: isSwept, indexer: indexer, mapBars: mapBars, copy: copy,
-    kindColor: kindColor, draw: draw, drawLines: drawLines, hitLine: hitLine
+    kindColor: kindColor, draw: draw, drawLines: drawLines, hitLine: hitLine, placer: placer
   };
 })(typeof window !== 'undefined' ? window : globalThis);
