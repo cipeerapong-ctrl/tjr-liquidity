@@ -218,6 +218,7 @@ html:not([data-motion="off"]) .opt { transition: background-color var(--m-out, 1
 @keyframes opt-ok { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--c-bull) 55%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
 .q__fb { margin: 0; min-height: 0; font-size: var(--t-small); line-height: 1.7; color: var(--ink); }
 .q__fb:empty { display: none; }
+@media (max-width: 639px) { .q__fb .ts-chip { height: 44px; padding-inline: var(--s-3); } }
 .q__ok { color: var(--c-bull); font-weight: 600; }
 .q__no { color: var(--c-bear); font-weight: 600; }
 .check.is-done { border-color: color-mix(in oklab, var(--c-bull) 55%, transparent); }

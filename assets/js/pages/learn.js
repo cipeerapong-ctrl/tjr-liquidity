@@ -250,8 +250,16 @@
       if (el.dd) { el.dd.textContent = '0'; var p = el.dd.closest('.score-pill'); if (p) p.setAttribute('data-tone', ''); }
       if (el.ann) setPressed(el.ann, S.ann !== false);
     }
+    function toBase() {                                  // a rolled-up series has other bar indices: start from the base series
+      var i = ch.info();
+      if (i.tf === i.baseTf) return;
+      ch.setTimeframe(i.baseTf);
+      $$('[data-tf]', fig).forEach(function (btn) { setPressed(btn, Number(btn.getAttribute('data-tf')) === i.baseTf); });
+      if (el.tf) el.tf.textContent = TF_NAME[i.baseTf] || '';
+    }
     function atStart() {
       run++; playing = false;
+      toBase();
       var from = startBar(cur.built);
       ch.reveal(from);
       onBar(from);
@@ -267,9 +275,12 @@
     }
     function play(to) {
       var my = ++run, n = cur.built.candles.length;
+      // never let the engine pick `from`: at its end it falls back to bar 0 and regrows the chart from nothing
+      var at = ch.info(), last = Math.min(to == null ? n - 1 : to, at.bars - 1);
+      if (at.revealed >= last) { toBase(); var f0 = startBar(cur.built); ch.reveal(f0); onBar(f0); at = ch.info(); last = Math.min(to == null ? n - 1 : to, at.bars - 1); }
       playing = true;
       setPlay('หยุด', true);
-      return ch.play({ to: to == null ? n - 1 : to, barsPerSec: cfg.bps || 8, onBar: onBar }).then(function (done) {
+      return ch.play({ from: at.revealed, to: last, barsPerSec: cfg.bps || 8, onBar: onBar }).then(function (done) {
         if (my !== run || dead) return done;
         playing = false;
         if (done && (to == null || to >= n - 1)) { S.done = true; setPlay('เล่นใหม่', false); } else setPlay('เล่น', false);
@@ -278,8 +289,8 @@
     }
     function toggle() {
       if (playing) { run++; playing = false; ch.pause(); setPlay('เล่น', false); return; }
-      var n = cur.built.candles.length;
-      if (ch.info().revealed >= n - 1) atStart();
+      var info = ch.info();
+      if (info.revealed >= info.bars - 1) atStart();
       S.started = true;
       play();
     }
@@ -296,7 +307,7 @@
       play();
     }
 
-    load(S.id);
+    try { load(S.id); } catch (e) { ch.destroy(); throw e; }
     var api = {
       destroy: function () { dead = true; run++; ch.destroy(); },
       autoplay: function () {
@@ -336,8 +347,8 @@
   // ---------------------------------------------------------------- module 2: the pair explorer
   function makePairs(fig, S) {
     var host = $('.chart-frame__canvas', fig), read = $('[data-k="read"]', fig);
+    var src = build('S01', 11), sw = src.truth.sweep.bar;      // built first: a throw here leaves no chart behind
     var ch = TJR.chart.create(host, { label: 'กราฟให้ลองชี้คู่แท่งเทียน: คู่ที่เข้ากฎ high และ low ของคลิปจะถูกไฮไลต์', interactive: true });
-    var src = build('S01', 11), sw = src.truth.sweep.bar;
     var a0 = Math.max(0, sw - 26), a1 = Math.min(src.candles.length, sw + 10);
     var data = { candles: src.candles.slice(a0, a1), meta: src.meta };
     var cs = data.candles, list = pairList(cs), showAll = !!S.all, shown = null, dead = false;
@@ -409,10 +420,10 @@
   // ---------------------------------------------------------------- module 3: the order stack on a chart
   function makeOrders(fig, S) {
     var host = $('.chart-frame__canvas', fig);
-    var ch = TJR.chart.create(host, { label: 'กราฟ S01: กลุ่ม buy orders เหนือ high และกลุ่ม sell orders ใต้ low', interactive: false });
-    var b = build('S01', 1), T = b.truth, u = b.meta.vol, rev = T.sweep.bar - 1;
+    var b = build('S01', 1), T = b.truth, u = b.meta.vol, rev = T.sweep.bar - 1;      // built first: a throw leaves no chart behind
     function lv(id) { return T.levels.filter(function (l) { return l.id === id; })[0]; }
     var hi = lv('T'), lo = lv('L1');
+    var ch = TJR.chart.create(host, { label: 'กราฟ S01: กลุ่ม buy orders เหนือ high และกลุ่ม sell orders ใต้ low', interactive: false });
     ch.setData(b);
     ch.setOverlays(TJR.annotate(b, { upTo: rev }));
     ch.reveal(rev);
@@ -446,7 +457,8 @@
         if (name === 'replay') stack();
         else if (name === 'sweep') {
           if (!S.started) stack();
-          ch.play({ to: Math.min(b.candles.length - 1, T.sweep.bar + 8), barsPerSec: 5 });
+          ch.reveal(rev);                                // every run starts at the same frame, never bar 0
+          ch.play({ from: rev, to: Math.min(b.candles.length - 1, T.sweep.bar + 8), barsPerSec: 5 });
         }
       },
       chart: ch
@@ -478,6 +490,7 @@
     m8a: { make: 'player', ids: 'S12', cfg: { label: 'กราฟจำลอง: low-resistance และ high-resistance liquidity' } }
   };
   var slots = [], live = [];
+  L.slots = slots;                                       // read-only handle for the console and the headless checks
 
   function Slot(fig, id) {
     var self = this, spec = CFG[id];
