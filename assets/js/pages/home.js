@@ -205,6 +205,7 @@
     function setPaused(p) {
       st.paused = p;
       if (btn) btn.setAttribute('aria-pressed', String(p));
+      if (btn) btn.setAttribute('aria-label', p ? 'เล่นแอนิเมชันกราฟต่อ' : 'หยุดแอนิเมชันกราฟชั่วคราว');
       if (p) {
         st.run++;
         if (st.timer) { clearTimeout(st.timer); st.timer = null; }
