@@ -1,56 +1,82 @@
 <!doctype html>
-<html lang="th">
+<html lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand" data-tone="dark" data-motion>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Chart engine demo</title>
+<meta name="description" content="Dev check for the canvas chart engine and the shared site components.">
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<meta name="theme-color" content="#1c1c1c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/system.css">
+<link rel="stylesheet" href="../assets/ui/cards.css">
+<link rel="stylesheet" href="../assets/motion/motion.css">
+<link rel="stylesheet" href="../assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="../assets/layout/layout.css">
+<link rel="stylesheet" href="../assets/icons/icon.css">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/site.css">
 <style>
-  /* Dev page for the canvas engine (Task 7). Task 8's tokens replace these values site-wide. */
-  :root {
-    --ground: #070a0e; --panel: #0c1117; --line: #1b2430; --muted: #8794a3; --ink: #e6edf3;
-    --font-text: 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
-    color-scheme: dark;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--ground); color: var(--ink); font: 15px/1.5 var(--font-text); }
-  main { max-width: 1200px; margin: 0 auto; padding: 28px 16px 64px; display: grid; gap: 28px; }
-  header h1 { font-size: 22px; margin: 0 0 4px; }
-  header p { margin: 0; color: var(--muted); font-size: 14px; }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
-  .bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
-  .bar b { font-family: var(--font-mono); font-size: 13px; color: #fbbf24; }
-  .bar span { font-size: 14px; }
-  .bar small { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
-  .chart { height: clamp(280px, 40vw, 440px); background: #0a0e13; }
-  .ctrls { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line); }
-  button {
-    min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 4px; cursor: pointer;
-    border: 1px solid var(--line); background: #111821; color: var(--ink);
-    font: 600 13px var(--font-mono); transition: background-color .15s, border-color .15s;
-  }
-  button:hover { border-color: #2c3b4d; background: #16202b; }
-  button:focus-visible { outline: 2px solid #22d3ee; outline-offset: 2px; }
-  button[aria-pressed="true"] { border-color: #22d3ee; color: #22d3ee; }
-  .seg { display: inline-flex; gap: 0; }
-  .seg button { border-radius: 0; margin-left: -1px; }
-  .seg button:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
-  .seg button:last-child { border-radius: 0 4px 4px 0; }
-  .out { padding: 8px 14px 12px; font: 12px/1.6 var(--font-mono); color: var(--muted); min-height: 44px; overflow-wrap: anywhere; }
+  /* dev page only (Task 7 engine check, Task 8 components) */
+  .demo { display: grid; gap: var(--s-8); }
+  .demo-charts { display: grid; gap: var(--s-7); }
+  .demo-out { padding: var(--s-2) var(--s-4) var(--s-3); font: 400 var(--t-label)/1.6 var(--font-mono); color: var(--muted);
+              min-height: 44px; overflow-wrap: anywhere; background: var(--p-surface); }
+  .demo-kit { display: grid; gap: var(--s-6); }
+  .demo-kit .grid { align-items: start; }
+  .demo-pills { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; margin-top: var(--s-5); }
+  @media (min-width: 1024px) { .demo-kit .span-6 { grid-column: auto / span 6; } }
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <h1>Chart engine — dev check</h1>
-    <p>S01, S06 (sessions), S10 (timeframe switch) · overlays from <code>TJR.annotate</code> · hover = crosshair, click = bar + price, drag the cyan line on S06.</p>
-  </header>
-  <div id="charts"></div>
+<main id="top" class="app">
+  <div class="wrap demo">
+    <header class="app__head">
+      <h1>Chart engine — dev check</h1>
+      <p>S01, S06 (sessions), S10 (timeframe switch) · overlays from <code>TJR.annotate</code> · hover = crosshair, click = bar + price, drag the cyan line on S06.</p>
+    </header>
+    <div id="charts" class="demo-charts"></div>
+
+    <section class="demo-kit" aria-labelledby="kit-h">
+      <h2 id="kit-h">ชิ้นส่วนของเว็บ: การ์ด <span class="nobr">เช็กลิสต์</span> และ chip เวลาในคลิป</h2>
+      <div class="grid">
+        <article class="fact-card span-6">
+          <p class="fact-card__id">F6.5</p>
+          <p class="fact-card__text">หลัง low ถูก sweep ให้รอแนวโน้มขาขึ้นก่อน: high, low แล้ว higher low และ higher high จุดเข้าเฉลี่ยอยู่ที่การย่อหลังจากนั้น</p>
+          <p class="fact-card__src chips" data-chips="1410"></p>
+        </article>
+        <div class="span-6">
+          <label class="check-row">
+            <input type="checkbox" class="m-check" checked>
+            <span class="check-row__text">ไม่กดซื้อทันทีตอนที่ low ถูกกวาด</span>
+            <span class="check-row__meta chips" data-chips="1350"></span>
+          </label>
+          <label class="check-row">
+            <input type="checkbox" class="m-check">
+            <span class="check-row__text">เทรดดัชนีสหรัฐเฉพาะช่วง NY open</span>
+            <span class="check-row__meta chips" data-chips="2160"></span>
+          </label>
+          <label class="check-row">
+            <input type="checkbox" class="m-check">
+            <span class="check-row__text">จุดวาง stop-loss</span>
+            <span class="check-row__meta chips" data-gap></span>
+          </label>
+          <div class="demo-pills">
+            <span class="score-pill" data-tone="good"><span class="score-pill__label">คะแนน</span><span class="score-pill__value">7/10</span></span>
+            <span class="score-pill" data-tone="bad"><span class="score-pill__label">streak</span><span class="score-pill__value">0</span></span>
+            <span class="score-pill"><span class="score-pill__label">รอบ</span><span class="score-pill__value">12</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="../assets/js/core/ns.js"></script>
 <script src="../assets/js/core/store.js"></script>
 <script src="../assets/js/scenario/rng.js"></script>
@@ -64,9 +90,23 @@
 <script src="../assets/js/chart/render.js"></script>
 <script src="../assets/js/chart/overlays.js"></script>
 <script src="../assets/js/chart/chart.js"></script>
+<script src="../assets/js/core/layout.js"></script>
+<script src="../assets/js/core/motion.js"></script>
 <script>
 (function () {
   'use strict';
+  TJR.layout.mount({
+    page: 'scenarios',
+    close: { title: 'ฝึกอ่าน liquidity บนกราฟที่ยุ่งเหมือนตลาดจริง', line: 'บทเรียน 8 บท จากคลิปเดียว ทุกข้อมีเวลาในคลิปกำกับ', label: 'เริ่มบทเรียน' }
+  });
+  TJR.motion.init();
+
+  // the component specimen's chips and gap badges
+  Array.prototype.forEach.call(document.querySelectorAll('[data-chips]'), function (el) {
+    el.innerHTML = el.getAttribute('data-chips').split(',').map(function (s) { return TJR.layout.chip(+s); }).join('');
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-gap]'), function (el) { el.innerHTML = TJR.layout.gap(); });
+
   var TF_NAME = { 1: '1m', 5: '5m', 15: '15m', 60: '1H', 240: '4H', 1440: 'D' };
   var host = document.getElementById('charts');
 
@@ -79,30 +119,42 @@
 
   function panel(id, opts) {
     var def = TJR.scenarios.get(id), built = TJR.scenarios.safeBuild(def, 3, {});
-    var box = el('section', { 'class': 'panel', 'aria-label': id });
-    var bar = el('div', { 'class': 'bar' });
-    bar.appendChild(el('b', null, id));
-    bar.appendChild(el('span', null, def.title));
-    var meta = el('small', null, '');
+    var box = el('figure', { 'class': 'chart-frame', 'aria-label': id + ' ' + def.title });
+    var bar = el('div', { 'class': 'chart-frame__bar' });
+    bar.appendChild(el('span', { 'class': 'chart-frame__sym' }, built.meta.instrument));
+    var tfTag = el('span', { 'class': 'chart-frame__tf' }, TF_NAME[built.meta.tf]);
+    bar.appendChild(tfTag);
+    bar.appendChild(el('span', { 'class': 'chart-frame__title' }, id + ' · ' + def.title));
+    var meta = el('span', { 'class': 'chart-frame__meta' }, '');
     bar.appendChild(meta);
-    var frame = el('div', { 'class': 'chart' });
-    var ctrls = el('div', { 'class': 'ctrls' });
-    var out = el('div', { 'class': 'out', 'aria-live': 'polite' }, 'hover / click the chart');
-    box.appendChild(bar); box.appendChild(frame); box.appendChild(ctrls); box.appendChild(out);
+    var ohlc = el('div', { 'class': 'chart-frame__ohlc', 'aria-live': 'polite' });
+    ['o', 'h', 'l', 'c'].forEach(function (k) { ohlc.appendChild(el('span', { 'data-k': k }, '')); });
+    var when = el('span', { 'class': 'chart-frame__time' }, '');
+    ohlc.appendChild(when);
+    var frame = el('div', { 'class': 'chart-frame__canvas' });
+    var ctrls = el('div', { 'class': 'chart-frame__ctrls' });
+    var out = el('div', { 'class': 'demo-out', 'aria-live': 'polite' }, 'hover / click the chart');
+    box.appendChild(bar); box.appendChild(ohlc); box.appendChild(frame); box.appendChild(ctrls); box.appendChild(out);
     host.appendChild(box);
-    host.appendChild(el('div', { style: 'height:28px' }));
 
     var ch = TJR.chart.create(frame, { label: id + ' chart' });
     ch.setData(built);
     ch.setOverlays(TJR.annotate(built, {}));
     if (opts.line) ch.addLine(opts.line);
 
+    function showCandle(k, t) {
+      var P = TJR.util.fmtPrice, s = ohlc.children;
+      s[0].textContent = P(k.o); s[1].textContent = P(k.h); s[2].textContent = P(k.l); s[3].textContent = P(k.c);
+      ohlc.setAttribute('data-dir', k.c >= k.o ? 'up' : 'down');
+      when.textContent = TJR.sessions.fmtET(t) + ' ET · ' + TJR.sessions.fmtThai(t) + ' TH';
+    }
     function showMeta() {
       var i = ch.info();
-      meta.textContent = built.meta.instrument + ' · ' + TF_NAME[i.tf] + ' · bar ' + i.revealed + '/' + (i.bars - 1) + ' · seed ' + built.meta.seed;
+      tfTag.textContent = TF_NAME[i.tf];
+      meta.textContent = 'bar ' + i.revealed + '/' + (i.bars - 1) + ' · seed ' + built.meta.seed;
     }
     function btn(label, fn, extra) {
-      var b = el('button', Object.assign({ type: 'button' }, extra || {}), label);
+      var b = el('button', Object.assign({ type: 'button', 'class': 'ctrl' }, extra || {}), label);
       b.addEventListener('click', function () { fn(b); showMeta(); });
       return b;
     }
@@ -122,7 +174,7 @@
       if (t) ch.flash(t);
     }));
     if (opts.tfs) {
-      var seg = el('div', { 'class': 'seg', role: 'group', 'aria-label': 'Timeframe' });
+      var seg = el('div', { 'class': 'ctrl-group', role: 'group', 'aria-label': 'Timeframe' });
       opts.tfs.forEach(function (tf) {
         seg.appendChild(btn(TF_NAME[tf], function (b) {
           ch.setTimeframe(tf);
@@ -132,15 +184,18 @@
       });
       ctrls.appendChild(seg);
     }
+    ctrls.appendChild(el('span', { 'class': 'score-pill' }, null)).innerHTML =
+      '<span class="score-pill__label">levels</span><span class="score-pill__value">' + built.truth.levels.length + '</span>';
 
     ch.on('hover', function (e) {
       if (!e) return;
-      var k = e.candle;
-      out.textContent = 'bar ' + e.i + ' · ' + TJR.sessions.fmtET(e.t) + ' ET / ' + TJR.sessions.fmtThai(e.t) + ' TH · O ' +
-        TJR.util.fmtPrice(k.o) + ' H ' + TJR.util.fmtPrice(k.h) + ' L ' + TJR.util.fmtPrice(k.l) + ' C ' + TJR.util.fmtPrice(k.c);
+      showCandle(e.candle, e.t);
+      out.textContent = 'bar ' + e.i;
     });
     ch.on('click', function (e) { out.textContent = 'click → bar ' + e.i + ' (base ' + e.baseFrom + '–' + e.baseTo + ') @ ' + TJR.util.fmtPrice(e.price); });
     ch.on('drag', function (e) { out.textContent = 'drag ' + e.id + ' → ' + TJR.util.fmtPrice(e.price) + (e.done ? ' (done)' : ''); });
+    var last = built.candles[built.candles.length - 1];
+    showCandle(last, last.t);
     showMeta();
     return ch;
   }

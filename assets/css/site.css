@@ -1,0 +1,195 @@
+/*
+  TJR Liquidity: shared site components (Task 8), over the kit's system.css and motion.css with the
+  tokens of tokens.css. One look: the near-black terminal, sharp corners, mono numerals, hairlines.
+  Hover and press follow the kit's motion tokens (references/motion.md): 150ms in, 120ms out, 90ms
+  press, a 1px step up and a 1px press; colour only under reduced motion. Nothing here animates on scroll.
+
+  .nobr                keeps a Thai loanword or term on one line
+  .app                 an app page's <main> (course, scenarios, playbook, lab): clears the fixed header
+  .chart-frame         terminal chrome round a chart
+    __bar                the top row: __sym (NQ), __tf (5m), __title, __meta (right)
+    __ohlc               the readout row: <span data-k="o|h|l|c">value</span>, __time; data-dir="up|down"
+                         on the row colours the values bull or bear
+    __canvas             the chart's host (TJR.chart.create(el)); height --chart-h
+    __ctrls              the control row (.ctrl buttons, .ctrl-group, a .score-pill)
+  .ctrl                a tool button (Play, Step, สุ่มกราฟใหม่, TF): 44px, tinted, aria-pressed="true" lit
+    .ctrl-group          a segmented set (role="group"), e.g. the timeframes
+  .badge-gap           the badge "คลิปไม่ได้ระบุ" (TJR.layout.gap())
+  .ts-chip             "▶ MM:SS", a link into the clip (TJR.layout.chip(sec)); .chips is a row of them
+  .fact-card           one clip fact: __id (F6.5), __text, __src (.chips)
+  .check-row           a checklist row: <label class="check-row"><input type="checkbox" class="m-check">
+                       <span class="check-row__text">..</span><span class="check-row__meta chips">..</span></label>
+  .score-pill          a score or streak: __label, __value; data-tone="good|bad"
+*/
+
+/* ---------------------------------------------------------------- Thai text
+   Chrome breaks Thai by dictionary and splits loanwords it does not know ("เช็ก|ลิสต์" at 390): wrap
+   such a word, or a term that must stay whole, in <span class="nobr"> */
+.nobr { white-space: nowrap; }
+
+/* ---------------------------------------------------------------- app pages */
+.app { padding: calc(var(--nav) + var(--s-7)) 0 var(--s-9); }
+.app__head { display: grid; gap: var(--s-3); max-width: 62ch; }
+.app__head p { color: var(--muted); }
+
+/* ---------------------------------------------------------------- shared footer extras (layout.js) */
+/* close-word sets the name from line to line, hand-set (sections-library.md, close-word): "Liquidity" in
+   Geist 500 at -0.045em runs about 3.6 times its size, so the size is the close's width / 3.65; on a
+   desktop it stops at 30% of the screen's height so the close and the links still share one screen
+   (1440x900: 270px, three quarters of the wrap; 1024x768 and phones: line to line) */
+.closing__cta.close--word { container-type: inline-size; }
+.close--word > .close__word { font-size: min(calc(100cqi / 3.65), 30svh); }
+@media (max-width: 639px) { .close--word > .close__word { font-size: calc(100cqi / 3.65); } }
+.footer__brand .footer__mark { font-size: 48px; }
+.footer__source-line, .footer__source-note { font-size: var(--t-small); line-height: 1.6; }
+.footer__source-line { color: var(--ink); }
+.footer__source-note { color: var(--muted); margin-top: var(--s-2); }
+@media (max-width: 639px) {
+  .footer__brand .footer__mark { font-size: 30px; }
+  .footer .footer__source { grid-column: 1 / -1; }
+  .footer__source-line a { display: inline-flex; align-items: center; min-height: 44px; }
+}
+
+/* ---------------------------------------------------------------- chart frame */
+.chart-frame {
+  --chart-h: clamp(260px, 38vw, 520px);
+  margin: 0; min-width: 0; display: flex; flex-direction: column;
+  background: var(--c-bg); color: var(--c-text);
+  border: 1px solid var(--line-strong); border-radius: var(--r-lg); overflow: clip;
+}
+.chart-frame__bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3);
+  min-height: 48px; padding: var(--s-2) var(--s-4);
+  background: var(--p-surface); border-bottom: 1px solid var(--line);
+}
+.chart-frame__sym, .chart-frame__tf {
+  display: inline-flex; align-items: center; height: 24px; padding: 0 var(--s-2);
+  font: 500 var(--t-label)/1 var(--font-mono); letter-spacing: 0; border-radius: var(--r-sm);
+}
+.chart-frame__sym { background: var(--p-ink); color: var(--p-bg); }
+.chart-frame__tf { border: 1px solid var(--line-strong); color: var(--ink); }
+.chart-frame__title { font-size: var(--t-small); font-weight: 500; line-height: 1.4; color: var(--ink); min-width: 0; }
+.chart-frame__meta {
+  margin-left: auto; font: 400 var(--t-label)/1.4 var(--font-mono); color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.chart-frame__ohlc {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-4);
+  min-height: 36px; padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--line);
+  font: 400 var(--t-label)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--c-text);
+}
+.chart-frame__ohlc [data-k]::before {
+  content: attr(data-k); text-transform: uppercase; color: var(--c-axis); margin-right: var(--s-1);
+}
+.chart-frame__ohlc[data-dir="up"] [data-k] { color: var(--c-bull); }
+.chart-frame__ohlc[data-dir="down"] [data-k] { color: var(--c-bear); }
+.chart-frame__time { color: var(--c-axis); margin-left: auto; }
+.chart-frame__canvas { position: relative; height: var(--chart-h); min-height: 0; }
+.chart-frame__ctrls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4); background: var(--p-surface); border-top: 1px solid var(--line);
+}
+.chart-frame__ctrls > .score-pill { margin-left: auto; }
+@media (max-width: 639px) {
+  .chart-frame__bar, .chart-frame__ohlc, .chart-frame__ctrls { padding-inline: var(--s-3); }
+  .chart-frame__time { margin-left: 0; flex-basis: 100%; }
+  .chart-frame__meta { margin-left: 0; }
+}
+
+/* ---------------------------------------------------------------- controls */
+.ctrl {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: 44px; min-width: 44px; padding: 0 var(--s-4); margin: 0;
+  border: 1px solid transparent; border-radius: var(--r-sm); cursor: pointer;
+  background: color-mix(in oklab, var(--ink) 8%, transparent); color: var(--ink);
+  font: 500 var(--t-small)/1 var(--font-text); letter-spacing: 0; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.ctrl svg { width: 14px; height: 14px; flex: none; }
+.ctrl[aria-pressed="true"] {
+  background: color-mix(in oklab, var(--action) 20%, transparent); border-color: var(--action); color: var(--ink);
+}
+.ctrl:disabled, .ctrl[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+.ctrl-group {
+  display: inline-flex; gap: 2px; padding: 2px; border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--ink) 6%, transparent);
+}
+.ctrl-group > .ctrl { background: transparent; min-width: 48px; font-family: var(--font-mono); font-size: var(--t-label); }
+.ctrl-group > .ctrl[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: transparent; }
+html:not([data-motion="off"]) .ctrl {
+  transition: background-color var(--m-out, 120ms) var(--ease), border-color var(--m-out, 120ms) var(--ease),
+              color var(--m-out, 120ms) var(--ease), transform var(--m-press, 90ms) var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-motion="off"]) .ctrl:hover:not(:disabled, [aria-disabled="true"]) {
+    background: color-mix(in oklab, var(--ink) 14%, transparent); transform: translateY(-1px);
+    transition-duration: var(--m-in, 150ms), var(--m-in, 150ms), var(--m-in, 150ms), var(--m-press, 90ms);
+  }
+  html:not([data-motion="off"]) .ctrl[aria-pressed="true"]:hover { background: color-mix(in oklab, var(--action) 28%, transparent); }
+  html:not([data-motion="off"]) .ctrl-group > .ctrl[aria-pressed="true"]:hover { background: var(--ink); }
+}
+html:not([data-motion="off"]) .ctrl:active:not(:disabled, [aria-disabled="true"]) { transform: translateY(1px) scale(.985); }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="off"]) .ctrl:is(:hover, :active) { transform: none; }
+  html:not([data-motion="off"]) .ctrl:active:not(:disabled) { background: color-mix(in oklab, var(--ink) 20%, transparent); }
+}
+
+/* ---------------------------------------------------------------- the gap badge */
+.badge-gap {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 var(--s-2); vertical-align: middle;
+  border: 1px dashed color-mix(in oklab, var(--ink) 42%, transparent); border-radius: var(--r-sm);
+  font: 500 var(--t-label)/1 var(--font-text); letter-spacing: 0; color: var(--ink); white-space: nowrap;
+}
+.badge-gap::before {
+  content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%;
+  border: 1.5px solid color-mix(in oklab, var(--ink) 60%, transparent);
+}
+
+/* ---------------------------------------------------------------- timestamp chip */
+.ts-chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 var(--s-2) 0 7px; vertical-align: middle;
+  border-radius: var(--r-sm); background: color-mix(in oklab, var(--action) 16%, transparent); color: var(--ink);
+  font: 500 var(--t-label)/1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0;
+  text-decoration: none; white-space: nowrap;
+}
+.ts-chip::before {
+  content: ""; flex: none; width: 7px; height: 8px; background: var(--action);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+html:not([data-motion="off"]) .ts-chip { transition: background-color var(--m-out, 120ms) var(--ease); }
+.ts-chip:is(:hover, :focus-visible) { background: color-mix(in oklab, var(--action) 30%, transparent); transition-duration: var(--m-in, 150ms); }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+/* a chip outside running text is a 44px target on a phone */
+@media (max-width: 639px) { .chips > .ts-chip { height: 44px; padding-inline: var(--s-3) var(--s-3); } }
+
+/* ---------------------------------------------------------------- fact card (the kit's card look) */
+.fact-card {
+  display: flex; flex-direction: column; gap: var(--s-3); min-width: 0;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--card-pad);
+}
+.fact-card__id { font: 500 var(--t-label)/1.4 var(--font-mono); color: var(--muted); }
+.fact-card__text { font-size: var(--t-body); line-height: 1.7; color: var(--ink); max-width: 62ch; }
+.fact-card__src { margin-top: auto; }
+
+/* ---------------------------------------------------------------- checklist row (the kit's .m-check) */
+.check-row {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: start; gap: var(--s-2) var(--s-4);
+  min-height: 56px; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); cursor: pointer;
+}
+.check-row > .m-check { margin-top: 4px; }
+.check-row__text { font-size: var(--t-body); line-height: 1.7; color: var(--ink); }
+.check-row__meta { grid-column: 2; }
+.check-row:has(> .m-check:checked) .check-row__text { color: var(--muted); }
+html:not([data-motion="off"]) .check-row__text { transition: color var(--m-out, 120ms) var(--ease); }
+
+/* ---------------------------------------------------------------- score pill */
+.score-pill {
+  display: inline-flex; align-items: center; gap: var(--s-2); height: 32px; padding: 0 var(--s-3);
+  border: 1px solid var(--line-strong); border-radius: 999px; background: var(--p-bg);
+  font: 500 var(--t-label)/1 var(--font-text); color: var(--muted); white-space: nowrap;
+}
+.score-pill__value { font: 500 var(--t-small)/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.score-pill[data-tone="good"] { border-color: color-mix(in oklab, var(--c-bull) 55%, transparent); }
+.score-pill[data-tone="good"] .score-pill__value { color: var(--c-bull); }
+.score-pill[data-tone="bad"] { border-color: color-mix(in oklab, var(--c-bear) 55%, transparent); }
+.score-pill[data-tone="bad"] .score-pill__value { color: var(--c-bear); }

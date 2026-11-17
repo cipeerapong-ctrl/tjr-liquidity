@@ -1,0 +1,94 @@
+/*
+  TJR Liquidity: design tokens (Task 8). Dealt with design-taste-frontend 2.5.1, run from this folder
+  on 2026-11-17 (history: .taste-skill/history.json). Project CSS only: the kit's files in assets/ stay as
+  copied. Link this file after the kit's six stylesheets and before site.css (see "Head" below).
+
+  DEALT
+  kind        software (an interactive fintech learning tool): <html data-type="software">,
+              <meta name="page-type" content="software">, <meta name="site-kind" content="software">
+  palette     start.mjs deal --page software --trade "trading education fintech" printed, in order:
+                cool-grey-cobalt    bg #eef0f3 surface #e2e5ea ink #0b0c0e accent #1f2de6  (light ground)
+                white-link-blue     bg #ffffff surface #f4f4f4 ink #111111 accent #1a4be0  (light ground)
+                charcoal-room-sage  bg #1c1c1c surface #262626 ink #f1f1ef accent #8fa68e  (near-black ground)
+              taken: charcoal-room-sage, the first printed palette with a dark ground (the site is a dark
+              trading terminal, spec 10; the two before it are light). Near-black like a terminal at night,
+              the sage accent quiet enough that the chart's green, red and amber stay the loudest colours.
+              No violet anywhere (accent hue 118).
+  pairing     printed, in order: geist (Geist + Geist Mono), gabarito (Gabarito/Figtree + DM Mono),
+              instrument (Instrument Sans + DM Mono). None of them covers Thai, so the first is kept for
+              Latin and numbers and IBM Plex Sans Thai is set next in the text and display stacks (also
+              after Geist Mono, for Thai labels the canvas draws in the mono stack). Plex Thai: loopless and
+              technical like Geist, 400/500/600 on Google Fonts, the face the chart engine already falls
+              back to (render.js DEFAULTS.sans).
+  css         start.mjs css --page software --palette charcoal-room-sage --type geist --radius sharp
+  one-liner   nav nav-centre · footer footer-dark · close close-word · rhythm surface-pairs ·
+              buttons tonal · mark ring
+  lit ground  sand ("sand|sky|sage" one-liner; lights only the kit's UI panels and .frame--cta)
+  radius      sharp (4 / 6 / 8, buttons 4)
+
+  <html>  lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand"
+          data-tone="dark" data-motion
+          (data-tone="dark" is what the kit's system.js would set on this ground; it is written in the
+          markup because module scripts do not run from file://. footer--dark needs it.)
+
+  HEAD (every page, in this order; ../ from dev/)
+    <meta name="theme-color" content="#1c1c1c">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/system.css">
+    <link rel="stylesheet" href="assets/ui/cards.css">
+    <link rel="stylesheet" href="assets/motion/motion.css">
+    <link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+    <link rel="stylesheet" href="assets/layout/layout.css">
+    <link rel="stylesheet" href="assets/icons/icon.css">
+    <link rel="stylesheet" href="assets/css/tokens.css">
+    <link rel="stylesheet" href="assets/css/site.css">
+    (Geist Mono is loaded to 700, not the printed 400..500: the canvas draws structure labels at 600/700.)
+*/
+
+:root {
+  /* ---- start.mjs css, as printed (the three --font-* lines add the Thai face; printed values in the comments) */
+  --p-bg: #1c1c1c; --p-surface: #262626; --p-ink: #f1f1ef; --p-muted: #9a9b96;
+  --p-accent: #8fa68e; --p-accent-ink: #1c1c1c; --p-action: #8fa68e; --p-action-ink: #1c1c1c;
+  --p-inv-bg: #c8c5ba; --p-inv-surface: #bab8ae; --p-inv-ink: #1c1c1c; --p-inv-muted: #454442;
+  --p-inv-accent: #1c1c1c; --p-inv-accent-ink: #c8c5ba; --p-inv-action: #1c1c1c; --p-inv-action-ink: #c8c5ba;
+  --font-display: "Geist", "IBM Plex Sans Thai", system-ui, sans-serif;     /* printed: "Geist", system-ui, sans-serif */
+  --font-text: "Geist", "IBM Plex Sans Thai", system-ui, sans-serif;        /* printed: "Geist", system-ui, sans-serif */
+  --font-mono: "Geist Mono", "IBM Plex Sans Thai", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                                                                             /* printed: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace */
+  --display-weight: 500;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.045em;
+
+  color-scheme: dark;
+
+  /* ---- chart theme (assets/js/chart/render.js reads these from the chart's element; plain hex or rgba
+     only, since the canvas takes the custom property's text as a colour). The dealt neutrals map 1:1
+     (ground, ink, muted, hairline); the market colours are fixed by meaning and tuned to this ground:
+     bull green, bear red, liquidity amber, sessions cyan, HTF silver, entry blue, target lime.
+     Contrast on --c-bg #141414: text 16.3, axis 6.6, bull 9.1, bear 6.0, liq 10.2, session 9.1,
+     htf 12.4, entry 7.1, target 11.8 (each 4.5 or more on --p-surface too). Hues, none from 270 to 330:
+     bull 153, bear 356, liq 38, session 186, entry 215, target 76. */
+  --c-bg: #141414;                              /* the ground a step darker (the footer-dark step): the screen in the frame */
+  --c-text: #f1f1ef;                            /* = --p-ink */
+  --c-axis: #9a9b96;                            /* = --p-muted */
+  --c-grid: rgba(241, 241, 239, 0.075);         /* = --p-ink at 7.5%: the hairline under the candles */
+  --c-bull: #2fcf86;
+  --c-bear: #f6626a;
+  --c-liq: #f5b544;
+  --c-session: #2cc8d8;
+  --c-htf: #d4d4ce;
+  --c-entry: #5ea2ff;
+  --c-target: #b6dd4f;
+}
+
+/* ---- Thai script (html lang="th"). The kit's heading leading (h1 1.04, h2 1.1) is set for Latin: Thai
+   stacks a vowel and a tone mark above the letter and a vowel below it, so tighter lines collide.
+   Headings open to 1.22 to 1.3 and running text to 1.7. The dealt tracking (-0.035em) stays: checked
+   on two-line Thai headings at 1440 and 390, the marks keep clear of each other. */
+html:lang(th) :is(h1, .t-h1) { line-height: 1.22; }
+html:lang(th) :is(h2, .t-h2) { line-height: 1.26; }
+html:lang(th) :is(h3, .t-h3) { line-height: 1.3; }
+html:lang(th) body { line-height: 1.7; }
+html:lang(th) :is(.t-lead, .section-head p) { line-height: 1.65; }
