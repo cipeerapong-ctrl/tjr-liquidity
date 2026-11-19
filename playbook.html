@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand" data-tone="dark" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Playbook เทรด liquidity 7 ขั้นจากคลิป TJR | Liquidity</title>
+<meta name="description" content="ลำดับเทรด liquidity 7 ขั้นจากคลิป TJR 49 นาที พร้อมเช็คลิสต์ก่อนเข้าเทรด และนาฬิกา session ที่นับถอยหลังถึง NY open ทุกข้อมีเวลาในคลิปกำกับ">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Playbook เทรด liquidity 7 ขั้นจากคลิป TJR">
+<meta property="og:description" content="ลำดับเทรด เช็คลิสต์ และนาฬิกา session ตามคลิป ส่วนที่คลิปไม่ได้บอก เขียนกฎของคุณเอง">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1c1c1c">
+<!-- <link rel="canonical" href="https://[the site's domain]/"> : no domain yet -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/pages/playbook.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+</head>
+<body>
+<!--
+  software · TJR Liquidity playbook page (Task 12), an app screen with long content (spec 7.4, 10)
+  deal: the home page's (Task 8/9): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
+        close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
+  page: head (h1 + the live session clock) · the 7-step procedure as a numbered rail beside ONE engine chart that
+        steps through a worked trade (S01 long / S03 short) · the pre-trade checklist (ticks, progress ring, the
+        user's own rules for stop-loss, size and risk, saved in TJR.store) · today's session table (ET and Thailand
+        time) · what the clip does not say.
+  moment: none dealt on this page: its motion is the clock, the chart's step-through, the progress ring and the
+        rail's active step, none of it under reduced motion.
+-->
+<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html" aria-current="page">Playbook</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div></div></header></noscript>
+<main class="app pb" id="top">
+  <div class="wrap">
+
+    <header class="pb-head">
+      <div class="pb-head__text">
+        <h1>Playbook เทรด liquidity 7 ขั้นจากคลิป TJR</h1>
+        <p class="t-lead">ลำดับตั้งแต่มาร์ก level ก่อน NY open จนถึงเป้า พร้อมเช็คลิสต์ก่อนเข้าเทรดและนาฬิกา session ส่วน stop-loss ขนาดสถานะ และความเสี่ยง คลิปไม่ได้สอน คุณเขียนกฎของตัวเองลงเช็คลิสต์ได้</p>
+        <a class="btn btn--primary" href="#checklist">เปิดเช็คลิสต์</a>
+      </div>
+
+      <section class="clock" id="clock" aria-labelledby="clock-h">
+        <div class="clock__top">
+          <p class="clock__title" id="clock-h">นาฬิกา session</p>
+          <p class="clock__live" role="status" aria-live="polite"><i class="clock__dot" aria-hidden="true"></i><span data-k="sess">รอเปิดสคริปต์</span></p>
+        </div>
+        <dl class="clock__times">
+          <div><dt><span data-k="zone">ET</span> · <span data-k="etdate"></span></dt><dd data-k="et">--:--:--</dd></div>
+          <div><dt>เวลาไทย · <span data-k="thdate"></span></dt><dd data-k="th">--:--:--</dd></div>
+        </dl>
+        <div class="clock__next">
+          <p class="clock__lab">NY open ถัดไป (09:30 ET)</p>
+          <p class="clock__count" data-k="count">--:--:--</p>
+          <p class="clock__at" data-k="openat">นาฬิกานี้ต้องใช้ JavaScript</p>
+        </div>
+        <p class="clock__rule">คลิปเทรด US index เฉพาะตอน NY open <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></p>
+      </section>
+    </header>
+
+    <section class="pb-sec" id="procedure" aria-labelledby="proc-h">
+      <header class="pb-sec__head">
+        <h2 id="proc-h">ลำดับเทรด 7 ขั้น</h2>
+        <p>เรียงตามที่คลิปสอน กด ดูบนกราฟ ที่แต่ละขั้น กราฟตัวอย่างจะเดินไปถึงจังหวะนั้นและโชว์เฉพาะสิ่งที่รู้ได้ ณ ตอนนั้น</p>
+      </header>
+      <div class="proc">
+        <ol class="steps" data-k="steps">
+          <li class="step is-active" data-step="1" id="step-1">
+            <span class="step__no" aria-hidden="true">01</span>
+            <div class="step__body">
+              <h3>มาร์กระดับ liquidity ก่อน NY open</h3>
+              <p>ก่อนตลาดสหรัฐเปิด มาร์ก high และ low ของ Asia กับ London, high/low ของ session ก่อนหน้ารวมทั้ง previous-day high, และ high/low ของ 1H กับ 4H แล้วจดว่ามี high หรือ low ที่เรียงซ้อนกันและยังไม่ถูกเก็บ (stacked, low-resistance) อยู่ตรงไหน</p>
+              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1965" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 32:45">32:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 28:30">28:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 39:45">39:45</a></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="1">ดูบนกราฟ</button>
+                <a class="ctrl" href="learn.html#m7" aria-label="อ่านบทที่ 7">บทที่ 7</a>
+                <a class="ctrl" href="learn.html#m8" aria-label="อ่านบทที่ 8">บทที่ 8</a>
+                <a class="ctrl" href="scenarios.html#S06" aria-label="เปิดสถานการณ์ S06">S06</a>
+              </div>
+            </div>
+          </li>
+          <li class="step" data-step="2" id="step-2">
+            <span class="step__no" aria-hidden="true">02</span>
+            <div class="step__body">
+              <h3>เทรด US index เฉพาะช่วง NY open</h3>
+              <p>TJR เทรด US index จึงเทรดตอนตลาดสหรัฐเปิดเท่านั้น เขาบอกว่าเทรดดัชนีนี้ตอน Asia หรือ London ไม่สมเหตุสมผล เพราะดัชนีขยับตอน NY open ขั้นนี้เป็นเรื่องเวลา ดูนาฬิกาด้านบน</p>
+              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="2">ดูบนกราฟ</button>
+                <a class="ctrl" href="#clock">ดูนาฬิกา</a>
+                <a class="ctrl" href="learn.html#m7" aria-label="อ่านบทที่ 7">บทที่ 7</a>
+              </div>
+            </div>
+          </li>
+          <li class="step" data-step="3" id="step-3">
+            <span class="step__no" aria-hidden="true">03</span>
+            <div class="step__body">
+              <h3>รอให้ราคา sweep ระดับที่มาร์กไว้</h3>
+              <p>ราคาทะลุ high หรือ low ที่มาร์กไว้ เปิดโอกาสให้ตลาดกลับตัว แต่ไม่ได้รับประกันว่าจะกลับ อย่ากด buy หรือ sell ทันทีที่โดน sweep เพราะถ้าราคาไปต่อ คุณจะติด drawdown</p>
+              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=945" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 15:45">15:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:30">22:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:15">23:15</a></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="3">ดูบนกราฟ</button>
+                <a class="ctrl" href="learn.html#m4" aria-label="อ่านบทที่ 4">บทที่ 4</a>
+                <a class="ctrl" href="learn.html#m6" aria-label="อ่านบทที่ 6">บทที่ 6</a>
+                <a class="ctrl" href="scenarios.html#S04" aria-label="เปิดสถานการณ์ S04">S04</a>
+              </div>
+            </div>
+          </li>
+          <li class="step" data-step="4" id="step-4">
+            <span class="step__no" aria-hidden="true">04</span>
+            <div class="step__body">
+              <h3>รอโครงสร้างใหม่บน 5m หรือ 1m</h3>
+              <p>หลังโดน sweep รอให้เทรนด์ใหม่ก่อตัว ฝั่งขึ้นเรียง L, H, HL, HH ฝั่งลงเรียง H, L, LL, LH คลิปยกตัวอย่างที่เริ่มนับต่างกันเล็กน้อย แต่ทั้งหมดต้องเห็นโครงสร้างครบก่อนจึงจะคิดเรื่องเข้า</p>
+              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 25:30">25:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2250" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 37:30">37:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 28:30">28:30</a></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="4">ดูบนกราฟ</button>
+                <a class="ctrl" href="learn.html#m6" aria-label="อ่านบทที่ 6">บทที่ 6</a>
+                <a class="ctrl" href="scenarios.html#S01" aria-label="เปิดสถานการณ์ S01">S01</a>
+                <a class="ctrl" href="scenarios.html#S03" aria-label="เปิดสถานการณ์ S03">S03</a>
+                <a class="ctrl" href="scenarios.html#S09" aria-label="เปิดสถานการณ์ S09">S09</a>
+              </div>
+            </div>
+          </li>
+          <li class="step" data-step="5" id="step-5">
+            <span class="step__no" aria-hidden="true">05</span>
+            <div class="step__body">
+              <h3>เข้าที่ pullback หลังโครงสร้างครบ</h3>
+              <p>TJR เรียกจุดนี้ว่า average entry คือเข้าตอนราคาพักตัวหลังโครงสร้างใหม่ปรากฏ ส่วนเงื่อนไขเข้าเป๊ะ ๆ ไม่อยู่ในคลิป เขาบอกว่ากลยุทธ์จริงมี confluence และกฎที่เข้มกว่า ช่วงเข้าบนกราฟตัวอย่างเป็นการอ่านของเว็บนี้ ไม่ใช่กฎของ TJR</p>
+              <p class="chips"><span class="badge-gap">จุดเข้าเป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:45">24:45</a></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="5">ดูบนกราฟ</button>
+                <a class="ctrl" href="learn.html#m6" aria-label="อ่านบทที่ 6">บทที่ 6</a>
+                <a class="ctrl" href="scenarios.html#S01" aria-label="เปิดสถานการณ์ S01">S01</a>
+                <a class="ctrl" href="scenarios.html#S09" aria-label="เปิดสถานการณ์ S09">S09</a>
+              </div>
+            </div>
+          </li>
+          <li class="step" data-step="6" id="step-6">
+            <span class="step__no" aria-hidden="true">06</span>
+            <div class="step__body">
+              <h3>ตั้งเป้าที่ liquidity ฝั่งตรงข้าม</h3>
+              <p>เป้าคือ liquidity แบบ low-resistance เช่น stacked highs เมื่อเข้า long หรือ level ของ session ฝั่งตรงข้าม เทรดไปหา low-resistance อย่าเทรดเข้าหา high-resistance ซึ่งคือ high หรือ low ที่ราคาเพิ่งกวาดแล้วกลับตัวจากมา</p>
+              <p class="chips"><span class="badge-gap">กฎ take-profit เป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:45">42:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2700" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 45:00">45:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2790" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 46:30">46:30</a></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="6">ดูบนกราฟ</button>
+                <a class="ctrl" href="learn.html#m8" aria-label="อ่านบทที่ 8">บทที่ 8</a>
+                <a class="ctrl" href="scenarios.html#S12" aria-label="เปิดสถานการณ์ S12">S12</a>
+                <a class="ctrl" href="scenarios.html#S14" aria-label="เปิดสถานการณ์ S14">S14</a>
+              </div>
+            </div>
+          </li>
+          <li class="step" data-step="7" id="step-7">
+            <span class="step__no" aria-hidden="true">07</span>
+            <div class="step__body">
+              <h3>เขียน stop-loss ขนาด และความเสี่ยงเอง</h3>
+              <p>คลิปไม่ได้พูดถึง stop-loss, ขนาดสถานะ, ความเสี่ยงต่อเทรด และวิธีรับมือเมื่อ confirmation ล้ม เว็บนี้จึงไม่ใส่ตัวเลขให้ ช่องกฎของคุณเองอยู่ในเช็คลิสต์ด้านล่าง</p>
+              <p class="chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="7">ดูบนกราฟ</button>
+                <a class="ctrl" href="#own-rules">เขียนกฎของคุณ</a>
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <figure class="chart-frame pf" data-ui="chart" aria-label="กราฟจำลองประกอบขั้นตอนเทรด">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta">ขั้นที่ 1 จาก 7</span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <p class="pf__now" role="status" aria-live="polite" data-k="now"><b data-k="now-n">ขั้นที่ 1</b> <span data-k="now-t">กราฟตัวอย่างต้องใช้ JavaScript</span> <span class="badge-gap" data-k="now-gap" hidden>คลิปไม่ได้ระบุ</span></p>
+          <div class="chart-frame__ctrls">
+            <div class="pf__row">
+              <button class="ctrl" type="button" data-act="prev" aria-label="ขั้นก่อนหน้า">◀ ก่อนหน้า</button>
+              <button class="ctrl" type="button" data-act="next" aria-label="ขั้นถัดไป">ถัดไป ▶</button>
+              <button class="ctrl" type="button" data-act="auto" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="auto-lab">เล่นต่อเนื่อง</span></button>
+            </div>
+            <div class="pf__row pf__row--opts">
+              <div class="ctrl-group" role="group" aria-label="ตัวอย่างฝั่งไหน" data-k="sides">
+                <button class="ctrl" type="button" data-side="S01" aria-pressed="true">Long</button>
+                <button class="ctrl" type="button" data-side="S03" aria-pressed="false">Short</button>
+              </div>
+              <button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button>
+              <span class="pf__seed" data-k="seed"></span>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="pb-sec" id="checklist" aria-labelledby="ck-h">
+      <header class="pb-sec__head">
+        <h2 id="ck-h">เช็คลิสต์ก่อนเข้าเทรด</h2>
+        <p>ติ๊กทีละข้อต่อหนึ่งเทรด แล้วกดเริ่มเทรดใหม่ ข้อ stop-loss ขนาด และความเสี่ยงเป็นกฎของคุณเอง ไม่ใช่ของคลิป เก็บไว้ในเบราว์เซอร์นี้เท่านั้น</p>
+      </header>
+      <div class="ck">
+        <aside class="ck__side" aria-label="ความคืบหน้าของเช็คลิสต์">
+          <div class="ck__prog">
+            <div class="ring" data-k="ring" style="--p:0">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><circle class="ring__bg" cx="32" cy="32" r="26"/><circle class="ring__fg" cx="32" cy="32" r="26" pathLength="100" transform="rotate(-90 32 32)"/></svg>
+            </div>
+            <div class="ck__nums">
+              <p class="ck__n"><b data-k="done">0</b> / <span data-k="total">11</span></p>
+              <p class="ck__state" role="status" aria-live="polite" data-k="state">ยังไม่ได้ติ๊กข้อไหน</p>
+            </div>
+          </div>
+          <div class="ck__acts">
+            <button class="ctrl" type="button" data-act="reset">เริ่มเทรดใหม่</button>
+            <button class="ctrl" type="button" data-act="copy">คัดลอกเป็นข้อความ</button>
+            <button class="ctrl" type="button" data-act="clear-rules">ล้างกฎของฉัน</button>
+          </div>
+          <p class="ck__copy" role="status" aria-live="polite" data-k="copy-state"></p>
+          <textarea class="ck__txt" data-k="txt" rows="8" readonly hidden aria-label="เช็คลิสต์ในรูปข้อความ เลือกแล้วคัดลอกเอง"></textarea>
+          <p class="ck__note">กฎของคุณเก็บอัตโนมัติในเบราว์เซอร์นี้ ยาวได้ 160 ตัวอักษร และไม่ถูกส่งไปที่ไหน สรุปเพื่อการเรียนจากคลิป ไม่ใช่คำแนะนำการลงทุน</p>
+        </aside>
+
+        <ul class="ck__list" data-k="list">
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-asia-london"><span class="check-row__text">มาร์ก high และ low ของ Asia กับ London แล้ว</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1965" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 32:45">32:45</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-htf"><span class="check-row__text">มาร์ก previous-day high/low และ high/low ของ 1H กับ 4H แล้ว</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 28:30">28:30</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-stack"><span class="check-row__text">จด stacked highs หรือ lows ที่ยังไม่ถูกเก็บแล้ว (low-resistance)</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 39:45">39:45</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-ny"><span class="check-row__text">ตอนนี้เป็นช่วง NY open และฉันเทรด US index</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-sweep"><span class="check-row__text">ราคา sweep ระดับที่มาร์กไว้แล้ว และฉันรู้ว่านี่เป็นแค่โอกาส ยังไม่ใช่สัญญาณ</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=945" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 15:45">15:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:30">22:30</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-structure"><span class="check-row__text">โครงสร้างใหม่ครบบน 5m หรือ 1m: L, H, HL, HH (long) หรือ H, L, LL, LH (short)</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 25:30">25:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2250" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 37:30">37:30</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-entry"><span class="check-row__text">รอเข้าที่ pullback หลังโครงสร้างครบ</span><span class="check-row__meta chips"><span class="badge-gap">จุดเข้าเป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:45">24:45</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-target"><span class="check-row__text">เป้าอยู่ที่ liquidity แบบ low-resistance หรือ level ของ session ฝั่งตรงข้าม ไม่ใช่ที่ high-resistance</span><span class="check-row__meta chips"><span class="badge-gap">กฎ take-profit เป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:45">42:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2790" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 46:30">46:30</a></span></label>
+          </li>
+          <li class="ck__item ck__item--own" id="own-rules">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-sl"><span class="check-row__text">กำหนด stop-loss ของเทรดนี้แล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></label>
+            <div class="own"><label class="own__lab" for="rule-sl">กฎ stop-loss ของคุณเอง</label><input class="own__in" id="rule-sl" type="text" data-rule="sl" maxlength="160" autocomplete="off" spellcheck="false"></div>
+          </li>
+          <li class="ck__item ck__item--own">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-size"><span class="check-row__text">กำหนดขนาดสถานะของเทรดนี้แล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></label>
+            <div class="own"><label class="own__lab" for="rule-size">กฎขนาดสถานะของคุณเอง</label><input class="own__in" id="rule-size" type="text" data-rule="size" maxlength="160" autocomplete="off" spellcheck="false"></div>
+          </li>
+          <li class="ck__item ck__item--own">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-risk"><span class="check-row__text">กำหนดความเสี่ยงต่อเทรดแล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></label>
+            <div class="own"><label class="own__lab" for="rule-risk">กฎความเสี่ยงของคุณเอง</label><input class="own__in" id="rule-risk" type="text" data-rule="risk" maxlength="160" autocomplete="off" spellcheck="false"></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="pb-sec" id="sessions" aria-labelledby="ses-h">
+      <header class="pb-sec__head">
+        <h2 id="ses-h">ตาราง session วันนี้</h2>
+        <p data-k="ses-lead">ช่วง ET ตามคลิป แปลงเป็นเวลาไทยของวันนี้โดยนาฬิกา (+1) คือวันที่ไทยเลยวันที่ ET ของเวลานั้นไปหนึ่งวัน</p>
+      </header>
+      <div class="ses" data-k="ses">
+        <table class="ses__tbl">
+          <caption class="vh">session ของวันเทรดนี้ ช่วงเวลา ET และเวลาไทย</caption>
+          <thead><tr><th scope="col">Session</th><th scope="col">ET</th><th scope="col">เวลาไทย</th><th scope="col">ที่คลิปบอก</th></tr></thead>
+          <tbody>
+            <tr data-row="asia"><th scope="row">Asia</th><td data-k="et-asia">18:00–03:00</td><td data-k="th-asia">—</td><td>ตลาดเริ่มขยับก่อน ใช้มาร์ก high/low ไว้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
+            <tr data-row="london"><th scope="row">London</th><td data-k="et-london">03:00–08:30</td><td data-k="th-london">—</td><td>ปิดทางการ 11:00 แต่ TJR ตัดที่ 08:30 <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
+            <tr data-row="ny-pre"><th scope="row">NY pre-market</th><td data-k="et-ny-pre">08:30–09:30</td><td data-k="th-ny-pre">—</td><td>London ที่นับสิ้นสุดตรงนี้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
+            <tr data-row="ny"><th scope="row">New York</th><td data-k="et-ny">09:30–17:00</td><td data-k="th-ny">—</td><td>ช่วงที่ TJR เทรด US index <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a></td></tr>
+            <tr data-row="spread"><th scope="row">Spread hour</th><td data-k="et-spread">17:00–18:00</td><td data-k="th-spread">—</td><td>เทรดไม่ได้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ses__note" data-k="ses-note">เวลาไทยของแต่ละ session ขยับตามเวลาออมแสงของสหรัฐ นาฬิกาคำนวณให้เองทุกวัน</p>
+      <p class="ses__note">เสาร์–อาทิตย์: นาฬิกาแสดงว่าไม่มี session ที่เทรดได้ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p>
+    </section>
+
+    <section class="pb-sec" id="gaps" aria-labelledby="gap-h">
+      <header class="pb-sec__head">
+        <h2 id="gap-h">สิ่งที่คลิปไม่ได้บอก</h2>
+        <p>คลิปบอกเองว่าไม่ได้ลงรายละเอียดกลยุทธ์จริง และ liquidity เป็นเพียงชิ้นเดียวของภาพรวม เว็บนี้จึงไม่เติมตัวเลขในช่องเหล่านี้ <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></p>
+      </header>
+      <ul class="gaps">
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ตำแหน่ง stop-loss</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ขนาดสถานะ</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ความเสี่ยงต่อเทรด</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>กฎ take-profit เป๊ะ ๆ นอกจากแนวคิดว่า liquidity เป็นเป้าราคา</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>Win rate และ backtest</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>กฎกรอง news</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ต้องทำอย่างไรเมื่อ confirmation ล้ม</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>เงื่อนไขเข้าเป๊ะ ๆ ของกลยุทธ์จริง ซึ่งมี confluence อื่นร่วมด้วย</p></li>
+      </ul>
+    </section>
+
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/js/core/ns.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/scenario/rng.js"></script>
+<script src="assets/js/scenario/swings.js"></script>
+<script src="assets/js/scenario/gen.js"></script>
+<script src="assets/js/scenario/sessions.js"></script>
+<script src="assets/js/scenario/library.js"></script>
+<script src="assets/js/scenario/annotate.js"></script>
+<script src="assets/js/scenario/grade.js"></script>
+<script src="assets/js/chart/scale.js"></script>
+<script src="assets/js/chart/render.js"></script>
+<script src="assets/js/chart/overlays.js"></script>
+<script src="assets/js/chart/chart.js"></script>
+<script src="assets/js/core/layout.js"></script>
+<script src="assets/js/core/motion.js"></script>
+<script src="assets/js/pages/playbook.js"></script>
+</body>
+</html>
