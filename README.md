@@ -14,7 +14,7 @@ Needs JavaScript, and internet for GSAP 3.12.5 + ScrollTrigger 3.12.5 (cdnjs) an
 ```
 node tests/run.mjs
 ```
-Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js` (193 tests: generator invariants over every scenario x 200 seeds, swing rule, sessions and DST days, grading, chart scale math, store with blocked localStorage, rapid Play clicks, page controllers with a stub DOM).
+Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js` (202 tests: generator invariants over every scenario x 200 seeds, swing rule, sessions and DST days, grading, chart scale math, store with blocked localStorage, rapid Play clicks, page controllers with a stub DOM).
 
 ## Pages
 | Page | What it does |
