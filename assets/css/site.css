@@ -187,6 +187,12 @@ html:not([data-motion="off"]) .ts-chip { transition: background-color var(--m-ou
 .chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 /* a chip outside running text is a 44px target on a phone */
 @media (max-width: 639px) { .chips > .ts-chip { height: 44px; padding-inline: var(--s-3) var(--s-3); } }
+/* a tablet is a touch screen too: the kit sizes targets for phones only (under 640px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .chips > .ts-chip { height: 44px; padding-inline: var(--s-3); }
+  .nav__logo, a.pill { min-height: 44px; }
+  a.pill { height: auto; }
+}
 
 /* ---------------------------------------------------------------- fact card (the kit's card look) */
 .fact-card {
