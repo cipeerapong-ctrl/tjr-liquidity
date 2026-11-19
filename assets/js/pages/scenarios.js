@@ -102,7 +102,12 @@
     S11: { text: 'ไม่มีเทรดที่นี่ ตัวอย่างเทียบน้ำหนัก high ของ 5m แตกแล้วเกิดขาลงสั้น ๆ คลิปคาดว่าไม่น่ายืน ส่วน liquidity ของ HTF มีน้ำหนักกว่า', secs: [1755], gap: 'จุดเข้าของตัวอย่างนี้' }
   };
 
-  G.IDS = IDS; G.FACT_SEC = FACT_SEC; G.D4 = D4_TEXT; G.NOTRADE = NOTRADE; G.SEEDS = SEEDS;
+  // the tag a no-trade scenario carries: where the clip itself says there is no trade, "ไม่มีเทรด"; where it only gives
+  // the day's story and no entry (S06 even says the trade is done, F7.12), the gap wording instead
+  var NO_ENTRY_IDS = ['S06', 'S07', 'S08'];
+  function noTradeTag(id) { return NO_ENTRY_IDS.indexOf(id) >= 0 ? 'คลิปไม่ได้ระบุจุดเข้า' : 'ไม่มีเทรด'; }
+
+  G.IDS = IDS; G.FACT_SEC = FACT_SEC; G.D4 = D4_TEXT; G.NOTRADE = NOTRADE; G.noTradeTag = noTradeTag; G.SEEDS = SEEDS;
   G.parseHash = parseHash; G.kindOf = kindOf; G.filterIds = filterIds; G.factSec = factSec; G.tfOptions = tfOptions;
   G.seriesIndex = seriesIndex; G.baseEnd = baseEnd; G.panelBar = panelBar; G.visibleNotes = visibleNotes; G.playRate = playRate; G.startBar = startBar;
 
@@ -135,7 +140,7 @@
   function cardHtml(d) {
     var k = kindOf(d), tags = k.trade
       ? '<span class="tag ' + SIDE_TAG[k.side][0] + '">' + SIDE_TAG[k.side][1] + '</span>' + (k.fail ? '<span class="tag">มีแบบ confirmation ล้ม</span>' : '')
-      : '<span class="tag tag--none">ไม่มีเทรด</span>';
+      : '<span class="tag tag--none">' + noTradeTag(d.id) + '</span>';
     if (k.session) tags += '<span class="tag">Session</span>';
     if (k.htf) tags += '<span class="tag">HTF</span>';
     return '<li class="card sc" id="' + d.id + '" data-id="' + d.id + '">' +
@@ -279,7 +284,7 @@
     var B = V.built, T = B.truth, d = V.def, h;
     if (!T.side) {
       var nt = NOTRADE[d.id];
-      h = '<div class="verdict__top"><span class="tag tag--none">ไม่มีเทรด</span></div>' +
+      h = '<div class="verdict__top"><span class="tag tag--none">' + noTradeTag(d.id) + '</span></div>' +
         '<p>' + nt.text + ' <span class="chips">' + chipsHtml(nt.secs) + '</span></p>' +
         (nt.link ? '<p><a class="btn btn--secondary" href="#' + nt.link + '">เปิด ' + nt.link + '</a></p>' : '') +
         '<p class="verdict__gap">' + nt.gap + ' ' + TJR.layout.gap() + '</p>';

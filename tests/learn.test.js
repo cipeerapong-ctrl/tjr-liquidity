@@ -137,4 +137,13 @@
       });
     });
   });
+
+  // T10: the right answer is not parked on one index (a guessable pattern in a self-check)
+  test('learn.html: the right answers are spread over the options (no index above half, no run of three)', () => {
+    var rights = (readText('learn.html').match(/class="q" data-right="([0-9])"/g) || []).map((m) => Number(m.slice(-2, -1)));
+    eq(rights.length, 16);
+    [0, 1, 2].forEach((i) => ok(rights.filter((r) => r === i).length <= 8, 'index ' + i + ' used ' + rights.filter((r) => r === i).length + ' times'));
+    [0, 1, 2].forEach((i) => ok(rights.filter((r) => r === i).length >= 3, 'index ' + i + ' is used at least 3 times'));
+    for (var k = 2; k < rights.length; k++) ok(!(rights[k] === rights[k - 1] && rights[k] === rights[k - 2]), 'three equal in a row at ' + k);
+  });
 })();

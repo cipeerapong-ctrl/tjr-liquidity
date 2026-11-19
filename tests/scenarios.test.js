@@ -148,4 +148,13 @@
     ok(order.every((p, i) => p > 0 && (i === 0 || p > order[i - 1])), 'script order');
     ok(h.indexOf('gsap/3.12.5/gsap.min.js') > 0 && h.indexOf('ScrollTrigger.min.js') > 0);
   });
+
+  // T11: S06 / S07 / S08 are days the clip narrates without an entry (S06 even says "trade done"): never the "no trade" tag
+  test('gallery.noTradeTag: "ไม่มีเทรด" only where the clip says so; the day-story scenarios get the gap wording', () => {
+    ['S04', 'S05', 'S11'].forEach((id) => eq(G.noTradeTag(id), 'ไม่มีเทรด', id));
+    ['S06', 'S07', 'S08'].forEach((id) => eq(G.noTradeTag(id), 'คลิปไม่ได้ระบุจุดเข้า', id));
+    var src = readText('assets/js/pages/scenarios.js');
+    ok(src.indexOf('tag--none">ไม่มีเทรด<') < 0, 'no hard-coded "no trade" tag is left');
+    eq(readText('scenarios.html').indexOf('aria-label="timeframe"'), -1, 'the timeframe group label is Thai');
+  });
 })();

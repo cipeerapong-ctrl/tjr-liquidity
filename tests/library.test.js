@@ -301,4 +301,18 @@
       S.list.forEach((d, i) => { d.build = saved[i]; });
     }
   });
+
+  // T5: the generic entry / target notes say only what the cited facts say
+  test('notes: entry text follows the side (higher low / lower high, F6.5-F6.9, F7.14); the short target note flags that F8.4 words the long side', () => {
+    for (const [id, word] of [['S01', 'higher low'], ['S09', 'higher low'], ['S03', 'lower high']]) {
+      const T = build(id, 5).truth, n = T.notes.find((x) => x.bar === T.entryWindow.from);
+      ok(n && n.text.indexOf(word) >= 0, id + ' entry note names the ' + word);
+      ok(n.text.indexOf('pullback') < 0, id + ' entry note does not say pullback');
+      ok(n.text.indexOf('คลิปไม่ได้ระบุ') >= 0, id + ' entry note carries the gap wording');
+    }
+    const t10 = build('S10', 5).truth, nt = t10.notes.filter((x) => x.fact === 'F8.4');
+    ok(nt.length === 1 && nt[0].text.indexOf('ฝั่ง short คลิปไม่ได้ระบุ') >= 0, 'S10 (short) target note flags the gap');
+    const t01 = build('S01', 5).truth;
+    ok(t01.notes.filter((x) => x.fact === 'F8.4').every((x) => x.text.indexOf('ที่ปิดกำไร') >= 0), 'S01 (long) target note keeps the F8.4 wording');
+  });
 })();

@@ -389,15 +389,18 @@
   //   sweep  - long: F6.3 (do not blindly buy when a low is taken, drawdown); short: F6.4 (no blind sell above a
   //            high, wait for confirmation; F6.3 only speaks of buying)
   //   confirm - F6.5 / F6.6 / F7.14 (long), F6.8 / F6.9 (short): the new trend's structure forms
-  //   entry  - F6.5 / F6.6 / F6.8 / F6.9 / F7.14: entry on the pullback after the structure
-  //   target - F8.4: liquidity acts as the price target (where positions are closed)
+  //   entry  - long: F6.5 / F6.6 / F7.14 (average entry around the higher low once the uptrend has formed); short:
+  //            F6.8 / F6.9 (around the lower high once the downtrend has formed). No exact entry rule (F9.2 gap)
+  //   target - F8.4: liquidity acts as the price target (where positions are closed). F8.4 words only the long
+  //            side (above stacked highs); the short text says so and applies it mirrored
   var NOTE = {
     sweep: { long: ['F6.3', 'ราคาลงกวาด low แล้ว — อย่าเพิ่งกด buy ทันที ถ้าราคายังลงต่อจะติด drawdown'],
              short: ['F6.4', 'ราคาขึ้นกวาด high แล้ว — ไม่ sell เหนือ high แบบไม่คิด ต้องรอ confirmation ก่อน'] },
     confirm: { long: 'HH เกิดแล้ว: เทรนด์ขาขึ้นใหม่เริ่มก่อตัว (confirmation)', short: 'LL เกิดแล้ว: เทรนด์ขาลงใหม่เริ่มก่อตัว (confirmation)' },
-    entry: 'ช่วง pullback หลังโครงสร้างยืนยัน = จุดเข้า (entry) ตามคลิป — จุดเข้าแบบเป๊ะ ๆ: คลิปไม่ได้ระบุ',
+    entry: { long: 'โครงสร้างขาขึ้นก่อตัวครบแล้ว คลิปชี้ว่าบริเวณ higher low คือจุดเข้าเฉลี่ย (average entry) — จุดเข้าแบบเป๊ะ ๆ: คลิปไม่ได้ระบุ',
+             short: 'โครงสร้างขาลงก่อตัวครบแล้ว คลิปชี้ว่าบริเวณ lower high คือจุดเข้าเฉลี่ย (average entry) — จุดเข้าแบบเป๊ะ ๆ: คลิปไม่ได้ระบุ' },
     target: { long: 'ราคาวิ่งขึ้นถึง liquidity ด้านบน — liquidity เป็นเป้าราคา (ที่ปิดกำไร) ได้',
-              short: 'ราคาลงถึง liquidity ด้านล่าง — liquidity เป็นเป้าราคา (ที่ปิดกำไร) ได้' },
+              short: 'ราคาลงถึง liquidity ด้านล่าง — เป็นหลักเดียวกับ F8.4 กลับด้าน (คลิปพูดถึงเป้าด้านบนเท่านั้น ฝั่ง short คลิปไม่ได้ระบุ)' },
     fail: ['F9.2', 'setup ล้ม: ราคากลับไปทะลุจุด sweep — วิธีจัดการเมื่อ confirmation ล้ม: คลิปไม่ได้ระบุ']
   };
   // f: {sweep, confirm, entry, target, more(T, cs) -> extra notes}. A slot is a fact id (that fact with the
@@ -412,7 +415,7 @@
       var out = [
         [T.sweep.bar].concat(f.sweep || NOTE.sweep[side]),
         [T.confirmBar].concat(c),
-        [T.entryWindow.from].concat(slot(f.entry || c[0], NOTE.entry))
+        [T.entryWindow.from].concat(slot(f.entry || c[0], NOTE.entry[side]))
       ];
       if (T.outcome === 'win') out.push([reachBar(cs, T)].concat(slot(f.target || 'F8.4', NOTE.target[side])));
       else out.push([failBar(cs, T)].concat(NOTE.fail));
