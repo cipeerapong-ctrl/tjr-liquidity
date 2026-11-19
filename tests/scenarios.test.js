@@ -89,6 +89,17 @@
     eq(G.seriesIndex(base, base, 17), 17);
   });
 
+  test('gallery.panelBar: a TF switch mid-bucket never shows the panel past the known base bar (S11/S10 at 4H)', () => {
+    ['S11', 'S10'].forEach((id) => {
+      var b = TJR.scenarios.safeBuild(TJR.scenarios.get(id), 5, {}), base = b.candles, s = TJR.gen.rollup(base, 5, 240);
+      var known = G.startBar(b), j = G.seriesIndex(base, s, known);
+      ok(G.baseEnd(base, s, j) > known, id + ': the start bar sits inside a partly revealed 4H bucket');
+      eq(G.panelBar(base, s, j, known), known, id + ': panel stays on the known bar');
+      eq(G.panelBar(base, s, j), G.baseEnd(base, s, j), id + ': a fully revealed bucket uses its end');
+      eq(G.panelBar(base, base, 17, 40), 17);
+    });
+  });
+
   test('gallery.visibleNotes: only notes at or before the bar, in bar order', () => {
     var notes = [{ bar: 30, fact: 'F6.5', text: 'c' }, { bar: 5, fact: 'F6.3', text: 'a' }, { bar: 12, fact: 'F6.5', text: 'b' }];
     eq(G.visibleNotes(notes, 4), []);

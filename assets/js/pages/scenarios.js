@@ -73,6 +73,12 @@
     while (lo < hi) { var m = (lo + hi) >> 1; if (base[m].t >= t) hi = m; else lo = m + 1; }
     return Math.max(0, lo - 1);
   }
+  // the base bar the side panel may show: the end of series bar j, but never past `known`
+  // (after a TF switch mid-bucket the chart draws a partial candle only up to the known base bar)
+  function panelBar(base, series, j, known) {
+    var e = baseEnd(base, series, j);
+    return known == null ? e : Math.min(e, known);
+  }
   // notes known once base bar b is on screen, in bar order
   function visibleNotes(notes, b) {
     return notes.filter(function (n) { return n.bar <= b; }).sort(function (x, y) { return x.bar - y.bar; });
@@ -98,7 +104,7 @@
 
   G.IDS = IDS; G.FACT_SEC = FACT_SEC; G.D4 = D4_TEXT; G.NOTRADE = NOTRADE; G.SEEDS = SEEDS;
   G.parseHash = parseHash; G.kindOf = kindOf; G.filterIds = filterIds; G.factSec = factSec; G.tfOptions = tfOptions;
-  G.seriesIndex = seriesIndex; G.baseEnd = baseEnd; G.visibleNotes = visibleNotes; G.playRate = playRate; G.startBar = startBar;
+  G.seriesIndex = seriesIndex; G.baseEnd = baseEnd; G.panelBar = panelBar; G.visibleNotes = visibleNotes; G.playRate = playRate; G.startBar = startBar;
 
   if (!doc || !TJR.layout || !TJR.chart || !TJR.chart.create) return;   // Node (tests): helpers only
 
@@ -320,9 +326,9 @@
     if (grew && !final && !M.reduced) { var last = el.notes.lastElementChild; if (last) last.classList.add('is-new'); }
   }
 
-  function onBar(j) {
+  function onBar(j, known) {
     if (!V) return;
-    var B = V.built, T = B.truth, b = baseEnd(V.base, V.series, clamp(j, 0, V.series.length - 1)), k = V.series[clamp(j, 0, V.series.length - 1)];
+    var B = V.built, T = B.truth, b = panelBar(V.base, V.series, clamp(j, 0, V.series.length - 1), known), k = V.series[clamp(j, 0, V.series.length - 1)];
     V.at = b;
     el.meta.textContent = k ? stamp(k.t) : '';
     var marks = { sweep: T.sweep && T.sweep.bar, confirm: T.confirmBar, entry: T.entryWindow && T.entryWindow.from };
@@ -386,12 +392,13 @@
   }
   function setTf(t) {
     V.run++; V.playing = false;
+    var b0 = V.at;                                         // the last base bar the panel showed
     V.ch.setTimeframe(t);
     V.tf = t;
     V.series = t === V.baseTf ? V.base : TJR.gen.rollup(V.base, V.baseTf, t);
     $$('[data-tf]', el.tfg).forEach(function (b) { setPressed(b, Number(b.getAttribute('data-tf')) === t); });
     el.tf.textContent = TF_NAME[t] || '';
-    onBar(V.ch.info().revealed);
+    onBar(V.ch.info().revealed, b0);
     setPlay('เล่น', false);
   }
 
@@ -444,6 +451,7 @@
   function closeView() {
     if (V) { V.run++; V.ch.destroy(); V = null; }
     viewer.hidden = true; gallery.hidden = false;
+    Object.keys(thumbs).forEach(function (id) { if (thumbs[id].done) drawThumb(thumbs[id], 1); });   // a thumb painted while hidden drew nothing
     doc.title = '14 สถานการณ์ liquidity จากคลิป TJR | Liquidity';
   }
 
@@ -454,7 +462,7 @@
     if (id) {
       if (!V) fromGrid = !first; else fromGrid = false;        // moved on to another scenario: close pushes the grid
       openViewer(id);
-    } else if (V) {
+    } else if (V && !(global.location.hash || '').replace('#', '')) {   // an in-page anchor (#top) leaves the viewer open
       var focusId = V.id;
       closeView();
       global.scrollTo(0, lastGridY);
