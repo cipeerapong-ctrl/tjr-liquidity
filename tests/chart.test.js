@@ -48,18 +48,25 @@
     }
 
     var ctx = fakeCtx();
-    var canvas = target('canvas', {
-      style: {}, width: 300, height: 150, parentNode: null,
-      getContext: function () { return ctx; },
-      getBoundingClientRect: function () { return { left: 0, top: 0, width: W, height: H }; },
-      setPointerCapture: function () {}, releasePointerCapture: function () {}
-    });
-    var el = target('el', {
-      style: {}, children: [], clientWidth: W, clientHeight: H,
-      appendChild: function (c) { el.children.push(c); c.parentNode = el; return c; },
-      removeChild: function (c) { el.children.splice(el.children.indexOf(c), 1); c.parentNode = null; return c; },
-      getBoundingClientRect: function () { return { left: 0, top: 0, width: W, height: H }; }
-    });
+    function makeCanvas(name) {
+      return target(name, {
+        style: {}, width: 300, height: 150, parentNode: null,
+        getContext: function () { return ctx; },
+        getBoundingClientRect: function () { return { left: 0, top: 0, width: W, height: H }; },
+        setPointerCapture: function () {}, releasePointerCapture: function () {}
+      });
+    }
+    function makeEl(name) {
+      var e = target(name, {
+        style: {}, children: [], clientWidth: W, clientHeight: H,
+        appendChild: function (c) { e.children.push(c); c.parentNode = e; return c; },
+        removeChild: function (c) { e.children.splice(e.children.indexOf(c), 1); c.parentNode = null; return c; },
+        getBoundingClientRect: function () { return { left: 0, top: 0, width: W, height: H }; }
+      });
+      return e;
+    }
+    var canvases = [makeCanvas('canvas'), makeCanvas('canvas2')], made = 0;     // one per chart created, in order
+    var canvas = canvases[0], el = makeEl('el'), el2 = makeEl('el2');
     var mqls = [];
 
     function Observer(list) {
@@ -72,7 +79,7 @@
       };
     }
 
-    window.document = { createElement: function (tag) { ok(tag === 'canvas', 'only canvases are created'); return canvas; } };
+    window.document = { createElement: function (tag) { ok(tag === 'canvas', 'only canvases are created'); return canvases[made++ % canvases.length]; } };
     window.requestAnimationFrame = function (cb) { var id = ++rafSeq; raf.set(id, cb); return id; };
     window.cancelAnimationFrame = function (id) { raf.delete(id); };
     window.ResizeObserver = Observer(ros);
@@ -92,7 +99,7 @@
     window.removeEventListener = win.removeEventListener;
 
     var env = {
-      el: el, canvas: canvas, ctx: ctx, regs: regs, ros: ros, ios: ios, clock: clock, mqls: mqls,
+      el: el, el2: el2, canvas: canvas, canvas2: canvases[1], ctx: ctx, regs: regs, ros: ros, ios: ios, clock: clock, mqls: mqls,
       pending: function () { return raf.size; },
       // run every scheduled frame once, at clock + dt
       frame: function (dt) {
@@ -101,9 +108,10 @@
         raf.clear();
         cbs.forEach(function (cb) { cb(clock.now); });
       },
-      fire: function (type, ev) {
+      fire: function (type, ev, which) {
         var e = Object.assign({ pointerId: 1, pointerType: 'mouse', button: 0, preventDefault: function () {} }, ev);
-        regs.filter(function (r) { return r.t === canvas && r.type === type; }).forEach(function (r) { r.fn(e); });
+        var on = which || canvas;
+        regs.filter(function (r) { return r.t === on && r.type === type; }).forEach(function (r) { r.fn(e); });
       },
       setVisible: function (v) {
         ios.forEach(function (o) { if (o.live) o.cb(o.targets.map(function (t) { return { target: t, isIntersecting: v }; })); });
@@ -473,5 +481,102 @@
       eq(clicks[0].candle, b.candles[b1], 'click carries its candle');
       ch.destroy();
     });
+  });
+
+  // ------------------------------------------------------------------ twin chart
+
+  function twinOf(env, opts) {
+    var tw = TJR.chart.twin(env.el, env.el2, opts || {});
+    tw.setData(build('S01'), build('S01', 5));
+    return tw;
+  }
+
+  test('chart.twin: reveal(30) reveals both charts and they share one view', () => {
+    withEnv({}, function (env) {
+      var tw = twinOf(env);
+      tw.reveal(30);
+      eq([tw.a.info().revealed, tw.b.info().revealed], [30, 30]);
+      eq(tw.b.info().view, tw.a.info().view, 'same bars on screen');
+      tw.reveal(60);
+      eq([tw.a.info().revealed, tw.b.info().revealed], [60, 60]);
+      eq(tw.b.info().view, tw.a.info().view);
+      tw.destroy();
+    });
+  });
+
+  test('chart.twin: play() walks both charts together, onBar is called once per bar, the promise resolves', () => {
+    withEnv({}, function (env) {
+      var tw = twinOf(env), seen = [], done = false;
+      tw.play({ from: 20, to: 25, barsPerSec: 10, onBar: function (i) { seen.push(i); } }).then(function () { done = true; });
+      eq([tw.a.info().revealed, tw.b.info().revealed], [20, 20]);
+      for (var i = 0; i < 12; i++) {
+        env.frame(50);
+        eq(tw.b.info().revealed, tw.a.info().revealed, 'twin follows bar for bar');
+      }
+      eq(seen, [20, 21, 22, 23, 24, 25]);
+      eq([tw.a.info().revealed, tw.b.info().revealed], [25, 25]);
+      tw.destroy();
+    });
+  });
+
+  test('chart.twin: prefers-reduced-motion jumps both to the last bar', () => {
+    withEnv({ reduced: true }, function (env) {
+      var tw = twinOf(env);
+      tw.reveal(5);
+      tw.play({ from: 5, to: 80 });
+      eq([tw.a.info().revealed, tw.b.info().revealed], [80, 80]);
+      tw.destroy();
+    });
+  });
+
+  test('chart.twin: the crosshair bar is shared in both directions and clears on leave', () => {
+    withEnv({ w: 800, h: 400 }, function (env) {
+      var PX = build('S01').candles[40].c;
+      var tw = twinOf(env);
+      env.frame(16);
+      var p = tw.a.coords(tw.a.info().view.from + 30, PX);
+      env.fire('pointermove', { clientX: p.x, clientY: p.y });
+      var i = tw.b.info().crosshair;
+      ok(Number.isInteger(i) && i >= 0, 'b shows the crosshair bar, got ' + i);
+      eq(i, tw.a.at(p.x, p.y).i, 'the bar under the pointer on a');
+      env.fire('pointerleave', {});
+      eq(tw.b.info().crosshair, null, 'cleared when the pointer leaves');
+      var q = tw.b.coords(tw.b.info().view.from + 12, build('S01', 5).candles[40].c);
+      env.fire('pointermove', { clientX: q.x, clientY: q.y }, env.canvas2);
+      eq(tw.a.info().crosshair, tw.b.at(q.x, q.y).i, 'and from b to a');
+      tw.destroy();
+    });
+  });
+
+  test('chart.twin.destroy() removes every listener and observer of both charts, twice is harmless', () => {
+    withEnv({}, function (env) {
+      var tw = twinOf(env, { interactive: true, crosshair: true });
+      tw.a.on('click', function () {}); tw.b.on('hover', function () {});
+      tw.play({ to: 200 });
+      ok(env.regs.length > 0, 'listeners were added');
+      tw.destroy();
+      eq(env.regs.map(function (r) { return r.t._name + ':' + r.type; }), [], 'listeners left after destroy');
+      eq(env.pending(), 0, 'no frame scheduled');
+      ok(env.ros.every(function (o) { return !o.live; }) && env.ios.every(function (o) { return !o.live; }), 'observers disconnected');
+      eq([env.el.children.length, env.el2.children.length], [0, 0], 'both canvases removed');
+      tw.destroy();
+    });
+  });
+
+  test('chart.twin.destroy() also cleans up without ResizeObserver (window resize listener path)', () => {
+    withEnv({}, function (env) {
+      window.ResizeObserver = undefined;
+      var tw = twinOf(env);
+      ok(env.regs.some(function (r) { return r.t._name === 'window' && r.type === 'resize'; }), 'a window resize listener is in use');
+      tw.destroy();
+      eq(env.regs.map(function (r) { return r.t._name + ':' + r.type; }), [], 'listeners left after destroy');
+    });
+  });
+
+  test('site.css stacks .twin vertically below 768px and lays it out in two columns above', () => {
+    var css = readText('assets/css/site.css');
+    ok(/\.twin\s*\{[^}]*grid-template-columns:\s*repeat\(2/.test(css), 'two columns by default');
+    var m = /@media\s*\(max-width:\s*767px\)\s*\{(?:[^{}]|\{[^}]*\})*\.twin\s*\{[^}]*grid-template-columns:\s*1fr[;\s}]/.exec(css);
+    ok(m, 'a max-width: 767px rule gives .twin one column');
   });
 })();

@@ -8,7 +8,10 @@
    index a page passes in setOverlays/addOverlay are BASE bar indices (as TJR.annotate emits them); the
    engine maps them by candle time. reveal/step/play/view/coords and event payloads use indices of the
    series on screen (identical to base indices while tf is the base timeframe); click/hover payloads also
-   carry baseFrom/baseTo, the base bars inside the clicked bar. */
+   carry baseFrom/baseTo, the base bars inside the clicked bar.
+
+   TJR.chart.twin(elA, elB, opts) drives two charts as one: the same revealed bar, the same view and one
+   shared crosshair bar (twin.a / twin.b are the charts; use the twin's setData / reveal / play). */
 (function (global) {
   'use strict';
   var TJR = global.TJR = global.TJR || {};
@@ -37,7 +40,7 @@
       view: { from: 0, to: 0 }, viewSet: false,
       src: [], ov: [], lines: [], shown: {}, sweptSeen: {}, anims: {},
       range: null, w: 0, h: 0, dpr: 1, fs: 11, th: R.readTheme(el, opts.theme),
-      hover: null, drag: null, down: null, play: null,
+      hover: null, mirror: null, drag: null, down: null, play: null,
       raf: null, lastTs: null, visible: true, reduced: false, dead: false,
       handlers: { click: [], hover: [], drag: [] }
     };
@@ -134,6 +137,13 @@
     function swept(m) {
       return st.partial ? O.isSwept(srcOf.get(m) || m, st.partialEnd) : O.isSwept(m, st.rev);
     }
+    // Has the revealed bar reached field f of a mapped overlay (a fvg's stateAt / endAt)? Same partial-bar rule.
+    function reached(m, f) {
+      if (m[f] == null) return false;
+      if (!st.partial) return m[f] <= st.rev;
+      var src = srcOf.get(m);
+      return src ? src[f] <= st.partialEnd : m[f] <= st.rev;
+    }
 
     // ---------------------------------------------------------------- price range + layout
     function targetRange() {
@@ -205,7 +215,7 @@
         function (s) { return ctx.measureText(s).width; }, box.left, box.right) : [];
       R.grid(ctx, th, plabs, tlabs, box);
 
-      var ovs = { rev: st.rev, box: box, fs: fs, axes: axes, dragId: st.drag && st.drag.id, vis: visible, swept: swept, prog: function (id) {
+      var ovs = { rev: st.rev, box: box, fs: fs, axes: axes, dragId: st.drag && st.drag.id, vis: visible, swept: swept, reached: reached, prog: function (id) {
         var a = st.anims[id];
         if (!a) return { inP: 1, flashP: null };
         return { inP: a.inT0 == null ? 1 : clamp((t - a.inT0) / O.DRAW_IN, 0, 1),
@@ -227,7 +237,8 @@
       }
       if (st.rev >= 0) R.lastPrice(ctx, sc, th, get(st.rev), box, fs, axes);
       O.drawLines(ctx, sc, th, st.lines, ovs);
-      if (st.hover && crosshairOn && !st.drag) R.crosshair(ctx, sc, th, st.hover, get(st.hover.i), st.tf, box, fs, axes, readoutOn);
+      var hv = st.hover && !st.drag ? st.hover : st.mirror != null && st.rev >= 0 ? { i: Math.min(st.mirror, st.rev), y: NaN } : null;
+      if (hv && crosshairOn) R.crosshair(ctx, sc, th, hv, get(hv.i), st.tf, box, fs, axes, readoutOn);   // y NaN: the twin's bar only
     }
 
     // ---------------------------------------------------------------- reveal + animation bookkeeping
@@ -404,7 +415,7 @@
         st.baseTf = meta.tf || 5; st.tf = st.baseTf; st.tick = meta.tick || 0.25;
         st.src = []; st.ov = []; st.lines = []; st.shown = {}; st.sweptSeen = {}; st.anims = {};
         st.rev = cs0.length - 1; st.partial = null; st.range = null;
-        st.hover = null; st.drag = null; st.down = null; st.viewSet = false;
+        st.hover = null; st.mirror = null; st.drag = null; st.down = null; st.viewSet = false;
         st.th = R.readTheme(el, opts.theme);
         canvas.style.touchAction = 'pan-y';
         fitView();
@@ -428,7 +439,7 @@
           for (var i = s; i <= bRev; i++) { k.h = Math.max(k.h, st.base[i].h); k.l = Math.min(k.l, st.base[i].l); }
           st.partial = k; st.partialEnd = bRev;
         }
-        st.hover = null; st.range = null; st.anims = {}; st.viewSet = false;
+        st.hover = null; st.mirror = null; st.range = null; st.anims = {}; st.viewSet = false;
         fitView(); follow();
         refreshShown(false);
         invalidate();
@@ -523,6 +534,14 @@
         return function off() { var a = st.handlers[type], k = a.indexOf(fn); if (k >= 0) a.splice(k, 1); };
       },
 
+      // A crosshair bar driven from outside (the twin chart's other half): a vertical line at bar i, null clears it.
+      setCrosshair: function (i) {
+        if (st.dead) return api;
+        var m = i == null || !n() ? null : clamp(Math.round(i), 0, n() - 1);
+        if (m !== st.mirror) { st.mirror = m; invalidate(); }
+        return api;
+      },
+
       coords: function (bar, price) { var L = layout(); return { x: L.sc.x(bar), y: L.sc.y(price) }; },
       at: function (x, y) { return n() ? pick(layout(), x, y) : null; },
 
@@ -530,7 +549,7 @@
         var t = now();
         return {
           tf: st.tf, baseTf: st.baseTf, bars: n(), revealed: st.rev, playing: !!st.play, reduced: st.reduced,
-          view: { from: st.view.from, to: st.view.to }, width: st.w, height: st.h,
+          view: { from: st.view.from, to: st.view.to }, width: st.w, height: st.h, crosshair: st.mirror,
           overlays: st.ov.map(copy), lines: st.lines.map(copy),
           visible: st.ov.filter(function (o) { return visible(o); }).map(function (o) { return o.id; }),
           swept: st.ov.filter(function (o) { return o.type === 'level' && visible(o) && swept(o); })
@@ -571,5 +590,69 @@
     return api;
   }
 
+  // ------------------------------------------------------------------ twin chart
+
+  // Two charts, one clock. reveal / play / setData act on both; the view of b follows a's, and the bar under
+  // the pointer on either chart is marked on the other. a and b keep their own price scale (two instruments).
+  // The page lays them out: a container with class "twin" (site.css) is two columns from 768 px, stacked below.
+  function twin(elA, elB, opts) {
+    opts = opts || {};
+    var a = create(elA, opts), b = create(elB, opts), dead = false;
+    var offs = [], ro = null, onWin = null;
+
+    function syncView() {
+      if (dead) return;
+      var v = a.info().view, w = b.info().view;
+      if (v.from !== w.from || v.to !== w.to) b.view(v.from, v.to);
+    }
+    function follow(i) { if (!dead && b.info().revealed !== i) b.reveal(i); syncView(); }
+
+    offs.push(a.on('hover', function (e) { b.setCrosshair(e ? e.i : null); }));
+    offs.push(b.on('hover', function (e) { a.setCrosshair(e ? e.i : null); }));
+    if (global.ResizeObserver) {                          // a's own observer was created first: a has refitted when this runs
+      ro = new global.ResizeObserver(function () { syncView(); });
+      ro.observe(elA);
+    } else if (global.addEventListener) {
+      onWin = function () { a.resize(); syncView(); };
+      global.addEventListener('resize', onWin);
+    }
+
+    var api = {
+      a: a, b: b,
+      setData: function (builtA, builtB) {
+        if (dead) return api;
+        a.setData(builtA); b.setData(builtB);
+        syncView();
+        return api;
+      },
+      reveal: function (i) {
+        if (dead) return -1;
+        var r = a.reveal(i);
+        follow(r);
+        return r;
+      },
+      play: function (o) {
+        o = o || {};
+        if (dead) return Promise.resolve(false);
+        var user = typeof o.onBar === 'function' ? o.onBar : null, play = {};
+        for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) play[k] = o[k];
+        play.onBar = function (i) { follow(i); if (user) user(i); };
+        return a.play(play).then(function (done) { follow(a.info().revealed); return done; });
+      },
+      destroy: function () {
+        if (dead) return;
+        dead = true;
+        offs.forEach(function (off) { off(); });
+        offs = [];
+        if (ro) ro.disconnect();
+        if (onWin && global.removeEventListener) global.removeEventListener('resize', onWin);
+        ro = onWin = null;
+        a.destroy(); b.destroy();
+      }
+    };
+    return api;
+  }
+
   chart.create = create;
+  chart.twin = twin;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -25,6 +25,7 @@
   .demo-charts { display: grid; gap: var(--s-7); }
   .demo-out { padding: var(--s-2) var(--s-4) var(--s-3); font: 400 var(--t-label)/1.6 var(--font-mono); color: var(--muted);
               min-height: 44px; overflow-wrap: anywhere; background: var(--p-surface); }
+  .demo-twin { display: grid; gap: var(--s-4); }
   .demo-kit { display: grid; gap: var(--s-6); }
   .demo-kit .grid { align-items: start; }
   .demo-pills { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; margin-top: var(--s-5); }
@@ -36,9 +37,14 @@
   <div class="wrap demo">
     <header class="app__head">
       <h1>Chart engine — dev check</h1>
-      <p>S01, S06 (sessions), S10 (timeframe switch) · overlays from <code>TJR.annotate</code> · hover = crosshair, click = bar + price, drag the cyan line on S06.</p>
+      <p>S01, S06 (sessions), S10 (timeframe switch) · overlays from <code>TJR.annotate</code> · hover = crosshair, click = bar + price, drag the cyan line on S06. Then S01 with FVG / BOS / EQ / window overlays (<code>TJR.annotate.confluence</code>) and a twin chart (shared bar, view and crosshair; stacks below 768 px).</p>
     </header>
     <div id="charts" class="demo-charts"></div>
+    <section class="demo-twin" aria-labelledby="twin-h">
+      <h2 id="twin-h">Twin chart (S01 + S03, demo data)</h2>
+      <div id="twin" class="twin"></div>
+      <div id="twin-ctrls" class="chart-frame__ctrls"></div>
+    </section>
 
     <section class="demo-kit" aria-labelledby="kit-h">
       <h2 id="kit-h">ชิ้นส่วนของเว็บ: การ์ด <span class="nobr">เช็กลิสต์</span> และ chip เวลาในคลิป</h2>
@@ -78,11 +84,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="../assets/js/core/ns.js"></script>
+<script src="../assets/js/core/sources.js"></script>
 <script src="../assets/js/core/store.js"></script>
 <script src="../assets/js/scenario/rng.js"></script>
 <script src="../assets/js/scenario/swings.js"></script>
 <script src="../assets/js/scenario/gen.js"></script>
 <script src="../assets/js/scenario/sessions.js"></script>
+<script src="../assets/js/scenario/confluence.js"></script>
 <script src="../assets/js/scenario/library.js"></script>
 <script src="../assets/js/scenario/annotate.js"></script>
 <script src="../assets/js/scenario/grade.js"></script>
@@ -124,7 +132,7 @@
     bar.appendChild(el('span', { 'class': 'chart-frame__sym' }, built.meta.instrument));
     var tfTag = el('span', { 'class': 'chart-frame__tf' }, TF_NAME[built.meta.tf]);
     bar.appendChild(tfTag);
-    bar.appendChild(el('span', { 'class': 'chart-frame__title' }, id + ' · ' + def.title));
+    bar.appendChild(el('span', { 'class': 'chart-frame__title' }, id + ' · ' + (opts.title || def.title)));
     var meta = el('span', { 'class': 'chart-frame__meta' }, '');
     bar.appendChild(meta);
     var ohlc = el('div', { 'class': 'chart-frame__ohlc', 'aria-live': 'polite' });
@@ -137,9 +145,11 @@
     box.appendChild(bar); box.appendChild(ohlc); box.appendChild(frame); box.appendChild(ctrls); box.appendChild(out);
     host.appendChild(box);
 
+    var show = { fvg: true, bos: true, eq: true, windows: true };
+    function overlays() { return opts.conf ? TJR.annotate(built, {}).concat(TJR.annotate.confluence(built, { show: show })) : TJR.annotate(built, {}); }
     var ch = TJR.chart.create(frame, { label: id + ' chart' });
     ch.setData(built);
-    ch.setOverlays(TJR.annotate(built, {}));
+    ch.setOverlays(overlays());
     if (opts.line) ch.addLine(opts.line);
 
     function showCandle(k, t) {
@@ -184,6 +194,17 @@
       });
       ctrls.appendChild(seg);
     }
+    if (opts.conf) {
+      var tg = el('div', { 'class': 'ctrl-group', role: 'group', 'aria-label': 'Confluence overlays' });
+      [['fvg', 'FVG'], ['bos', 'BOS'], ['eq', 'EQ'], ['windows', 'Windows']].forEach(function (k) {
+        tg.appendChild(btn(k[1], function (b) {
+          show[k[0]] = !show[k[0]];
+          b.setAttribute('aria-pressed', String(show[k[0]]));
+          ch.setOverlays(overlays());
+        }, { 'aria-pressed': 'true' }));
+      });
+      ctrls.appendChild(tg);
+    }
     ctrls.appendChild(el('span', { 'class': 'score-pill' }, null)).innerHTML =
       '<span class="score-pill__label">levels</span><span class="score-pill__value">' + built.truth.levels.length + '</span>';
 
@@ -206,8 +227,45 @@
   window.demoCharts = {
     S01: panel('S01', {}),
     S06: panel('S06', { line: asia ? { id: 'my-asia-high', price: asia.high + 6, label: 'ลากเส้นนี้', draggable: true } : null }),
-    S10: panel('S10', { tfs: [5, 15, 60, 240] })
+    S10: panel('S10', { tfs: [5, 15, 60, 240] }),
+    S01conf: panel('S01', { conf: true, title: 'FVG / BOS / EQ / windows' })
   };
+
+  // twin: two chart frames in a .twin container, one clock
+  (function () {
+    var wrap = document.getElementById('twin'), hosts = [], builts = [];
+    [['S01', 3], ['S03', 3]].forEach(function (p) {
+      var def = TJR.scenarios.get(p[0]), built = TJR.scenarios.safeBuild(def, p[1], {});
+      var fig = el('figure', { 'class': 'chart-frame', 'aria-label': p[0] + ' twin chart' });
+      var bar = el('div', { 'class': 'chart-frame__bar' });
+      bar.appendChild(el('span', { 'class': 'chart-frame__sym' }, built.meta.instrument));
+      bar.appendChild(el('span', { 'class': 'chart-frame__title' }, p[0] + ' · ' + def.title));
+      var host = el('div', { 'class': 'chart-frame__canvas' });
+      fig.appendChild(bar); fig.appendChild(host); wrap.appendChild(fig);
+      hosts.push(host); builts.push(built);
+    });
+    var tw = TJR.chart.twin(hosts[0], hosts[1], { label: 'twin chart' });
+    tw.setData(builts[0], builts[1]);
+    tw.a.setOverlays(TJR.annotate(builts[0], {}).concat(TJR.annotate.confluence(builts[0], {})));
+    tw.b.setOverlays(TJR.annotate(builts[1], {}).concat(TJR.annotate.confluence(builts[1], {})));
+    var ctrls = document.getElementById('twin-ctrls'), last = Math.min(builts[0].candles.length, builts[1].candles.length) - 1;
+    function tbtn(label, fn) {
+      var b = el('button', { type: 'button', 'class': 'ctrl' }, label);
+      b.addEventListener('click', fn);
+      ctrls.appendChild(b);
+      return b;
+    }
+    var playing = false;
+    var pb = tbtn('Play', function () {
+      if (playing) { tw.a.pause(); playing = false; pb.textContent = 'Play'; return; }
+      var r = tw.a.info().revealed;
+      playing = true; pb.textContent = 'Pause';
+      tw.play({ from: r >= last ? Math.floor(last * 0.15) : r, to: last, barsPerSec: 14 }).then(function () { playing = false; pb.textContent = 'Play'; });
+    });
+    tbtn('Reveal 30', function () { playing = false; pb.textContent = 'Play'; tw.reveal(30); });
+    tbtn('End', function () { playing = false; pb.textContent = 'Play'; tw.reveal(last); });
+    window.demoTwin = tw;
+  })();
 })();
 </script>
 </body>

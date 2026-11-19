@@ -6,8 +6,19 @@
      marker {bar, price, shape:'up'|'down'|'dot'|'x'}
      zone   {from, to, low, high, kind:'entry', label?}
      trend  {a:{bar, price}, b:{bar, price}}
+     fvg    {from, to, low, high, dir:'bull'|'bear', state:'open'|'respected'|'disrespected', stateAt?, endAt?, label?}
+            three-candle gap, from its first candle (`from`) to endAt or the right edge, known at its third (`to`);
+            drawn open until the revealed bar reaches stateAt, then respected = solid edge, disrespected = dashed
+            edge + pill IFVG
+     bos    {price, from, at, dir:'up'|'down'}   ray from the swing (`from`) to the breaking bar (`at`) + pill BOS
+     eq     {from, to, low, high, dir:'up'|'down', endAt?}   equilibrium box from the range's start swing (`from`)
+            to the right edge, known once its end swing (`to`) is confirmed (annotate sets appearAt); gone from
+            endAt on, the bar where the next range replaces it. Lines at 0, 0.5, 1; the half away from the trend
+            tinted (up = discount, down = premium)
+     band   {from, to, label}   full-height time band, drawn up to the revealed bar
    Bars are indices into the series on screen. Nothing anchored after the revealed bar is drawn: a level
-   marked 'swept' draws as active (a ray to the right edge) until the revealed bar reaches its `to`. */
+   marked 'swept' draws as active (a ray to the right edge) until the revealed bar reaches its `to`; a fvg is
+   open until the revealed bar reaches its `stateAt` (st.reached judges that bar, see draw). */
 (function (global) {
   'use strict';
   var TJR = global.TJR = global.TJR || {};
@@ -23,7 +34,10 @@
     switch (o.type) {
       case 'label': case 'marker': return o.bar == null || o.bar <= rev;
       case 'trend': return !o.a || o.a.bar <= rev;
-      case 'box': case 'zone': case 'level': return o.from == null || o.from <= rev;
+      case 'box': case 'zone': case 'level': case 'band': return o.from == null || o.from <= rev;
+      case 'fvg': return (o.to != null ? o.to : o.from == null ? -1 : o.from) <= rev;       // its third candle has closed
+      case 'eq': return (o.to == null || o.to <= rev) && !(o.endAt != null && o.endAt <= rev);   // gone once the next range replaces it
+      case 'bos': return (o.from == null || o.from <= rev) && (o.at == null || o.at <= rev);
       default: return true;
     }
   }
@@ -62,7 +76,7 @@
     var at = indexer(base, series);
     return (list || []).map(function (o) {
       var c = copy(o);
-      ['from', 'to', 'bar', 'appearAt'].forEach(function (f) { if (c[f] != null) c[f] = at(c[f]); });
+      ['from', 'to', 'bar', 'at', 'appearAt', 'stateAt', 'endAt'].forEach(function (f) { if (c[f] != null) c[f] = at(c[f]); });
       if (c.a && c.a.bar != null) c.a.bar = at(c.a.bar);
       if (c.b && c.b.bar != null) c.b.bar = at(c.b.bar);
       return c;
@@ -311,12 +325,164 @@
     ctx.restore();
   }
 
+  // ------------------------------------------------------------------ confluence shapes
+
+  // Has the revealed bar reached o[f]? The chart passes a judge that knows a partly revealed roll-up.
+  function reached(st, o, f) {
+    if (o[f] == null) return false;
+    return st.reached ? st.reached(o, f) : o[f] <= st.rev;
+  }
+
+  // Box of a fvg / eq from its first bar to endAt (once revealed) or the right edge, grown by the draw-in.
+  function spanGeom(sc, o, st, pr) {
+    var box = st.box, x0 = Math.max(box.left, sc.x(o.from) - sc.slot / 2);
+    var x1 = reached(st, o, 'endAt') ? Math.min(box.right, sc.x(o.endAt) + sc.slot / 2) : box.right;
+    if (x1 <= x0) return null;
+    var p = ease(pr.inP);
+    return { x0: x0, x1: x0 + (x1 - x0) * p, p: p };
+  }
+
+  function fvgState(st, o) {
+    return o.stateAt != null && !reached(st, o, 'stateAt') ? 'open' : o.state || 'open';
+  }
+
+  function fvgGeom(sc, o, st, pr) {
+    var g = spanGeom(sc, o, st, pr);
+    if (g) { g.y0 = sc.y(o.high); g.y1 = sc.y(o.low); }
+    return g;
+  }
+
+  // The shaded gap: beneath the candles. open = faint edge, respected = strong solid edge,
+  // disrespected = dashed edge and a dimmer fill.
+  function drawFvg(ctx, sc, th, o, st, pr) {
+    var g = fvgGeom(sc, o, st, pr), state = fvgState(st, o), col = o.dir === 'bear' ? th.bear : th.bull;
+    if (!g) return;
+    ctx.save();
+    ctx.globalAlpha = (state === 'disrespected' ? 0.09 : 0.15) * g.p;
+    ctx.fillStyle = col;
+    ctx.fillRect(g.x0, g.y0, g.x1 - g.x0, g.y1 - g.y0);
+    ctx.globalAlpha = (state === 'respected' ? 0.95 : state === 'disrespected' ? 0.8 : 0.4) * g.p;
+    ctx.strokeStyle = col; ctx.lineWidth = state === 'respected' ? 1.5 : 1;
+    if (state === 'disrespected') ctx.setLineDash([4, 3]);
+    glow(ctx, col, pr.flashP);
+    ctx.strokeRect(Math.round(g.x0) + 0.5, Math.round(g.y0) + 0.5, Math.round(g.x1 - g.x0), Math.round(g.y1 - g.y0));
+    ctx.restore();
+  }
+
+  function drawFvgLabel(ctx, sc, th, o, st, pr, place) {
+    var g = fvgGeom(sc, o, st, pr), text = fvgState(st, o) === 'disrespected' ? 'IFVG' : o.label;
+    if (!g || !text || g.x1 - g.x0 < 24) return;
+    ctx.save();
+    ctx.globalAlpha = g.p;
+    pill(ctx, th, text, g.x0 + 2, g.y0 + 2 + st.fs + 6, 'left', o.dir === 'bear' ? th.bear : th.bull, st.fs, { place: place });
+    ctx.restore();
+  }
+
+  // Break of structure: the ray from the swing to the breaking bar, its pill at the break (above the ray
+  // for a break up, below for a break down: the candles before the break sit on the other side).
+  function drawBos(ctx, sc, th, o, st, pr, place) {
+    var box = st.box, col = o.dir === 'down' ? th.bear : th.bull;
+    var x0 = Math.max(box.left, sc.x(o.from)), x1 = Math.min(box.right, sc.x(o.at));
+    var y = Math.round(sc.y(o.price)) + 0.5;
+    if (x1 < x0 || y < box.top - 2 || y > box.bottom + 2) return;
+    var p = ease(pr.inP), xe = x0 + (x1 - x0) * p;
+    ctx.save();
+    ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.9;
+    glow(ctx, col, pr.flashP);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(xe, y); ctx.stroke();
+    ctx.restore();
+    if (p > 0.6) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, (p - 0.6) / 0.4);
+      var h = st.fs + 6;
+      pill(ctx, th, 'BOS', xe, o.dir === 'down' ? y + 3 + h : y - 3, 'right', col, st.fs, { mono: true, place: place });
+      ctx.restore();
+    }
+  }
+
+  function eqGeom(sc, o, st, pr) {
+    var g = spanGeom(sc, o, st, pr);
+    if (!g) return null;
+    var mid = o.eq != null ? o.eq : (o.low + o.high) / 2;
+    g.yLow = sc.y(o.low); g.yHigh = sc.y(o.high); g.yMid = sc.y(mid);
+    return g;
+  }
+
+  // Equilibrium box beneath the candles: the half away from the trend tinted, lines at 0, 0.5 and 1.
+  function drawEq(ctx, sc, th, o, st, pr) {
+    var g = eqGeom(sc, o, st, pr);
+    if (!g) return;
+    var up = o.dir !== 'down', col = up ? th.bull : th.bear;
+    ctx.save();
+    ctx.globalAlpha = 0.11 * g.p;
+    ctx.fillStyle = col;                                   // up: lower half (discount), down: upper half (premium)
+    if (up) ctx.fillRect(g.x0, g.yMid, g.x1 - g.x0, g.yLow - g.yMid);
+    else ctx.fillRect(g.x0, g.yHigh, g.x1 - g.x0, g.yMid - g.yHigh);
+    ctx.globalAlpha = 0.6 * g.p;
+    ctx.strokeStyle = th.htf; ctx.lineWidth = 1;
+    glow(ctx, th.htf, pr.flashP);
+    [g.yHigh, g.yLow].forEach(function (y) {
+      ctx.beginPath(); ctx.moveTo(g.x0, Math.round(y) + 0.5); ctx.lineTo(g.x1, Math.round(y) + 0.5); ctx.stroke();
+    });
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(g.x0, Math.round(g.yMid) + 0.5); ctx.lineTo(g.x1, Math.round(g.yMid) + 0.5); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Right-side 0 / 0.5 / 1 labels (0 at the range's start swing, 1 at its end swing) and the half's name.
+  function drawEqLabels(ctx, sc, th, o, st, pr, place) {
+    var g = eqGeom(sc, o, st, pr);
+    if (!g || g.p < 0.6 || g.x1 - g.x0 < 40) return;
+    var up = o.dir !== 'down', h = st.fs + 6, x = g.x1 - 3, col = th.htf;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, (g.p - 0.6) / 0.4);
+    pill(ctx, th, up ? '1' : '0', x, g.yHigh - 2, 'right', col, st.fs, { mono: true, place: place });
+    pill(ctx, th, '0.5', x, g.yMid - 2, 'right', col, st.fs, { mono: true, place: place });
+    pill(ctx, th, up ? '0' : '1', x, g.yLow - 2, 'right', col, st.fs, { mono: true, place: place });
+    pill(ctx, th, up ? 'discount' : 'premium', g.x0 + 2, up ? g.yLow - 2 : g.yHigh + 2 + h, 'left', up ? th.bull : th.bear, st.fs, { place: place });
+    ctx.restore();
+  }
+
+  function bandGeom(sc, o, st, pr) {
+    var box = st.box, to = Math.min(o.to == null ? st.rev : o.to, st.rev);
+    var x0 = Math.max(box.left, sc.x(o.from) - sc.slot / 2), x1 = Math.min(box.right, sc.x(to) + sc.slot / 2);
+    if (x1 <= x0) return null;
+    var p = ease(pr.inP);
+    return { x0: x0, x1: x0 + (x1 - x0) * p, p: p };
+  }
+
+  // Full-height time band beneath the candles.
+  function drawBand(ctx, sc, th, o, st, pr) {
+    var g = bandGeom(sc, o, st, pr), box = st.box;
+    if (!g) return;
+    ctx.save();
+    ctx.globalAlpha = 0.07 * g.p;
+    ctx.fillStyle = th.session;
+    ctx.fillRect(g.x0, box.top, g.x1 - g.x0, box.bottom - box.top);
+    ctx.globalAlpha = 0.4 * g.p;
+    ctx.strokeStyle = th.session; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(g.x0) + 0.5, box.top); ctx.lineTo(Math.round(g.x0) + 0.5, box.bottom);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBandLabel(ctx, sc, th, o, st, pr, place) {
+    var g = bandGeom(sc, o, st, pr);
+    if (!g || !o.label || g.p < 0.6) return;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, (g.p - 0.6) / 0.4);
+    pill(ctx, th, o.label, g.x0 + 2, st.box.top + 2 + st.fs + 6, 'left', th.session, st.fs, { place: place });
+    ctx.restore();
+  }
+
   // ------------------------------------------------------------------ public draw
 
-  var ORDER = { box: 0, zone: 1, trend: 2, level: 3, marker: 4, label: 5 };
+  var ORDER = { band: 0, box: 1, eq: 2, fvg: 3, zone: 4, trend: 5, level: 6, bos: 7, marker: 8, label: 9 };
 
-  // st: {rev, box, fs, prog(id) -> {inP 0..1, flashP 0..1|null}, vis?(o), swept?(o)}. vis/swept replace
-  // isVisible/isSwept against st.rev (the chart passes judges that know a partly revealed roll-up).
+  // st: {rev, box, fs, prog(id) -> {inP 0..1, flashP 0..1|null}, vis?(o), swept?(o), reached?(o, field)}.
+  // vis/swept replace isVisible/isSwept against st.rev, reached(o, f) replaces o[f] <= st.rev (the chart
+  // passes judges that know a partly revealed roll-up).
   // layer 'under' = box and zone shading (drawn beneath the candles), 'over' = their labels and everything
   // else; omitted = both.
   function draw(ctx, sc, th, list, st, layer) {
@@ -330,6 +496,9 @@
       vis.forEach(function (o) {
         if (o.type === 'box') drawRect(ctx, sc, th, o, st, st.prog(o.id), 0.07, 0.5, [3, 3]);
         else if (o.type === 'zone') drawRect(ctx, sc, th, o, st, st.prog(o.id), 0.16, 0.75, null);
+        else if (o.type === 'band') drawBand(ctx, sc, th, o, st, st.prog(o.id));
+        else if (o.type === 'eq') drawEq(ctx, sc, th, o, st, st.prog(o.id));
+        else if (o.type === 'fvg') drawFvg(ctx, sc, th, o, st, st.prog(o.id));
       });
     }
     if (layer !== 'under') {
@@ -342,6 +511,10 @@
           case 'level': drawLevel(ctx, sc, th, o, st, pr, place); break;
           case 'trend': drawTrend(ctx, sc, th, o, st, pr); break;
           case 'marker': drawMarker(ctx, sc, th, o, st, pr); break;
+          case 'fvg': drawFvgLabel(ctx, sc, th, o, st, pr, place); break;
+          case 'eq': drawEqLabels(ctx, sc, th, o, st, pr, place); break;
+          case 'band': drawBandLabel(ctx, sc, th, o, st, pr, place); break;
+          case 'bos': drawBos(ctx, sc, th, o, st, pr, place); break;
           case 'label': drawLabel(ctx, sc, th, o, st, pr); break;
         }
       });

@@ -110,6 +110,16 @@
   .chart-frame__meta { margin-left: 0; }
 }
 
+/* ---------------------------------------------------------------- twin charts (TJR.chart.twin)
+   Two chart frames side by side from 768px, stacked below it (an SMT pair must stay readable at 390 / 320). */
+.twin { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); align-items: start; }
+.twin > * { min-width: 0; }
+.twin > .chart-frame { --chart-h: clamp(240px, 26vw, 400px); }
+@media (max-width: 767px) {
+  .twin { grid-template-columns: 1fr; }
+  .twin > .chart-frame { --chart-h: clamp(240px, 60vw, 360px); }
+}
+
 /* ---------------------------------------------------------------- controls */
 .ctrl {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
