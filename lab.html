@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand" data-tone="dark" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>แบบฝึก liquidity: Replay, Spot, Sessions, Quiz | Liquidity</title>
+<meta name="description" content="แบบฝึก 4 โหมดบนกราฟสุ่มใหม่ทุกข้อ เล่นทีละแท่งแล้วเลือก Long Short รอ, คลิกหา swing, ลากเส้น session, ตอบชนิด liquidity ตรวจคำตอบตามคลิป TJR">
+<meta property="og:type" content="website">
+<meta property="og:title" content="แบบฝึก liquidity บนกราฟสุ่ม">
+<meta property="og:description" content="ตัดสินใจทีละแท่ง ตรวจคำตอบตามคลิป คะแนนและ streak แยกตามโหมด">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1c1c1c">
+<!-- <link rel="canonical" href="https://[the site's domain]/"> : no domain yet -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/pages/lab.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+</head>
+<body>
+<!--
+  software · TJR Liquidity exercise lab (Task 13), an app screen (spec 7.5, 10)
+  deal: the home page's (Task 8/9): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
+        close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
+  page: four modes (Replay, Spot, Sessions, Quiz) as tabs over ONE engine chart on a fresh random scenario each round;
+        a side panel carries the prompt, the choices and the feedback; per-mode score and streak are saved locally.
+  moment: none dealt on this page: its motion is the chart itself and the feedback arriving.
+-->
+<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="lab.html" aria-current="page">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div></div></header></noscript>
+<main class="app lab" id="top">
+  <div class="wrap">
+    <header class="lab-head">
+      <h1>แบบฝึกอ่านกราฟ liquidity</h1>
+      <p class="t-lead">กราฟสุ่มใหม่ทุกข้อ ตัดสินใจเอง แล้วตรวจคำตอบตามที่คลิปสอน คะแนนวัดว่าตัดสินใจถูกตามขั้นตอน ไม่ได้วัดกำไร</p>
+    </header>
+
+    <div class="lab-bar">
+      <div class="lab-tabs" role="tablist" aria-label="โหมดแบบฝึก" data-k="tabs">
+        <button class="lab-tab" type="button" role="tab" id="tab-replay" data-mode="replay" aria-selected="true" aria-controls="lab-panel" tabindex="0">Replay</button>
+        <button class="lab-tab" type="button" role="tab" id="tab-spot" data-mode="spot" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Spot</button>
+        <button class="lab-tab" type="button" role="tab" id="tab-sessions" data-mode="sessions" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Sessions</button>
+        <button class="lab-tab" type="button" role="tab" id="tab-quiz" data-mode="quiz" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Quiz</button>
+      </div>
+      <div class="lab-score" data-k="score" role="status" aria-live="polite" aria-label="คะแนนของโหมดนี้"></div>
+      <button class="ctrl" type="button" data-act="reset" aria-label="รีเซ็ตคะแนนของโหมดนี้">รีเซ็ตคะแนน</button>
+    </div>
+
+    <section id="lab-panel" class="lab-panel" role="tabpanel" aria-labelledby="tab-replay" tabindex="-1">
+      <p class="lab-intro" data-k="intro"></p>
+      <div class="lab-grid">
+        <figure class="chart-frame lf" data-ui="chart" aria-label="กราฟจำลองของแบบฝึก">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="sim-tag">จำลอง</span>
+            <span class="chart-frame__meta" data-k="meta"></span>
+          </div>
+          <div class="chart-frame__canvas" data-k="host"></div>
+          <div class="chart-frame__ctrls lf__ctrls" data-k="ctrls"></div>
+        </figure>
+        <aside class="lab-side" aria-label="โจทย์และผลตรวจ">
+          <div class="lab-card" data-k="prompt"></div>
+          <div class="lab-choices" data-k="choices"></div>
+          <div class="lab-card lab-fb" data-k="fb" role="status" aria-live="polite" hidden></div>
+          <div class="lab-card lab-out" data-k="out" hidden></div>
+          <button class="ctrl lab-next" type="button" data-act="next" hidden>ข้อใหม่</button>
+        </aside>
+      </div>
+      <p class="lab-nojs" data-k="nojs">หน้านี้ต้องใช้ JavaScript เพื่อสร้างกราฟ เปิดสคริปต์แล้วโหลดหน้าใหม่</p>
+    </section>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/js/core/ns.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/scenario/rng.js"></script>
+<script src="assets/js/scenario/swings.js"></script>
+<script src="assets/js/scenario/gen.js"></script>
+<script src="assets/js/scenario/sessions.js"></script>
+<script src="assets/js/scenario/library.js"></script>
+<script src="assets/js/scenario/annotate.js"></script>
+<script src="assets/js/scenario/grade.js"></script>
+<script src="assets/js/chart/scale.js"></script>
+<script src="assets/js/chart/render.js"></script>
+<script src="assets/js/chart/overlays.js"></script>
+<script src="assets/js/chart/chart.js"></script>
+<script src="assets/js/core/layout.js"></script>
+<script src="assets/js/core/motion.js"></script>
+<script src="assets/js/pages/lab.js"></script>
+</body>
+</html>
