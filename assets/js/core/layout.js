@@ -6,16 +6,17 @@
    because the kit's system.js is a module and Chrome runs no module script from file://.
 
    TJR.layout.mount({ page, base, close })
-     page   'home' | 'learn' | 'scenarios' | 'playbook' | 'lab'  (that word gets aria-current="page";
-            anything else marks none)
+     page   a PAGES id: 'home' | 'learn' | 'confluences' | 'strategy' | 'scenarios' | 'playbook' | 'risk' | 'lab'
+            (that word gets aria-current="page"; anything else marks none)
      base   prefix for the site's own links ('' at the site root, '../' from dev/); by default the folder
             layout.js was loaded from, minus assets/js/core/
      close  optional { title, line, label, href }: the dealt close-word row (the h2, one line, the main
             button, then the name across the .wrap); the footer is then footer.closing, one screen tall.
             Without it the footer is the plain dark footer at its own height.
      -> { nav, footer } (the injected elements). Calling it again replaces both and their listeners.
-   Pure builders (no DOM): navHTML(opts), footerHTML(opts), chip(sec), gap(); constants NAME, PAGES,
-   CLIP, GAP_TEXT, SOURCE_TEXT.
+   Pure builders (no DOM): navHTML(opts), footerHTML(opts), chip(sec, clip?), olderNote(html, clip, sec),
+   webDef(html, url), gap(); constants NAME, PAGES, CLIP, PLAYLIST, GAP_TEXT, SOURCE_TEXT, OLDER_LABEL, WEBDEF_LABEL.
+   chip(sec) is the main-clip chip; chip(sec, n) is a playlist chip "#n MM:SS" (TJR.sources, core/sources.js).
    A page puts <main id="top"> (the skip link's target) and a <noscript> copy of navHTML's bar. */
 (function (global) {
   'use strict';
@@ -29,20 +30,27 @@
   var NAME = 'Liquidity';
   var CLIP = 'https://youtu.be/Vulini8xbB0';
   var CLIP_TITLE = 'TJR · The ONLY Liquidity Guide You’ll Ever Need';
-  var SOURCE_TEXT = 'เนื้อหาจากคลิปนี้เท่านั้น';
+  var PLAYLIST = 'https://www.youtube.com/playlist?list=PLKE_22Jx497s5Q6ZX2pfDcDwCm_IyxR7e';
+  var PLAYLIST_TITLE = 'เพลย์ลิสต์ Path to Profitability';
+  var SOURCE_TEXT = 'เนื้อหาจากคลิปของ TJR เท่านั้น';
   var GAP_TEXT = 'คลิปไม่ได้ระบุ';
+  var OLDER_LABEL = 'คลิปเก่า (ม.ค. 2026) พูดว่า…';
+  var WEBDEF_LABEL = 'นิยามทั่วไป ไม่ใช่จากคลิป';
   var CTA = { label: 'เริ่มบทเรียน', page: 'learn' };
   var PAGES = [
     { id: 'home', label: 'หน้าแรก', href: 'index.html' },
     { id: 'learn', label: 'บทเรียน', href: 'learn.html' },
+    { id: 'confluences', label: 'Confluences', href: 'confluences.html' },
+    { id: 'strategy', label: 'กลยุทธ์', href: 'strategy.html' },
     { id: 'scenarios', label: 'สถานการณ์', href: 'scenarios.html' },
     { id: 'playbook', label: 'Playbook', href: 'playbook.html' },
+    { id: 'risk', label: 'ความเสี่ยง', href: 'risk.html' },
     { id: 'lab', label: 'แบบฝึก', href: 'lab.html' }
   ];
   // footer columns, ordered as the nav
   var COLUMNS = [
-    { title: 'เรียน', ids: ['home', 'learn', 'scenarios'] },
-    { title: 'ฝึก', ids: ['playbook', 'lab'] }
+    { title: 'เรียน', ids: ['home', 'learn', 'confluences', 'strategy'] },
+    { title: 'ฝึก', ids: ['scenarios', 'playbook', 'risk', 'lab'] }
   ];
 
   var ICON_BARS = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -110,6 +118,7 @@
       '<p class="footer__lede">เรียนระบบ liquidity จากคลิปเดียว บนกราฟที่ยุ่งเหมือนตลาดจริง</p></div>';
     var source = '<div class="span-4 footer__col footer__source"><h3>ที่มา</h3>' +
       '<p class="footer__source-line"><a href="' + CLIP + '" target="_blank" rel="noopener">' + esc(CLIP_TITLE) + '</a></p>' +
+      '<p class="footer__source-line"><a href="' + PLAYLIST + '" target="_blank" rel="noopener">' + esc(PLAYLIST_TITLE) + '</a></p>' +
       '<p class="footer__source-note">' + esc(SOURCE_TEXT) + '</p></div>';
     var links = '<div class="closing__links">' +
       '<div class="grid">' + brand + cols + source + '</div>' +
@@ -121,10 +130,31 @@
     '</footer>';
   }
 
-  // the timestamp chip (site.css .ts-chip): "▶ MM:SS" (the triangle is drawn by CSS), opens the clip there
-  function chip(sec) {
-    var c = TJR.util.tsChip(sec);
-    return '<a class="ts-chip" href="' + esc(c.href) + '" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ ' + c.label + '">' + c.label + '</a>';
+  // the timestamp chip (site.css .ts-chip): "▶ MM:SS" (the triangle is drawn by CSS), opens the main clip there.
+  // chip(sec, n) with a playlist clip n: "▶ #n MM:SS", class ts-chip--pl, opens that video there.
+  function chip(sec, clip) {
+    var c = TJR.util.tsChip(sec, clip);
+    if (!c.clip) {
+      return '<a class="ts-chip" href="' + esc(c.href) + '" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ ' + c.label + '">' + c.label + '</a>';
+    }
+    var mmss = c.label.replace(/^#\d+ /, '');
+    return '<a class="ts-chip ts-chip--pl" href="' + esc(c.href) + '" target="_blank" rel="noopener" aria-label="' +
+      esc('ดูในคลิป #' + c.clip + ' ' + TJR.sources.byClip(c.clip).title + ' ที่ ' + mmss) + '">' + c.label + '</a>';
+  }
+  // the older-video box (site.css .older-note): what the January 2026 playlist said where the main clip differs.
+  // html is trusted markup written in the page; the chip points at the playlist clip it came from.
+  function olderNote(html, clip, sec) {
+    return '<aside class="older-note"><p class="older-note__label">' + OLDER_LABEL + '</p>' +
+      '<div class="older-note__body">' + html + '</div>' +
+      '<p class="older-note__src chips">' + chip(sec, clip) + '</p></aside>';
+  }
+  // the general-definition box (site.css .web-def): a definition from the web, not from a clip, with its source
+  function webDef(html, url) {
+    var u = String(url == null ? '' : url);
+    var link = /^https?:\/\//i.test(u)
+      ? '<p class="web-def__src"><a href="' + esc(u) + '" target="_blank" rel="noopener">ที่มา: ' + esc(u) + '</a></p>' : '';
+    return '<aside class="web-def"><p class="web-def__label">' + WEBDEF_LABEL + '</p>' +
+      '<div class="web-def__body">' + html + '</div>' + link + '</aside>';
   }
   // the gap badge (site.css .badge-gap): what the clip does not say, never filled in
   function gap() { return '<span class="badge-gap">' + GAP_TEXT + '</span>'; }
@@ -211,9 +241,14 @@
     navHTML: navHTML,
     footerHTML: footerHTML,
     chip: chip,
+    olderNote: olderNote,
+    webDef: webDef,
     gap: gap,
     NAME: NAME,
     CLIP: CLIP,
+    PLAYLIST: PLAYLIST,
+    OLDER_LABEL: OLDER_LABEL,
+    WEBDEF_LABEL: WEBDEF_LABEL,
     GAP_TEXT: GAP_TEXT,
     SOURCE_TEXT: SOURCE_TEXT,
     PAGES: PAGES.map(function (p) { return { id: p.id, label: p.label, href: p.href }; })

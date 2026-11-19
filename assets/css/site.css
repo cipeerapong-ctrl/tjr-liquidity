@@ -16,6 +16,10 @@
     .ctrl-group          a segmented set (role="group"), e.g. the timeframes
   .badge-gap           the badge "คลิปไม่ได้ระบุ" (TJR.layout.gap())
   .ts-chip             "▶ MM:SS", a link into the clip (TJR.layout.chip(sec)); .chips is a row of them
+    .ts-chip--pl         a playlist chip "▶ #n MM:SS" (TJR.layout.chip(sec, n)): muted outline, same height
+  .older-note          the older-video box (TJR.layout.olderNote): what the Jan 2026 playlist said, muted
+  .web-def             the general-definition box (TJR.layout.webDef): not from a clip, with its source link
+  .level-tag           "L1" / "L2" tag (data-level="1|2"): which level of the system a lesson belongs to
   .fact-card           one clip fact: __id (F6.5), __text, __src (.chips)
   .check-row           a checklist row: <label class="check-row"><input type="checkbox" class="m-check">
                        <span class="check-row__text">..</span><span class="check-row__meta chips">..</span></label>
@@ -184,6 +188,41 @@ html:not([data-motion="off"]) .ctrl {
 }
 html:not([data-motion="off"]) .ts-chip { transition: background-color var(--m-out, 120ms) var(--ease); }
 .ts-chip:is(:hover, :focus-visible) { background: color-mix(in oklab, var(--action) 30%, transparent); transition-duration: var(--m-in, 150ms); }
+/* a playlist chip: outline instead of the main clip's tinted fill, so the two sources read apart at a glance;
+   same box (26px, 44px on touch via .chips) and the same triangle */
+.ts-chip--pl {
+  background: transparent; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ink) 34%, transparent);
+  color: var(--ink);
+}
+.ts-chip--pl::before { background: color-mix(in oklab, var(--ink) 62%, transparent); }
+.ts-chip--pl:is(:hover, :focus-visible) { background: color-mix(in oklab, var(--ink) 10%, transparent); }
+
+/* ---------------------------------------------------------------- older-video note and web definition */
+.older-note, .web-def {
+  display: block; margin-block: var(--s-4); padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-sm); font-size: var(--t-label); line-height: 1.6; color: var(--muted);
+}
+.older-note { border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent); background: color-mix(in oklab, var(--ink) 4%, transparent); }
+.web-def { border: 1px dashed color-mix(in oklab, var(--ink) 34%, transparent); }
+.older-note__label, .web-def__label {
+  margin: 0 0 var(--s-2); font: 500 var(--t-label)/1.4 var(--font-mono); letter-spacing: 0; color: var(--ink);
+}
+.older-note__body > :first-child, .web-def__body > :first-child { margin-top: 0; }
+.older-note__body > :last-child, .web-def__body > :last-child { margin-bottom: 0; }
+.older-note__src { margin: var(--s-2) 0 0; }
+.web-def__src { margin: var(--s-2) 0 0; word-break: break-all; }
+.web-def__src a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------------------------------------------------------------- level tag (L1 = the liquidity clip, L2 = the playlist) */
+.level-tag {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 var(--s-2); vertical-align: middle;
+  border-radius: var(--r-sm); font: 500 var(--t-label)/1 var(--font-mono); letter-spacing: 0; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c-liq, var(--ink)) 60%, transparent); color: var(--c-liq, var(--ink));
+}
+.level-tag[data-level="2"] {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c-session, var(--ink)) 60%, transparent); color: var(--c-session, var(--ink));
+}
+
 .chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
 /* a chip outside running text is a 44px target on a phone */
 @media (max-width: 639px) { .chips > .ts-chip { height: 44px; padding-inline: var(--s-3) var(--s-3); } }

@@ -23,13 +23,14 @@
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  // Timestamp chip data for a clip second mark: label MM:SS + deep link.
-  function tsChip(sec) {
+  // Timestamp chip data for a second mark in a video. clip 0/undefined = the main clip: label MM:SS.
+  // clip n (1..16, a playlist video, see TJR.sources) gives label "#n MM:SS" and that video's own link.
+  function tsChip(sec, clip) {
     var s = Math.max(0, Math.floor(sec));
-    return {
-      label: pad2(Math.floor(s / 60)) + ':' + pad2(s % 60),
-      href: VIDEO + '?t=' + s
-    };
+    var mmss = pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
+    var n = clip == null ? 0 : clip;
+    if (!n) return { label: mmss, href: VIDEO + '?t=' + s, clip: 0 };
+    return { label: '#' + n + ' ' + mmss, href: TJR.sources.href(n, s), clip: n };
   }
 
   TJR.util = { clamp: clamp, lerp: lerp, roundTick: roundTick, fmtPrice: fmtPrice, tsChip: tsChip };

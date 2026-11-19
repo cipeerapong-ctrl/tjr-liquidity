@@ -11,7 +11,7 @@ Static, multi-page Thai website that teaches only TJR's own system: his liquidit
 ## Run / test
 - Run: open `index.html` in a browser.
 - Test: `node tests/run.mjs` (Node 24; loads the site's scripts into a `vm` context, then `tests/*.test.js`).
-- Test globals: `test(name, fn)`, `eq`, `ok`, `near`, `readText(relPathFromRepoRoot)`.
+- Test globals: `test(name, fn)`, `eq`, `ok`, `near`, `readText(relPathFromRepoRoot)`, `listRootHtml()` (root `*.html` file names).
 
 ## Content rule
 Content comes ONLY from `docs/source/clip-facts.md` (ids `F*`, main clip) and `docs/source/playlist/<videoId>.md` (ids `P<clip#>.<n>`). The main clip wins on conflict; the playlist's older version may be shown in a muted box labelled as the older video. Every teaching claim carries a timestamp chip linking `https://youtu.be/<videoId>?t=<seconds>` of the video the fact came from (main: `▶ MM:SS`; playlist: `▶ #<clip> MM:SS`). Anything no clip says is shown as the badge `คลิปไม่ได้ระบุ`, never filled in. Paraphrase; no verbatim transcript sentences; no TJR screenshots or footage. Excluded: prop-firm promo codes, firm rule tables, prices and income figures (playlist #4), clip #16 goal/life claims; on-screen tool readouts are labelled as readouts, never rules. Web definitions only in a box labelled `นิยามทั่วไป ไม่ใช่จากคลิป` with the source URL.

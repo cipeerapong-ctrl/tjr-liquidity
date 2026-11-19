@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SCRIPTS = [
-  'core/ns', 'core/store', 'scenario/rng', 'scenario/swings', 'scenario/gen',
+  'core/ns', 'core/sources', 'core/store', 'scenario/rng', 'scenario/swings', 'scenario/gen',
   'scenario/sessions', 'scenario/library', 'scenario/annotate', 'scenario/grade',
   'chart/scale', 'chart/render', 'chart/overlays', 'chart/chart', 'core/layout', 'core/motion',
 ].map((p) => `assets/js/${p}.js`);
@@ -18,6 +18,7 @@ const queue = [];
 const ctx = vm.createContext({ console });
 ctx.window = ctx;
 ctx.readText = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+ctx.listRootHtml = () => fs.readdirSync(ROOT).filter((f) => f.endsWith('.html')).sort();
 ctx.test = (name, fn) => queue.push({ name, fn });
 ctx.eq = (a, b, msg) => {
   const sa = JSON.stringify(a), sb = JSON.stringify(b);

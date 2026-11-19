@@ -11,10 +11,10 @@
     return function () { if (had) window[name] = old; else delete window[name]; };
   }
 
-  test('layout: the nav lists the five pages in order, with the brief\'s labels', () => {
-    eq(TJR.layout.PAGES.map((p) => p.label), ['หน้าแรก', 'บทเรียน', 'สถานการณ์', 'Playbook', 'แบบฝึก']);
-    eq(TJR.layout.PAGES.map((p) => p.id), ['home', 'learn', 'scenarios', 'playbook', 'lab']);
-    eq(TJR.layout.PAGES.map((p) => p.href), ['index.html', 'learn.html', 'scenarios.html', 'playbook.html', 'lab.html']);
+  test('layout: the nav lists the pages in order, with the plan\'s labels (the full list is also pinned in sources.test.js)', () => {
+    eq(TJR.layout.PAGES.map((p) => p.label), ['หน้าแรก', 'บทเรียน', 'Confluences', 'กลยุทธ์', 'สถานการณ์', 'Playbook', 'ความเสี่ยง', 'แบบฝึก']);
+    eq(TJR.layout.PAGES.map((p) => p.id), ['home', 'learn', 'confluences', 'strategy', 'scenarios', 'playbook', 'risk', 'lab']);
+    eq(TJR.layout.PAGES.map((p) => p.href), ['index.html', 'learn.html', 'confluences.html', 'strategy.html', 'scenarios.html', 'playbook.html', 'risk.html', 'lab.html']);
     const html = TJR.layout.navHTML({ page: 'home', base: '' });
     let at = -1;
     TJR.layout.PAGES.forEach((p) => {
@@ -49,8 +49,8 @@
   test('layout: the footer carries the clip link and the source line', () => {
     const html = TJR.layout.footerHTML({ base: '' });
     ok(html.indexOf('href="https://youtu.be/Vulini8xbB0"') >= 0, 'clip link');
-    ok(html.indexOf('เนื้อหาจากคลิปนี้เท่านั้น') >= 0, 'source line');
-    eq(TJR.layout.SOURCE_TEXT, 'เนื้อหาจากคลิปนี้เท่านั้น');
+    ok(html.indexOf('เนื้อหาจากคลิปของ TJR เท่านั้น') >= 0, 'source line');
+    eq(TJR.layout.SOURCE_TEXT, 'เนื้อหาจากคลิปของ TJR เท่านั้น');
     ok(html.indexOf('<footer class="footer footer--dark ground-inverse"') === 0, 'footer-dark at its own height');
     ok(html.indexOf('footer closing') < 0 && html.indexOf('close--word') < 0, 'no close: not the one-screen footer.closing');
     ok(html.indexOf('class="footer__mark"') >= 0, 'footer-dark sets the name large');
