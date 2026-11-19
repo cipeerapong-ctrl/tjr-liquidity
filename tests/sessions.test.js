@@ -180,4 +180,56 @@
     eq(S.WINDOWS.spread, { from: 17 * 60, to: 18 * 60 });
     eq(Object.keys(S.WINDOWS).sort(), ['asia', 'london', 'ny', 'ny-pre', 'spread']);
   });
+
+  // NY windows (P5.12-P5.19): open 09:30, manipulation 09:30-09:50, entry 09:50-10:10, his cut-off 10:30, PM 13:00 (ET)
+  test('sessions: nyWindows on a winter day (2026-01-09, EST) opens 14:30Z', () => {
+    const w = S.nyWindows(utc(2026, 1, 9, 12, 0));
+    eq(w, {
+      open: utc(2026, 1, 9, 14, 30),
+      manipulation: { from: utc(2026, 1, 9, 14, 30), to: utc(2026, 1, 9, 14, 50) },
+      entry: { from: utc(2026, 1, 9, 14, 50), to: utc(2026, 1, 9, 15, 10) },
+      cutoff: utc(2026, 1, 9, 15, 30),
+      pm: utc(2026, 1, 9, 18, 0),
+    });
+  });
+
+  test('sessions: nyWindows on a summer day (2026-07-09, EDT) opens 13:30Z', () => {
+    const w = S.nyWindows(utc(2026, 7, 9, 12, 0));
+    eq(w, {
+      open: utc(2026, 7, 9, 13, 30),
+      manipulation: { from: utc(2026, 7, 9, 13, 30), to: utc(2026, 7, 9, 13, 50) },
+      entry: { from: utc(2026, 7, 9, 13, 50), to: utc(2026, 7, 9, 14, 10) },
+      cutoff: utc(2026, 7, 9, 14, 30),
+      pm: utc(2026, 7, 9, 17, 0),
+    });
+  });
+
+  test('sessions: nyWindows reads the ET day, any moment of it gives the same windows', () => {
+    const summer = S.nyWindows(utc(2026, 7, 9, 13, 30));
+    // 04:00Z on the 10th is 00:00 ET on the 10th; 03:59Z is still 23:59 ET on the 9th
+    eq(S.nyWindows(utc(2026, 7, 10, 3, 59)), summer);
+    eq(S.nyWindows(utc(2026, 7, 9, 4, 0)), summer, '00:00 ET on the 9th');
+    eq(S.nyWindows(utc(2026, 7, 9, 3, 59)).open, utc(2026, 7, 8, 13, 30), 'still the 8th in ET');
+    eq(S.nyWindows(utc(2026, 7, 10, 4, 0)).open, utc(2026, 7, 10, 13, 30));
+    // 23:30 ET winter Friday is already Saturday in UTC
+    eq(S.nyWindows(utc(2026, 1, 10, 4, 30)).open, utc(2026, 1, 9, 14, 30));
+  });
+
+  test('sessions: nyWindows follows the DST switches (Mon 2026-03-09 EDT, Mon 2026-11-02 EST)', () => {
+    eq(S.nyWindows(utc(2026, 3, 9, 15, 0)).open, utc(2026, 3, 9, 13, 30));
+    eq(S.nyWindows(utc(2026, 3, 6, 15, 0)).open, utc(2026, 3, 6, 14, 30), 'Friday before the jump');
+    eq(S.nyWindows(utc(2026, 11, 2, 15, 0)).open, utc(2026, 11, 2, 14, 30));
+    eq(S.nyWindows(utc(2026, 10, 30, 15, 0)).open, utc(2026, 10, 30, 13, 30), 'Friday before the fall back');
+    // on the switch day itself (Sun 2026-03-08, jump at 02:00) 09:30 is already EDT
+    eq(S.nyWindows(utc(2026, 3, 8, 12, 0)).open, utc(2026, 3, 8, 13, 30));
+  });
+
+  test('sessions: nyWindows displays as 09:30 / 09:50 / 10:10 / 10:30 / 13:00 ET in every season', () => {
+    for (const t of [utc(2026, 1, 9, 12), utc(2026, 7, 9, 12), utc(2026, 3, 8, 12), utc(2026, 11, 1, 12)]) {
+      const w = S.nyWindows(t);
+      eq([w.open, w.manipulation.from, w.manipulation.to, w.entry.from, w.entry.to, w.cutoff, w.pm].map(S.fmtET),
+        ['09:30', '09:30', '09:50', '09:50', '10:10', '10:30', '13:00']);
+      ok(w.manipulation.to === w.entry.from && w.manipulation.from === w.open, 'windows are contiguous');
+    }
+  });
 })();

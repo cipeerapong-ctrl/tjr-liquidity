@@ -3,7 +3,8 @@
    Times in = unix seconds UTC. ET wall-clock in = (y, mo, d, h, mi).
    Windows are ET minutes after midnight:
      Asia 18:00-03:00, London 03:00-08:30, NY pre-market 08:30-09:30, NY 09:30-17:00, spread hour 17:00-18:00.
-   Weekend = Fri 17:00 -> Sun 18:00 ET: market hours, not a system rule. */
+   Weekend = Fri 17:00 -> Sun 18:00 ET: market hours, not a system rule.
+   nyWindows: the New York day windows from the playlist time clip (P5.12-P5.19), DST-aware through etToUtc. */
 (function (global) {
   'use strict';
   var TJR = global.TJR = global.TJR || {};
@@ -90,6 +91,20 @@
     throw new Error('sessions.nextNyOpen: no weekday open found');   // unreachable
   }
 
+  // New York day windows (P5.12-P5.19), all ET: open 09:30, manipulation 09:30-09:50, entry 09:50-10:10,
+  // his own cut-off 10:30, PM 13:00. Returns utc seconds for the ET calendar day that utcSec falls in.
+  function nyWindows(utcSec) {
+    var e = toET(utcSec);
+    function at(h, mi) { return etToUtc(e.y, e.mo, e.d, h, mi); }
+    return {
+      open: at(9, 30),
+      manipulation: { from: at(9, 30), to: at(9, 50) },
+      entry: { from: at(9, 50), to: at(10, 10) },
+      cutoff: at(10, 30),
+      pm: at(13, 0)
+    };
+  }
+
   TJR.sessions = {
     WINDOWS: WINDOWS,
     etOffsetHours: etOffsetHours,
@@ -98,6 +113,7 @@
     fmtThai: fmtThai,
     which: which,
     etToUtc: etToUtc,
-    nextNyOpen: nextNyOpen
+    nextNyOpen: nextNyOpen,
+    nyWindows: nyWindows
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SCRIPTS = [
   'core/ns', 'core/sources', 'core/store', 'scenario/rng', 'scenario/swings', 'scenario/gen',
-  'scenario/sessions', 'scenario/library', 'scenario/annotate', 'scenario/grade',
+  'scenario/sessions', 'scenario/confluence', 'scenario/library', 'scenario/annotate', 'scenario/grade',
   'chart/scale', 'chart/render', 'chart/overlays', 'chart/chart', 'core/layout', 'core/motion',
 ].map((p) => `assets/js/${p}.js`);
 
