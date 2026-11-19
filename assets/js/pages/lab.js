@@ -109,11 +109,11 @@
   var SPOT_TEXT = {
     'any-high': 'คลิก swing high หนึ่งจุด คือแท่งขึ้นตามด้วยแท่งลง จุดสูงสุดของสองแท่งนั้น',
     'any-low': 'คลิก swing low หนึ่งจุด คือแท่งลงตามด้วยแท่งขึ้น จุดต่ำสุดของสองแท่งนั้น',
-    'sweep': 'คลิกแท่งที่ไส้ทะลุ level แล้วเก็บ liquidity เป็นครั้งแรกบนกราฟนี้',
-    'entry-pivot-long': 'คลิก pullback ที่ให้จังหวะเข้า long คือ HL ตัวแรกหลัง HH ปรากฏ',
-    'entry-pivot-short': 'คลิก pullback ที่ให้จังหวะเข้า short คือ LH ตัวแรกหลัง LL ปรากฏ'
+    'sweep': 'คลิกแท่งแรกที่ไส้ทะลุ level ที่มาร์กไว้บนกราฟ แล้วเก็บ liquidity',
+    'entry-pivot-long': 'คลิก pullback ที่ให้จังหวะเข้า long คือ HL ตัวแรกหลัง HH ปรากฏ (เว็บนี้อ่านจากตัวอย่างในคลิป)',
+    'entry-pivot-short': 'คลิก pullback ที่ให้จังหวะเข้า short คือ LH ตัวแรกหลัง LL ปรากฏ (เว็บนี้อ่านจากตัวอย่างในคลิป)'
   };
-  var SPOT_SECS = { 'any-high': [315], 'any-low': [315], 'sweep': [90, 1350], 'entry-pivot-long': [1410], 'entry-pivot-short': [1530] };
+  var SPOT_SECS = { 'any-high': [315], 'any-low': [315], 'sweep': [90, 1350], 'entry-pivot-long': [1410, 2250], 'entry-pivot-short': [1530] };
   function spotKey(task, built) { return task === 'entry-pivot' ? 'entry-pivot-' + (built.truth.side === 'short' ? 'short' : 'long') : task; }
   function spotPrompt(task, built) { var k = spotKey(task, built); return { text: SPOT_TEXT[k], secs: SPOT_SECS[k] }; }
   // arrow under a low, over a high
@@ -132,12 +132,71 @@
   }
 
   // ---------------------------------------------------------------- sessions
-  // four starting lines, spread over the chart's range and apart from each other
+  // four starting lines, spread over the price range of the session window (Asia start to London end, which is the
+  // window the lab shows on a phone) so they start inside the visible price range, and never on a true level
+  function sessionSpan(built) {
+    var from = Infinity, to = -Infinity;
+    (built.truth.sessions || []).forEach(function (x) { if (x.name === 'asia' || x.name === 'london') { from = Math.min(from, x.from); to = Math.max(to, x.to); } });
+    return from <= to ? { from: Math.max(0, from - 2), to: Math.min(built.candles.length - 1, to + 2) } : { from: 0, to: built.candles.length - 1 };
+  }
   function sessionStarts(built) {
-    var lo = Infinity, hi = -Infinity;
-    built.candles.forEach(function (c) { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; });
-    function at(f) { return TJR.util.roundTick(lo + (hi - lo) * f, built.meta.tick || TICK); }
-    return { asiaHigh: at(0.86), asiaLow: at(0.14), londonHigh: at(0.66), londonLow: at(0.34) };
+    var lo = Infinity, hi = -Infinity, sp = sessionSpan(built), tick = built.meta.tick || TICK, T = built.truth, out = {}, truth = {};
+    for (var i = sp.from; i <= sp.to; i++) { var c = built.candles[i]; if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; }
+    function at(f) { return TJR.util.roundTick(lo + (hi - lo) * f, tick); }
+    ['asia', 'london'].forEach(function (nm) {
+      var x = (T.sessions || []).filter(function (q) { return q.name === nm; }).pop();
+      if (x) { truth[nm + 'High'] = x.high; truth[nm + 'Low'] = x.low; }
+    });
+    var base = { asiaHigh: 0.86, asiaLow: 0.14, londonHigh: 0.66, londonLow: 0.34 };
+    Object.keys(base).forEach(function (k) {
+      var v = at(base[k]);
+      for (var n = 0; n < 8; n++) {                       // step away from the true level and from the lines already placed
+        var near = truth[k] != null && Math.abs(v - truth[k]) <= (TJR.grade.SESSION_TOL || 4) * tick * 2;
+        var clash = Object.keys(out).some(function (o) { return Math.abs(out[o] - v) < (hi - lo) * 0.05; });
+        if (!near && !clash) break;
+        v = at(Math.min(0.95, Math.max(0.05, base[k] + (base[k] > 0.5 ? -1 : 1) * 0.06 * (n + 1))));
+      }
+      out[k] = v;
+    });
+    return out;
+  }
+  // the window a phone can read: Asia start to London end, rolled up (1m -> 5m -> 15m ...) until it fits `slots` bars.
+  // Grading is by price, so a roll-up never changes the answer. -> { tf, from, to } in that timeframe's indices
+  function sessionView(built, slots) {
+    var T = built.truth, cs = built.candles, base = built.meta.tf || 5, asia = null, lon = null, best = null;
+    (T.sessions || []).forEach(function (s) { if (s.name === 'asia') asia = s; else if (s.name === 'london') lon = s; });
+    if (!asia || !lon) return null;
+    var t0 = cs[asia.from].t, t1 = cs[lon.to].t;
+    function lastLE(series, t) {
+      var lo = 0, hi = series.length - 1;
+      while (lo < hi) { var m = (lo + hi + 1) >> 1; if (series[m].t <= t) lo = m; else hi = m - 1; }
+      return lo;
+    }
+    [1, 5, 15, 60, 240].forEach(function (tf) {
+      if (best && best.fits) return;
+      if (tf < base || tf % base) return;
+      var series = tf === base ? cs : TJR.gen.rollup(cs, base, tf);
+      var from = Math.max(0, lastLE(series, t0) - 2), to = Math.min(series.length - 1, lastLE(series, t1)) + 2;
+      best = { tf: tf, from: from, to: to, fits: to - from + 1 <= slots };
+    });
+    return best && { tf: best.tf, from: best.from, to: best.to };
+  }
+  // Spot: the levels the sweep task refers to (everything known before the sweep, still untaken); other tasks draw none
+  function spotSetup(built, task) {
+    var sw = built.truth.sweep;
+    if (task !== 'sweep' || !sw) return [];
+    return TJR.annotate(built, { upTo: sw.bar - 1 }).filter(function (o) { return o.type === 'level' || o.type === 'trend'; });
+  }
+  // Spot: a view that holds the bar to click when the default fit (a phone) has pushed it off the left edge.
+  // null = keep the fit. view = the engine's current { from, to }
+  function spotView(built, task, view) {
+    if (task !== 'sweep' && task !== 'entry-pivot') return null;
+    var exp = TJR.grade.spot(built, task, 0, 0).expected;
+    if (!exp) return null;
+    var n = built.candles.length, span = Math.max(10, view.to - view.from);
+    if (exp.bar >= view.from + 3 && exp.bar <= Math.min(view.to, n - 1) - 3) return null;
+    var to = Math.min(n + 1, exp.bar + Math.round(span * 0.3)), from = Math.max(0, to - span);
+    return { from: from, to: from + span };
   }
   function sessionTicks(item) { return !item || item.diff == null ? null : Math.round(item.diff / TICK); }
 
@@ -146,7 +205,9 @@
   function quizAnswers(level, after) {
     return ANSWERS.filter(function (a) { return TJR.grade.quiz(level, a, { after: !!after }); });
   }
-  // resistanceAfter is asked only on win builds that print a confirmation (never on a fail variant)
+  // resistanceAfter is asked only on win builds that print a confirmation (never on a fail variant), and only for a
+  // level price actually reversed from (resistanceAfter 'high', F8.6). A target level that price runs into at the
+  // end ('low') or one with no stated state is never asked "after": the premise would be false (F8.1)
   function afterAllowed(built) { return built.truth.outcome === 'win' && built.truth.confirmBar != null; }
   // every (level, state) the chart can ask, with the bar the chart is revealed to
   function quizOptions(built) {
@@ -159,7 +220,7 @@
         var a = quizAnswers(l, false);
         if (a.length) out.push({ level: l, after: false, rev: beforeRev, valid: a });
       }
-      if (swept && afterAllowed(built)) {
+      if (swept && afterAllowed(built) && l.resistanceAfter === 'high') {
         var b = quizAnswers(l, true);
         if (b.length) out.push({ level: l, after: true, rev: n - 1, valid: b });
       }
@@ -198,7 +259,7 @@
   L.replayStart = replayStart; L.newReplay = newReplay; L.canDecide = canDecide; L.canStep = canStep; L.stepReplay = stepReplay;
   L.decide = decide; L.replayOverlays = replayOverlays; L.outcomeInfo = outcomeInfo; L.replayFeedback = replayFeedback;
   L.spotPrompt = spotPrompt; L.spotShape = spotShape; L.pickSpot = pickSpot;
-  L.sessionStarts = sessionStarts; L.sessionTicks = sessionTicks;
+  L.sessionStarts = sessionStarts; L.sessionSpan = sessionSpan; L.sessionTicks = sessionTicks; L.sessionView = sessionView; L.spotSetup = spotSetup; L.spotView = spotView;
   L.quizAnswers = quizAnswers; L.quizOptions = quizOptions; L.pickQuiz = pickQuiz; L.quizOverlay = quizOverlay; L.afterAllowed = afterAllowed;
   L.freshSeed = freshSeed; L.makeRound = makeRound;
 
@@ -222,9 +283,10 @@
   var SESSION_COLOR = { asiaHigh: '--c-liq', asiaLow: '--c-liq', londonHigh: '--c-session', londonLow: '--c-session' };
 
   var INTRO = {
-    replay: ['เล่นทีละแท่งจนราคากวาด level แล้วเลือก Long, Short หรือ รอ ให้ตรงกับขั้นตอนในคลิป ห้ามกดตอนที่เพิ่งกวาด รอโครงสร้างใหม่ขึ้นก่อน แล้วเข้าตอน pullback ราว 1 ใน 4 ของเซ็ตอัพจะไปต่อไม่ได้ คะแนนยังนับที่การตัดสินใจ', [1350, 1410, 1530]],
-    spot: ['โจทย์สุ่มบนกราฟใหม่ คลิกบนกราฟเพื่อตอบ ผ่านถ้าใกล้จุดจริงไม่เกิน 1 แท่ง ตรวจแล้วจะเห็นตำแหน่งที่ถูกบนกราฟ', [315, 1350]],
-    sessions: ['ลากเส้นสีทองสองเส้นไป Asia high กับ low และเส้นสีฟ้าสองเส้นไป London high กับ low ผ่านถ้าห่างไม่เกิน 4 tick แกนเวลาเป็น ET ช่วง session ตามที่คลิปใช้', [1875]],
+    replay: ['เล่นทีละแท่งจนราคากวาด level แล้วเลือก Long, Short หรือ รอ ให้ตรงกับขั้นตอนในคลิป ห้ามกดตอนที่เพิ่งกวาด รอโครงสร้างใหม่ขึ้นก่อน แล้วเข้าตอน pullback คะแนนนับที่การตัดสินใจ', [1350, 1410, 1530],
+      ' ในแบบฝึกนี้ เว็บนี้ใส่เซ็ตอัพที่ confirmation ล้มไว้ราว 1 ใน 4 ข้อ (ตัวเลขของเว็บ ไม่ใช่สถิติจากคลิป) อัตราที่ระบบนี้ชนะจริง ' + TJR.layout.gap()],
+    spot: ['โจทย์สุ่มบนกราฟใหม่ คลิกบนกราฟเพื่อตอบ ผ่านถ้าใกล้จุดจริงไม่เกิน 1 แท่ง (เกณฑ์ของเว็บนี้) ตรวจแล้วจะเห็นตำแหน่งที่ถูกบนกราฟ', [315, 1350]],
+    sessions: ['ลากเส้นสีทองสองเส้นไป Asia high กับ low และเส้นสีฟ้าสองเส้นไป London high กับ low ผ่านถ้าห่างไม่เกิน 4 tick (เกณฑ์ของเว็บนี้) แกนเวลาเป็น ET ช่วง session ตามที่คลิปใช้', [1875]],
     quiz: ['เส้นสีทองบนกราฟคือ level หนึ่ง ตอบว่ามันเป็น low-resistance, high-resistance, HTF หรือ session ตามที่คลิปแบ่ง', [2385, 2700, 1635]]
   };
 
@@ -408,7 +470,9 @@
       var pr = L.spotPrompt(round.task, round.built);
       el.ctrls.innerHTML = '<span class="lf__hint">คลิกบนกราฟเพื่อตอบ</span>';
       el.prompt.innerHTML = '<h2>โจทย์</h2><p>' + pr.text + ' <span class="chips">' + chipsHtml(pr.secs) + '</span></p>';
-      S.ch.setOverlays([]);
+      S.ch.setOverlays(L.spotSetup(round.built, round.task));
+      var vw = L.spotView(round.built, round.task, S.ch.info().view);
+      if (vw) S.ch.view(vw.from, vw.to);
       var run = S.run;
       S.ch.on('click', function (p) { if (S.run === run) Sp.answer(p); });
     },
@@ -452,6 +516,11 @@
       });
       el.prompt.innerHTML = h + '</ul>';
       S.rows = {};
+      var win = ch.info().view, sv = L.sessionView(round.built, win.to - win.from + 1);
+      if (sv) {
+        if (sv.tf !== round.built.meta.tf) { ch.setTimeframe(sv.tf); el.tf.textContent = TF_NAME[sv.tf] || ''; }
+        ch.view(sv.from, sv.to);
+      }
       L.SESSION_KEYS.forEach(function (k) { S.rows[k] = round.lines[k]; Se.line(k, round.lines[k]); });
       applyTouch();
       var run = S.run;
@@ -484,7 +553,7 @@
       applyTouch();
       S.ch.setOverlays(TJR.annotate(b, { upTo: b.candles.length - 1 }));
       $$('[data-se="check"]', el.ctrls).forEach(function (x) { x.disabled = true; });
-      showFb(res.score === 4, '<p class="lab-verdict"><b>ถูก ' + res.score + ' จาก 4 เส้น</b> ผ่านถ้าห่างจากจริงไม่เกิน 4 tick (1 tick = 0.25) ตัวเลขข้างแต่ละเส้นคือระยะที่คลาด กล่องบนกราฟคือช่วง session จริง <span class="chips">' + chipsHtml([1875]) + '</span></p>' + scenarioLine(r));
+      showFb(res.score === 4, '<p class="lab-verdict"><b>ถูก ' + res.score + ' จาก 4 เส้น</b> ผ่านถ้าห่างจากจริงไม่เกิน 4 tick (เกณฑ์ของเว็บนี้ 1 tick = 0.25) ตัวเลขข้างแต่ละเส้นคือระยะที่คลาด กล่องบนกราฟคือช่วง session จริง <span class="chips">' + chipsHtml([1875]) + '</span></p>' + scenarioLine(r));
     },
     input: function (inp) {
       var k = inp.id.replace('in-', '');
@@ -508,8 +577,8 @@
   var Qz = {
     start: function (round) {
       var q = round.q, l = q.level;
-      var ask = q.after ? 'ราคากวาด level สีทองนี้แล้วกลับตัวออกมาแล้ว ตอนนี้มันเป็นแบบไหน'
-        : l.sweptAt != null ? 'level สีทองนี้ ก่อนราคาจะไปแตะมัน เป็นแบบไหน' : 'level สีทองนี้ยังไม่ถูกเก็บ มันเป็นแบบไหน';
+      var ask = q.after ? 'ราคากวาด level สีทองนี้แล้วกลับตัวออกมา ตอนนี้มันเป็นแบบไหน'
+        : l.sweptAt != null ? 'level สีทองนี้ ณ แท่งล่าสุดบนกราฟ เป็นแบบไหน' : 'level สีทองนี้ยังไม่ถูกเก็บ มันเป็นแบบไหน';
       el.ctrls.innerHTML = '<span class="lf__hint">ดูแกนเวลาและตำแหน่งของเส้น แล้วเลือกคำตอบ</span>';
       el.prompt.innerHTML = '<h2>โจทย์</h2><p>' + ask + '</p>';
       el.choices.innerHTML = L.ANSWERS.map(function (a) {
@@ -550,7 +619,7 @@
       t.tabIndex = on ? 0 : -1;
       if (on) { el.panel.setAttribute('aria-labelledby', t.id); if (focus) t.focus(); }
     });
-    el.intro.innerHTML = INTRO[m][0] + ' <span class="chips">' + chipsHtml(INTRO[m][1]) + '</span>';
+    el.intro.innerHTML = INTRO[m][0] + ' <span class="chips">' + chipsHtml(INTRO[m][1]) + '</span>' + (INTRO[m][2] || '');
     S.score = L.loadScore(m); S.lastOk = null;
     renderScore();
     TJR.store.set('lab.mode', m);

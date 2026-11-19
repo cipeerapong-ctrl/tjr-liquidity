@@ -208,6 +208,119 @@
     eq(L.afterAllowed(fail), false);
   });
 
+  // C1: the quiz never grades the opposite of the clip (F8.1: an untaken stack is low-resistance; F8.6: a level price
+  // reversed from is high-resistance)
+  test('lab quiz: no round grades the opposite of the clip, over many seeds (after only for levels price reversed from)', () => {
+    var after = 0, before = 0, seen = {};
+    for (var seed = 1; seed <= 400; seed++) {
+      var r = L.makeRound('quiz', rngOf(seed * 104729), null), q = r.q, l = q.level, b = r.built;
+      seen[r.def.id] = 1;
+      if (q.after) {
+        after++;
+        eq(l.resistanceAfter, 'high', r.def.id + ' ' + l.id + ': an after-question only on a level price reversed from');
+        ok(q.valid.indexOf('low') < 0, r.def.id + ' ' + l.id + ': never accepts low-resistance after the sweep');
+        ok(l.sweptAt != null && l.sweptAt <= q.rev, 'the level is swept at the revealed bar');
+        eq(b.truth.outcome, 'win'); ok(b.truth.confirmBar != null);
+      } else {
+        before++;
+        ok(q.valid.indexOf('high') < 0, r.def.id + ' ' + l.id + ': high-resistance is never a before-answer');
+        if (q.valid.indexOf('low') >= 0) ok(l.sweptAt == null || l.sweptAt > q.rev, 'low-resistance only while the level is untaken');
+      }
+      // every option the grader can ask, not only the picked one
+      L.quizOptions(b).forEach(function (o) {
+        if (o.after) eq(o.level.resistanceAfter, 'high', r.def.id + ': ' + o.level.id);
+        if (o.valid.indexOf('low') >= 0) ok(!o.after, r.def.id + ': low-resistance is never an after-answer');
+      });
+    }
+    ok(after > 0 && before > 0, 'both kinds of question still occur: ' + after + ' after / ' + before + ' before');
+    ok(Object.keys(seen).length >= 3, 'varied scenarios');
+  });
+
+  // I1: the sweep task draws what its prompt names, and nothing drawn is taken before the answer
+  test('lab spot: the sweep task draws the levels it refers to, untaken until the sweep bar', () => {
+    var checked = 0;
+    for (var seed = 1; seed <= 120; seed++) {
+      var r = L.makeRound('spot', rngOf(seed * 7907), null);
+      var b = r.built, T = b.truth;
+      if (r.task !== 'sweep') {
+        eq(L.spotSetup(b, r.task), [], 'only the sweep task draws setup levels');
+        continue;
+      }
+      var ov = L.spotSetup(b, 'sweep'), lv = ov.filter(function (o) { return o.type === 'level'; });
+      ok(lv.some(function (o) { return o.id === T.sweep.levelId; }), r.def.id + ': the level that gets swept is drawn');
+      ov.forEach(function (o) {
+        ok(o.appearAt < T.sweep.bar, 'known before the sweep');
+        if (o.type === 'level') {
+          eq(o.state, 'active', 'no swept state before the answer');
+          ok(o.to <= T.sweep.bar - 1);
+          var tl = T.levels.filter(function (x) { return x.id === o.id; })[0];
+          for (var i = tl.known; i < T.sweep.bar; i++) {
+            var c = b.candles[i], hit = tl.side === 'high' ? c.h >= tl.price : c.l <= tl.price;
+            ok(!hit, r.def.id + ' ' + o.id + ': bar ' + i + ' takes a drawn level before the sweep bar');
+          }
+        }
+      });
+      checked++;
+    }
+    ok(checked >= 10, 'sweep tasks were exercised: ' + checked);
+    ok(L.spotPrompt('sweep', TJR.scenarios.safeBuild(TJR.scenarios.get('S01'), 1, {})).text.indexOf('ที่มาร์กไว้บนกราฟ') > 0, 'the prompt names the marked level');
+  });
+
+  // I2: at a 358 px phone (192 bar slots) the bars the round grades are inside the view the lab sets
+  test('lab views: Sessions and Spot show the graded bars on 358 / 320 px phones and on desktop', () => {
+    function lastLE(series, t) { var j = 0; for (var i = 0; i < series.length; i++) if (series[i].t <= t) j = i; return j; }
+    [358, 320, 850].forEach(function (w) {
+      var slots = Math.floor((w - 70) / 1.5), sessions = 0, spots = 0;
+      for (var seed = 1; seed <= 60; seed++) {
+        var rs = L.makeRound('sessions', rngOf(seed * 6151), null), b = rs.built, base = b.meta.tf;
+        var v = L.sessionView(b, slots), series = v.tf === base ? b.candles : TJR.gen.rollup(b.candles, base, v.tf);
+        ok(v.tf >= base && v.tf % base === 0, 'a whole roll-up of the base timeframe');
+        ok(v.to - v.from + 1 <= slots, rs.def.id + ' @' + w + ': window ' + (v.to - v.from + 1) + ' > ' + slots + ' slots at ' + v.tf + 'm');
+        ['asia', 'london'].forEach(function (nm) {
+          var s = b.truth.sessions.filter(function (x) { return x.name === nm; }).pop(), hi = s.from, lo = s.from;
+          for (var i = s.from; i <= s.to; i++) { if (b.candles[i].h > b.candles[hi].h) hi = i; if (b.candles[i].l < b.candles[lo].l) lo = i; }
+          [hi, lo].forEach(function (i) {
+            var j = lastLE(series, b.candles[i].t);
+            ok(j >= v.from && j <= v.to, rs.def.id + ' @' + w + ': the ' + nm + ' extreme (bar ' + i + ' -> ' + j + ') is inside ' + v.from + '..' + v.to);
+          });
+        });
+        sessions++;
+        var rp = L.makeRound('spot', rngOf(seed * 3571), null), pb = rp.built, n = pb.candles.length;
+        var margin = Math.max(2, Math.round(Math.min(n, slots) * 0.04)), toFit = n - 1 + margin;
+        var fit = { from: Math.max(0, toFit + 1 - slots), to: toFit };
+        var sv = L.spotView(pb, rp.task, fit), exp = TJR.grade.spot(pb, rp.task, 0, 0).expected;
+        if (rp.task === 'sweep' || rp.task === 'entry-pivot') {
+          var view = sv || fit;
+          ok(exp.bar >= view.from && exp.bar <= Math.min(view.to, n - 1), rp.def.id + ' ' + rp.task + ' @' + w + ': bar ' + exp.bar + ' is clickable in ' + view.from + '..' + view.to);
+          if (sv) ok(sv.to - sv.from <= fit.to - fit.from, 'the window keeps the slot count');
+          spots++;
+        } else eq(sv, null, 'any-high / any-low keep the fit');
+      }
+      ok(sessions === 60 && spots > 0, 'both views were exercised @' + w);
+    });
+  });
+
+  // I3: the 1-in-4 is the site own mix, never a clip statistic
+  test('lab replay intro: the 1-in-4 fail mix is labelled as the site number, and the win rate stays a gap', () => {
+    var js = readText('assets/js/pages/lab.js');
+    ok(js.indexOf('ราว 1 ใน 4 ของเซ็ตอัพจะไปต่อไม่ได้') < 0, 'the old wording is gone');
+    ok(js.indexOf('ตัวเลขของเว็บ ไม่ใช่สถิติจากคลิป') > 0, 'labelled as the site number');
+    ok(js.indexOf("อัตราที่ระบบนี้ชนะจริง ' + TJR.layout.gap()") > 0, 'win rate is the gap badge');
+  });
+
+  // I2 (vertical): the engine fits the price range to the visible bars, so the draggable lines must start inside the session window's range
+  test('lab sessions: the four starting lines sit inside the price range of the session window, off the true levels, apart', () => {
+    for (var seed = 1; seed <= 80; seed++) {
+      var r = L.makeRound('sessions', rngOf(seed * 2713), null), b = r.built, st = r.lines, v = L.SESSION_KEYS.map((k) => st[k]);
+      var lo = Infinity, hi = -Infinity;
+      var sp = L.sessionSpan(b);
+      for (var i = sp.from; i <= sp.to; i++) { lo = Math.min(lo, b.candles[i].l); hi = Math.max(hi, b.candles[i].h); }
+      v.forEach((p, i) => ok(p >= lo && p <= hi, r.def.id + ' ' + L.SESSION_KEYS[i] + ' ' + p + ' inside ' + lo + '..' + hi));
+      eq(new Set(v).size, 4, 'four different lines');
+      eq(TJR.grade.sessions(b.truth, st).score, 0, r.def.id + ' no line starts on a true level');
+    }
+  });
+
   test('lab.makeRound: every mode yields a round on a fresh seed; rapid rounds differ; scenarios match the mode flag', () => {
     L.MODES.forEach((m) => {
       var ids = {};

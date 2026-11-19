@@ -174,9 +174,10 @@
     }
 
     function fitView() {
-      var count = n(), margin = Math.max(2, Math.round(count * 0.04));
+      var count = n();
       var plotW = Math.max(40, st.w - (axes ? 70 : 0));
       var maxBars = Math.max(10, Math.floor(plotW / MIN_SLOT));
+      var margin = Math.max(2, Math.round(Math.min(count, maxBars) * 0.04));   // of the bars on screen, not of all bars
       var to = count - 1 + margin;
       st.view = { from: Math.max(0, to + 1 - maxBars), to: to };
     }

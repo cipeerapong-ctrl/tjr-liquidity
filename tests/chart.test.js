@@ -342,6 +342,18 @@
     });
   });
 
+  test('chart fit: the right margin is 4% of the bars on screen, not of all bars (phone, 1080-bar chart)', () => {
+    withEnv({ w: 358, h: 280 }, function (env) {
+      var ch = TJR.chart.create(env.el, {});
+      var b = build('S09');
+      ch.setData(b);
+      var v = ch.info().view, slots = Math.floor((358 - 70) / 1.5), n = b.candles.length;
+      eq(v.to - v.from + 1, slots, 'the view holds every slot the phone has');
+      ok(v.to - (n - 1) <= Math.round(slots * 0.04), 'margin ' + (v.to - (n - 1)) + ' bars');
+      ch.destroy();
+    });
+  });
+
   test('chart created in a hidden host waits for a real size and never pins its height', () => {
     withEnv({ w: 800, h: 400 }, function (env) {
       env.el.clientWidth = 0; env.el.clientHeight = 0;          // display:none parent
