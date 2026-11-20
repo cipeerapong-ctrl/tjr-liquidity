@@ -138,6 +138,67 @@
     });
   });
 
+  // v2 Task 5: Level-1 additions from the playlist (candle anatomy, previous-day / data / equal / stacked draws)
+  test('learn.html: v2 additions carry playlist chips of the right videos (#12, #14, #5), never clip #4', () => {
+    var html = readText('learn.html');
+    var pl = html.match(/<a\b[^>]*\bclass="ts-chip ts-chip--pl"[^>]*>[^<]*<\/a>/g) || [];
+    ok(pl.length >= 14, 'playlist chips present: ' + pl.length);
+    var by = {};
+    pl.forEach(function (a) {
+      var href = /href="https:\/\/youtu\.be\/([\w-]+)\?t=(\d+)"/.exec(a);
+      ok(href, 'playlist chip links a video: ' + a);
+      by[href[1]] = (by[href[1]] || 0) + 1;
+      var src = TJR.sources.list.filter(function (s) { return s.id === href[1]; })[0];
+      ok(src && !src.main, 'a playlist chip, not the main clip: ' + href[1]);
+      ok(src.clip !== 4, 'clip #4 is never chipped');
+      // the static markup is exactly what TJR.layout.chip emits for that clip and second
+      eq(a, TJR.layout.chip(Number(href[2]), src.clip), 'chip markup ' + href[1] + ' t=' + href[2]);
+    });
+    ['AGmAVyAuBE0', '8qwEmE1DwYw', 'L4xz2o23aPQ'].forEach(function (id) { ok(by[id] >= 1, 'a chip to ' + id); });
+    ok(by.AGmAVyAuBE0 >= 8, 'ch. 7 and 8 draws cite #12');
+    ok(by['8qwEmE1DwYw'] >= 5, 'ch. 2 candle anatomy cites #14');
+    ok(!/52nxvJKM57U/.test(html), 'no link to clip #4');
+  });
+
+  test('learn.html: the C2 older note says London to 11:30 (clip #5) inside .older-note; main keeps 11:00', () => {
+    var html = readText('learn.html');
+    var m = /<aside class="older-note">[\s\S]*?<\/aside>/.exec(html);
+    ok(m, 'an .older-note box');
+    ok(m[0].indexOf('11:30') > 0, 'the note mentions 11:30');
+    ok(m[0].indexOf('คลิปเก่า (ม.ค. 2026) พูดว่า…') > 0, 'the older-video label');
+    ok(m[0].indexOf('youtu.be/L4xz2o23aPQ?t=69') > 0 && m[0].indexOf('#5 01:09') > 0, 'chip #5 01:09');
+    eq(html.split('class="older-note"').length - 1, 1, 'one older note');
+    ok(html.indexOf('ปิดทางการ 11:00') > 0, 'main clip 11:00 stays');
+  });
+
+  test('learn.html: marked Level 1 and points on to the Level 2 pages; the 8 modules and 8 self-checks stay', () => {
+    var html = readText('learn.html');
+    ok(/<p class="level-tag" data-level="1">Level 1 · Liquidity<\/p>/.test(html), 'level tag');
+    ok(html.indexOf('ต่อใน Level 2') > 0, 'the Level 2 heading');
+    var tail = html.slice(html.indexOf('id="limits"'));
+    ok(tail.indexOf('href="confluences.html"') > 0 && tail.indexOf('href="playbook.html"') > 0, 'links to both Level 2 pages');
+    ok(tail.indexOf('market structure break') > 0 && tail.indexOf('fair value gap') > 0 && tail.indexOf('inverse fair value gap') > 0, 'F9.1 list');
+    ok(tail.indexOf('youtu.be/Vulini8xbB0?t=2880') > 0, 'F9.1 chip 48:00');
+    ok(html.indexOf('ที่คลิปนี้ไม่ได้สอน') < 0, 'the old closing block is gone');
+    eq(html.split('class="check"').length - 1, 8);
+    eq((html.match(/class="q" data-right/g) || []).length, 16);
+  });
+
+  test('learn.html: the new draws are in their chapters (ch. 2 anatomy, ch. 7 previous-day/data/older, ch. 8 equal/stacked)', () => {
+    var html = readText('learn.html');
+    function sec(n) { var a = html.indexOf('id="m' + n + '" data-m'); var b = html.indexOf('id="m' + (n + 1) + '" data-m'); return html.slice(a, b > 0 ? b : html.indexOf('id="limits"')); }
+    var m2 = sec(2), m7 = sec(7), m8 = sec(8);
+    ok(m2.indexOf('OHLC') > 0 && m2.indexOf('wick') > 0, 'm2 candle anatomy');
+    ok(m2.indexOf('4 ชั่วโมง') > 0 || m2.indexOf('4h') > 0, 'm2 4h = four 1h');
+    ok(m2.indexOf('เวลา New York') > 0 || m2.indexOf('New York (ET)') > 0, 'm2 chart in NY time');
+    ok(m7.indexOf('previous-day') > 0, 'm7 previous-day high/low');
+    ok(m7.indexOf('Forex Factory') > 0 && m7.indexOf('red folder') > 0, 'm7 data highs/lows with Forex Factory');
+    ok(m7.indexOf('older-note') > 0, 'm7 holds the C2 note');
+    ok(m8.indexOf('equal') > 0 && m8.indexOf('สี่') > 0, 'm8 relative equal = four sets');
+    ok(m8.indexOf('จุดเข้าและจุดออก') > 0, 'm8 stacked levels as entry and exit');
+    ok(m8.indexOf('คลิปไม่ได้ระบุ') > 0, 'm8 keeps its gap badge');
+  });
+
   // T10: the right answer is not parked on one index (a guessable pattern in a self-check)
   test('learn.html: the right answers are spread over the options (no index above half, no run of three)', () => {
     var rights = (readText('learn.html').match(/class="q" data-right="([0-9])"/g) || []).map((m) => Number(m.slice(-2, -1)));

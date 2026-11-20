@@ -249,3 +249,20 @@ html:not([data-motion="off"]) .opt { transition: background-color var(--m-out, 1
 
 /* long picker labels wrap instead of running out of the frame */
 .lc .ctrl-group { flex-wrap: wrap; max-width: 100%; }
+
+/* ================================================================ v2: Level-1 additions from the playlist */
+.learn-head .level-tag { justify-self: start; }
+
+/* a short block of playlist detail under a chapter's own facts: a dashed rule on the left and a mono label,
+   so it reads as "added from the older series" beside the main clip's solid-ruled facts */
+.pl-add { display: grid; gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-md); border: 1px dashed color-mix(in oklab, var(--ink) 34%, transparent); }
+.pl-add__t { margin: 0; font: 500 var(--t-label)/1.5 var(--font-mono); letter-spacing: 0; color: var(--ink); }
+.pl-add .facts { gap: var(--s-3); }
+.pl-add .facts li { border-left-color: color-mix(in oklab, var(--ink) 22%, transparent); }
+@media (max-width: 639px) { .pl-add { padding: var(--s-3); } }
+
+/* the Level 2 hand-off that closes the page */
+.limits__text h3 { margin: var(--s-2) 0 0; font-size: var(--t-card); }
+.limits__go { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+.limits__go .btn { min-height: 44px; }
+@media (max-width: 639px) { .limits__go .btn { flex: 1 1 100%; } }
