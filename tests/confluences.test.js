@@ -385,6 +385,12 @@
   test('confluences.html: nothing excluded - no prices, money amounts, promo codes or prop-firm names; chart numbers are labelled as simulated', () => {
     ok(!/\$\s?\d/.test(html), 'no dollar amounts');
     ok(!/promo|apex|topstep|funded/i.test(html), 'no prop-firm talk');
+  });
+
+  test('confluences.js: lists the page loops over are taken with $$ (all matches), never $ (one element): the SMT twin went blank', () => {
+    var js = readText('assets/js/pages/confluences.js');
+    ok(js.indexOf("asks = $$('[data-pick]', fig)") > 0, 'the SMT answer buttons are a list');
+    ok(!/[^$]\$\('\[data-pick\]'/.test(js), 'no single-element $ for the answer buttons');
     ok(html.indexOf('ตัวเลขจากกราฟจำลอง') > 0, 'the simulated-numbers label is on the page');
     ok(html.indexOf('ตัวเลขจากเครื่องมือบนจอ ไม่ใช่ที่เขาพูด') > 0, 'on-screen readouts are labelled');
   });

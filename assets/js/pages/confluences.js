@@ -621,7 +621,7 @@
   // ---------------------------------------------------------------- lesson 5: the twin chart of S21 ("which index leads?")
   function makeTwin(fig, S) {
     var hostA = $('[data-k="hostA"]', fig), hostB = $('[data-k="hostB"]', fig), symA = $('[data-k="symA"]', fig), symB = $('[data-k="symB"]', fig);
-    var read = $('[data-k="read"]', fig), asks = $('[data-pick]', fig), more = $('[data-act="more"]', fig);
+    var read = $('[data-k="read"]', fig), asks = $$('[data-pick]', fig), more = $('[data-act="more"]', fig);
     var b = null, cs = null, rd = null, tw = null, dead = false, run = 0, startAt = 0, onA = 'ES', onB = 'NQ';
     tw = TJR.chart.twin(hostA, hostB, { label: 'กราฟคู่ ES และ NQ ในช่วงเวลาเดียวกัน จุดตัดตรงกันทั้งสองกราฟ', interactive: true });
 
