@@ -8,6 +8,9 @@ Static, multi-page Thai website that teaches only TJR's own system: his liquidit
 - GSAP 3.12.5 + ScrollTrigger 3.12.5 from cdnjs only. Google Fonts (Thai-capable).
 - Design kit copied from the design-taste-frontend skill into `assets/` (do not edit kit files).
 
+## Pages (v2)
+Level 1 (liquidity clip): `learn.html`, `scenarios.html` S01–S14, `lab.html` v1 modes. Level 2 (playlist): `confluences.html`, `strategy.html`, `playbook.html`, `risk.html`, scenarios S15–S22, lab drills gap/bos/smt. `index.html` maps both. Script order and file map: `docs/superpowers/plans/2026-11-19-tjr-v2-full-system.md`.
+
 ## Run / test
 - Run: open `index.html` in a browser.
 - Test: `node tests/run.mjs` (Node 24; loads the site's scripts into a `vm` context, then `tests/*.test.js`).
