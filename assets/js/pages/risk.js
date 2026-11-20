@@ -71,6 +71,7 @@
       base: base,
       size: size,
       halved: !!inp.halve,
+      cannotHalve: !!inp.halve && base === 1,            // one contract halves to one: the toggle changes nothing
       widest: lossPart(size, widest, tick, account),
       tightest: tight == null ? null : lossPart(size, tight, tick, account),
       oneContract: lossPart(1, widest, tick, account),
@@ -217,7 +218,7 @@
     if (K.meter) K.meter.setAttribute('data-state', c.tooSmall ? 'small' : 'ok');
     var m = meter(c.riskPct, c.tooSmall ? c.oneContract.pct : c.widest.pct, c.tightest && !c.tooSmall ? c.tightest.pct : 0);
     setText(K.contracts, String(c.size));
-    setText(K['contracts-sub'], c.halved && c.base >= 1 ? 'ลดครึ่งจาก ' + c.base + ' contract ปกติ' : c.tooSmall ? 'ต่อให้ 1 contract ก็เกินที่ตั้งไว้' : 'contract ต่อเทรด');
+    setText(K['contracts-sub'], c.cannotHalve ? 'ขนาดปกติคือ 1 contract หารครึ่งไม่ได้ จึงยังเป็น 1 contract' : c.halved && c.base >= 1 ? 'ลดครึ่งจาก ' + c.base + ' contract ปกติ' : c.tooSmall ? 'ต่อให้ 1 contract ก็เกินที่ตั้งไว้' : 'contract ต่อเทรด');
     if (c.tooSmall) {
       setText(K['loss-wide'], fmtNum(c.oneContract.loss)); setText(K['pct-wide'], fmtPct(c.oneContract.pct));
       setText(K['loss-tight'], '–'); setText(K['pct-tight'], '–');

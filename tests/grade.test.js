@@ -301,13 +301,13 @@
     eq(G.bos(b, NaN, false).expected, false);
   });
 
-  test('grade.smt: the leader is the index with the lower high, read from both candle series (S21 seeds 1..60)', () => {
+  test('grade.smt: the leader is the index with the lower high (higher low), read from both candle series (S21 seeds 1..60)', () => {
     for (let seed = 1; seed <= 60; seed++) {
-      const b = S.safeBuild(S.get('S21'), seed, {}), s = b.truth.smt, tw = b.truth.twin.candles;
-      const mHigher = b.candles[s.main.p2.bar].h > b.candles[s.main.p1.bar].h;
-      const tHigher = tw[s.twin.p2.bar].h > tw[s.twin.p1.bar].h;
-      ok(mHigher !== tHigher, 'seed ' + seed + ': one index makes a higher high, the other a lower high');
-      const lead = mHigher ? 'twin' : 'main';
+      const b = S.safeBuild(S.get('S21'), seed, {}), s = b.truth.smt, tw = b.truth.twin.candles, low = s.kind === 'low';
+      const mHigher = low ? b.candles[s.main.p2.bar].l > b.candles[s.main.p1.bar].l : b.candles[s.main.p2.bar].h > b.candles[s.main.p1.bar].h;
+      const tHigher = low ? tw[s.twin.p2.bar].l > tw[s.twin.p1.bar].l : tw[s.twin.p2.bar].h > tw[s.twin.p1.bar].h;
+      ok(mHigher !== tHigher, 'seed ' + seed + ': one index makes the higher swing, the other the lower');
+      const lead = (low ? mHigher : !mHigher) ? 'main' : 'twin';
       eq(G.smt(b, lead), { correct: true, expected: lead });
       eq(G.smt(b, lead === 'main' ? 'twin' : 'main'), { correct: false, expected: lead });
       eq(lead, s.leader, 'truth agrees with the candles');

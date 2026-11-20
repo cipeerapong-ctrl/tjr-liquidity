@@ -30,7 +30,8 @@
   function levelOf(id) { return Number(String(id).slice(1)) >= 15 ? 2 : 1; }
   var SESSION_IDS = ['S06', 'S07', 'S08', 'S09'];       // charts built on session highs / lows
   var HTF_IDS = ['S05', 'S10', 'S11'];                   // daily, 4H highs, 4H high vs a 5m high
-  var SHORT_IDS = ['S03', 'S10', 'S16', 'S17', 'S21'];  // the trade scenarios that go short
+  var SHORT_IDS = ['S03', 'S10', 'S16', 'S17'];         // the trade scenarios that go short
+  var EITHER_IDS = ['S21'];                              // the seed decides: bearish SMT at a high (short) or bullish at a low (long)
   var TWIN_IDS = ['S21'];                                // opens as an ES / NQ pair (truth.twin)
   var SEEDS = { S01: 1, S02: 5, S03: 4, S04: 2, S05: 3, S06: 6, S07: 7, S08: 2, S09: 3, S10: 5, S11: 4, S12: 2, S13: 3, S14: 6,
                 S15: 1, S16: 1, S17: 1, S18: 1, S19: 1, S20: 1, S21: 1, S22: 1 };
@@ -84,7 +85,7 @@
     return {
       trade: def.outcomes.length > 0, fail: def.outcomes.indexOf('fail') >= 0,
       session: SESSION_IDS.indexOf(def.id) >= 0, htf: HTF_IDS.indexOf(def.id) >= 0,
-      side: def.outcomes.length ? (SHORT_IDS.indexOf(def.id) >= 0 ? 'short' : 'long') : null
+      side: def.outcomes.length ? (EITHER_IDS.indexOf(def.id) >= 0 ? 'either' : SHORT_IDS.indexOf(def.id) >= 0 ? 'short' : 'long') : null
     };
   }
   // ids of the scenarios a filter keeps, in library order
@@ -184,7 +185,8 @@
     function add(key, label, bar, fn) { rows.push({ key: key, label: label, bar: bar, text: bar <= at ? fn() : null }); }
     if (T.smt) add('smt', 'SMT', T.smt.at, function () {
       var lead = T.smt.leader === 'main' ? b.meta.instrument : T.twin.instrument;
-      return 'bearish SMT ที่ high: ' + lead + ' ทำ lower high นำ · ' + stampOf(cs[T.smt.at].t);
+      var low = T.smt.kind === 'low';
+      return (low ? 'bullish SMT ที่ low: ' + lead + ' ทำ higher low นำ' : 'bearish SMT ที่ high: ' + lead + ' ทำ lower high นำ') + ' · ' + stampOf(cs[T.smt.at].t);
     });
     if (T.sweep) add('sweep', 'sweep', T.sweep.bar, function () { return levelName(T, T.sweep.levelId) + ' · ' + stampOf(cs[T.sweep.bar].t); });
     var c = K.confirm;
@@ -209,11 +211,11 @@
   function twinBuilt(b) { return { candles: b.truth.twin.candles, meta: Object.assign({}, b.meta, { instrument: b.truth.twin.instrument }) }; }
   // the SMT line (high 1 -> high 2) of one chart of the pair, with its two labels; both appear when the second high is known
   function twinOverlays(b, which) {
-    var s = b.truth.smt, p = s[which], tag = which === 'main' ? 'm' : 't';
+    var s = b.truth.smt, p = s[which], tag = which === 'main' ? 'm' : 't', low = s.kind === 'low', up = p.p2.price > p.p1.price;
     return [
       { id: 'smt-l-' + tag, type: 'trend', a: { bar: p.p1.bar, price: p.p1.price }, b: { bar: p.p2.bar, price: p.p2.price }, appearAt: s.at },
-      { id: 'smt-1-' + tag, type: 'label', bar: p.p1.bar, price: p.p1.price, text: 'high แรก', pos: 'above', appearAt: s.at },
-      { id: 'smt-2-' + tag, type: 'label', bar: p.p2.bar, price: p.p2.price, text: p.p2.price > p.p1.price ? 'higher high' : 'lower high', pos: 'above', appearAt: s.at }
+      { id: 'smt-1-' + tag, type: 'label', bar: p.p1.bar, price: p.p1.price, text: low ? 'low แรก' : 'high แรก', pos: low ? 'below' : 'above', appearAt: s.at },
+      { id: 'smt-2-' + tag, type: 'label', bar: p.p2.bar, price: p.p2.price, text: low ? (up ? 'higher low' : 'lower low') : (up ? 'higher high' : 'lower high'), pos: low ? 'below' : 'above', appearAt: s.at }
     ];
   }
 
@@ -265,7 +267,7 @@
   var filterKey = 'all';
 
   // ---------------------------------------------------------------- the cards
-  var SIDE_TAG = { long: ['tag--long', 'Long'], short: ['tag--short', 'Short'] };
+  var SIDE_TAG = { long: ['tag--long', 'Long'], short: ['tag--short', 'Short'], either: ['tag--none', 'Long / Short'] };
   function cardHtml(d) {
     var lv = levelOf(d.id), k = kindOf(d), tags = '<span class="level-tag" data-level="' + lv + '">L' + lv + '</span>';
     tags += k.trade

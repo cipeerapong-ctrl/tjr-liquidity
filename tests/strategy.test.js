@@ -7,7 +7,7 @@
   (0, eval)(readText('assets/js/pages/strategy.js'));
   var P = TJR.strategyPage, S = TJR.scenarios, C = TJR.confluence;
 
-  function build(seed) { return S.safeBuild(S.get('S21'), seed, {}); }
+  function build(seed) { return S.safeBuild(S.get('S21'), seed, { kind: 'high', lead: 'ES' }); }
   var SEEDS = [];
   for (var s = 1; s <= 30; s++) SEEDS.push(s);
 

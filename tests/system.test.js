@@ -104,11 +104,15 @@
     }
     eq(build('S16', 4).truth.side, 'short');
     for (const id of ['S17', 'S21']) {
-      const b = build(id, 4), k = b.truth.confluence;
-      eq([k.confirm.kind, k.cont.kind, b.truth.side], ['bos', 'eq', 'short'], id + ' kinds');
-      const r = C.eqRange(b.candles, { at: k.cont.at, dir: 'down' });
-      eq([r.low, r.high, r.eq], [k.cont.low, k.cont.high, k.cont.eq], id + ' eq range = detector');
-      ok(b.candles[k.entry.at].c < b.candles[k.entry.at].o && b.candles[k.entry.at].c < k.cont.eq, id + ' bearish close under eq');
+      for (const kind of id === 'S21' ? ['high', 'low'] : [null]) {
+        const b = S.get(id).build(4, kind ? { kind } : {}), k = b.truth.confluence, L = kind === 'low';
+        eq([k.confirm.kind, k.cont.kind, b.truth.side], ['bos', 'eq', L ? 'long' : 'short'], id + ' kinds');
+        const r = C.eqRange(b.candles, { at: k.cont.at, dir: L ? 'up' : 'down' });
+        eq([r.low, r.high, r.eq], [k.cont.low, k.cont.high, k.cont.eq], id + ' eq range = detector');
+        const e = b.candles[k.entry.at];
+        if (L) ok(e.c > e.o && e.c > k.cont.eq, id + ' bullish close over eq');
+        else ok(e.c < e.o && e.c < k.cont.eq, id + ' bearish close under eq');
+      }
     }
     const k19 = build('S19', 4).truth.confluence;
     ok(k19.stack && k19.stack.top !== k19.cont.i, 'S19 stack: top gap and the bottom gap (cont)');
@@ -130,18 +134,76 @@
     }
   });
 
-  test('system: S21 twin - same times, ES lower high (main), NQ higher high (twin), leader main; S22 windows', () => {
-    for (let s = 1; s <= 5; s++) {
-      const b = build('S21', s), T = b.truth;
-      eq(T.twin.instrument, 'NQ');
+  test('system: S21 twin - same clock, the traded index leads (lower high / higher low), the other index pushes through; S22 windows', () => {
+    for (let s = 1; s <= 8; s++) {
+      const b = build('S21', s), T = b.truth, low = T.smt.kind === 'low';
       eq(T.twin.candles.map((k) => k.t), b.candles.map((k) => k.t), 'twin shares the clock');
       eq(TJR.gen.validate(T.twin.candles, 0.25), [], 'twin candles valid');
-      ok(T.smt.main.p2.price < T.smt.main.p1.price && T.smt.twin.p2.price > T.smt.twin.p1.price, 'ES LH, NQ HH');
-      eq([T.smt.type, T.smt.leader, T.twin.leader], ['bearish', 'main', 'main']);
+      eq([b.meta.instrument, T.twin.instrument].sort(), ['ES', 'NQ'], 'the pair is ES and NQ');
+      const m = T.smt.main, t = T.smt.twin;
+      if (low) ok(m.p2.price > m.p1.price && t.p2.price < t.p1.price, 'main higher low, twin lower low');
+      else ok(m.p2.price < m.p1.price && t.p2.price > t.p1.price, 'main lower high, twin higher high');
+      eq([T.smt.type, T.smt.leader, T.twin.leader], [low ? 'bullish' : 'bearish', 'main', 'main']);
+      eq(T.side, low ? 'long' : 'short', 'the trade follows the SMT kind');
       const c = build('S22', s), N = TJR.sessions.nyWindows(c.candles[c.truth.sweep.bar].t);
       const ts = c.candles[c.truth.sweep.bar].t, te = c.candles[c.truth.confluence.entry.at].t;
       ok(ts >= N.manipulation.from && ts < N.manipulation.to, 'S22 sweep inside 09:30-09:50 ET');
       ok(te >= N.entry.from && te < N.entry.to, 'S22 entry inside 09:50-10:10 ET');
+    }
+  });
+
+  // M3 (final review): which index leads and the SMT kind come from the seed; opts pin them
+  test('system: S21 randomises the leader (ES or NQ) and the kind (high / low) per seed; opts.kind / opts.lead pin them', () => {
+    const seen = {};
+    for (let s = 1; s <= 80; s++) {
+      const b = build('S21', s), T = b.truth, key = T.smt.kind + '/' + b.meta.instrument;
+      seen[key] = (seen[key] || 0) + 1;
+      // the leader is read from the swings by the detector, never assumed
+      const r = C.smt({ p1: T.smt.main.p1.price, p2: T.smt.main.p2.price }, { p1: T.smt.twin.p1.price, p2: T.smt.twin.p2.price }, T.smt.kind);
+      eq([r.type, r.leader === 'a' ? 'main' : r.leader === 'b' ? 'twin' : null], [T.smt.type, T.smt.leader], 'seed ' + s + ' detector agrees');
+      eq(T.twin.leader, T.smt.leader);
+      eq(T.twin.instrument, b.meta.instrument === 'ES' ? 'NQ' : 'ES');
+    }
+    eq(Object.keys(seen).sort(), ['high/ES', 'high/NQ', 'low/ES', 'low/NQ'], 'all four variants occur: ' + JSON.stringify(seen));
+    Object.keys(seen).forEach((k) => ok(seen[k] >= 10, k + ' occurs often enough: ' + JSON.stringify(seen)));
+    for (const [kind, lead] of [['high', 'ES'], ['high', 'NQ'], ['low', 'ES'], ['low', 'NQ']]) {
+      for (let s = 1; s <= 25; s++) {
+        const b = S.get('S21').build(s, { kind, lead }), tag = kind + '/' + lead + ' seed ' + s;
+        eq([b.truth.smt.kind, b.meta.instrument], [kind, lead], tag);
+        eq(S.check(b), [], tag + ' check');
+      }
+    }
+    let threw = 0;
+    try { S.get('S21').build(1, { kind: 'mid' }); } catch (e) { threw++; }
+    try { S.get('S21').build(1, { lead: 'DAX' }); } catch (e) { threw++; }
+    eq(threw, 2, 'unknown kind / lead are refused');
+  });
+
+  // B1 (final review): the break is the FIRST close beyond the watched swing, and it comes after the SMT is known
+  test('system: S21 seeds 1..200 - the BOS is the first close beyond its level once the level is known, and after smt.at', () => {
+    for (let s = 1; s <= 200; s++) {
+      const b = build('S21', s), T = b.truth, K = T.confluence, cs = b.candles, L = T.side === 'long';
+      const sw = TJR.swings.find(cs), list = L ? sw.highs : sw.lows;
+      const lv = list.find((p) => p.i === K.confirm.level.i && p.price === K.confirm.level.price);
+      ok(lv, 'seed ' + s + ' the level is a swing');
+      for (let j = lv.pair[1] + 1; j < K.confirm.at; j++) {
+        ok(L ? !(cs[j].c > lv.price) : !(cs[j].c < lv.price), 'seed ' + s + ' bar ' + j + ' already closed beyond ' + lv.price + ' before the break at ' + K.confirm.at);
+      }
+      ok(K.confirm.at > T.smt.at, 'seed ' + s + ' the break comes after the SMT is known');
+    }
+  });
+
+  // M1 (final review): no SMT note says "lower high" before both second swings are known
+  test('system: S21 seeds 1..200 - SMT notes sit on or after the bar both second swings are known', () => {
+    const smtFacts = ['P1.31', 'P6.15', 'P6.16', 'P6.17', 'P6.18', 'P6.19', 'P1.35'];
+    for (let s = 1; s <= 200; s++) {
+      const b = build('S21', s), T = b.truth, sw = TJR.swings.find(b.candles), tw = TJR.swings.find(T.twin.candles);
+      const low = T.smt.kind === 'low';
+      const knownAt = (found, p) => (low ? found.lows : found.highs).find((q) => q.i === p.bar && q.price === p.price).pair[1] + 1;
+      const known = Math.max(knownAt(sw, T.smt.main.p2), knownAt(tw, T.smt.twin.p2));
+      eq(T.smt.at, known, 'seed ' + s + ' smt.at');
+      T.notes.filter((n) => smtFacts.includes(n.fact)).forEach((n) => ok(n.bar >= known, 'seed ' + s + ' note ' + n.fact + ' at ' + n.bar + ' before ' + known));
+      ok(T.notes.some((n) => n.fact === 'P6.17' && n.text.indexOf(b.meta.instrument) >= 0), 'seed ' + s + ' the leader is named');
     }
   });
 
@@ -162,17 +224,54 @@
     bad('S19', (b) => { b.truth.confluence.stack.top = b.truth.confluence.cont.i; }, 'S19 stack top = bottom');
   });
 
+  // M2 (final review): "the IFVG comes before the BOS" is claimed only when the chart shows it
+  test('system: S16 note P8.25 matches the chart - head start only when the BOS comes later; same bar and earlier break say so (seeds 1..200)', () => {
+    const seen = { later: 0, same: 0, none: 0, earlier: 0 };
+    for (const outcome of ['win', 'fail']) {
+      for (let s = 1; s <= 200; s++) {
+        const b = build('S16', s, outcome), T = b.truth, at = T.confluence.confirm.at, tag = 'seed ' + s + ' ' + outcome;
+        const notes = T.notes.filter((n) => n.fact === 'P8.25');
+        eq(notes.length, 1, tag + ' one P8.25 note');
+        eq(notes[0].bar, at, tag + ' the note sits on the IFVG bar');
+        const bos = C.bos(b.candles, { trend: 'up', from: T.sweep.bar + 1 })[0], txt = notes[0].text;
+        if (!bos) { seen.none++; ok(/ยังไม่มีแท่งปิดใต้ low/.test(txt), tag + ' no BOS yet: ' + txt); }
+        else if (bos.at > at) { seen.later++; ok(txt.indexOf('ตามหลัง ' + (bos.at - at) + ' แท่ง') >= 0 && !/แท่งเดียวกัน/.test(txt), tag + ' BOS ' + (bos.at - at) + ' bars later: ' + txt); }
+        else if (bos.at === at) { seen.same++; ok(/แท่งเดียวกัน/.test(txt) && !/ตามหลัง/.test(txt), tag + ' same bar: ' + txt); }
+        else { seen.earlier++; ok(/BOS มาก่อน/.test(txt), tag + ' BOS first: ' + txt); }
+      }
+    }
+    ok(seen.later > 0 && seen.same > 0, 'both the head start and the same-bar case occur: ' + JSON.stringify(seen));
+  });
+
+  // B1 (final review): check() itself rejects a break that skips an earlier close beyond its level
+  test('system: check names a BOS that is not the first close beyond its level', () => {
+    for (const id of ['S15', 'S17']) {
+      const b = build(id, 3), K = b.truth.confluence, L = b.truth.side === 'long';
+      const sw = TJR.swings.find(b.candles), lv = (L ? sw.highs : sw.lows).find((p) => p.i === K.confirm.level.i && p.price === K.confirm.level.price);
+      const j = lv.pair[1] + 1;
+      ok(j < K.confirm.at, id + ' there is a bar between the level being known and the break');
+      const k = b.candles[j], nx = b.candles[j + 1];
+      if (L) { k.c = lv.price + 0.25; k.h = Math.max(k.h, k.c); } else { k.c = lv.price - 0.25; k.l = Math.min(k.l, k.c); }
+      nx.o = k.c; nx.h = Math.max(nx.h, nx.o); nx.l = Math.min(nx.l, nx.o);   // keep the candles continuous
+      ok(S.check(b).some((m) => /already closed beyond/.test(m)), id + ': ' + JSON.stringify(S.check(b).slice(0, 3)));
+    }
+  });
+
   test('system: notes cite real facts in Thai at bars on the chart; every def fact is cited', () => {
     for (const id of IDS) {
       for (const outcome of outcomesOf(S.get(id))) {
-        const b = build(id, 11, outcome);
-        ok(b.truth.notes.length > 0, id + ' has notes');
-        b.truth.notes.forEach((n) => {
-          ok(factExists(n.fact), id + ' note fact ' + n.fact);
-          ok(THAI.test(n.text), id + ' note Thai');
-          ok(n.bar >= 0 && n.bar < b.candles.length, id + ' note bar');
+        // S21 tells a bearish (high) and a bullish (low) story: together the two cite every def fact
+        const builds = id === 'S21' ? [S.get(id).build(11, { kind: 'high' }), S.get(id).build(11, { kind: 'low' })] : [build(id, 11, outcome)];
+        const cited = new Set();
+        builds.forEach((b) => {
+          ok(b.truth.notes.length > 0, id + ' has notes');
+          b.truth.notes.forEach((n) => {
+            ok(factExists(n.fact), id + ' note fact ' + n.fact);
+            ok(THAI.test(n.text), id + ' note Thai');
+            ok(n.bar >= 0 && n.bar < b.candles.length, id + ' note bar');
+            cited.add(n.fact);
+          });
         });
-        const cited = new Set(b.truth.notes.map((n) => n.fact));
         S.get(id).facts.forEach((f) => ok(cited.has(f), id + ' ' + (outcome || '') + ': def fact ' + f + ' is cited by a note'));
       }
     }

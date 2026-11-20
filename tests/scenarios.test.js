@@ -45,7 +45,8 @@
     LIST.forEach((d) => {
       var k = G.kindOf(d), b = TJR.scenarios.safeBuild(d, G.SEEDS[d.id], {});
       eq(k.trade, b.truth.side != null, d.id + ' trade');
-      eq(k.side, b.truth.side, d.id + ' side');
+      if (d.id === 'S21') ok(k.side === 'either' && ['long', 'short'].includes(b.truth.side), 'S21 side depends on the seed');
+      else eq(k.side, b.truth.side, d.id + ' side');
       eq(k.fail, d.outcomes.indexOf('fail') >= 0, d.id + ' fail');
     });
     eq(LIST.filter((d) => G.kindOf(d).fail).map((d) => d.id), ['S01', 'S03', 'S09', 'S10', 'S15', 'S16']);

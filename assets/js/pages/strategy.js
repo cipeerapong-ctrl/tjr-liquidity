@@ -67,7 +67,9 @@
   };
 
   var SEED = 1;                                           // fixed: the chart every visitor sees first (checked readable)
-  function build(seed) { return TJR.scenarios.safeBuild(TJR.scenarios.get('S21'), seed == null ? SEED : seed, {}); }
+  // his trade is the bearish SMT at a high with ES leading: S21 draws kind and leader from the seed, so both are pinned here
+  var STORY = { kind: 'high', lead: 'ES' };
+  function build(seed) { return TJR.scenarios.safeBuild(TJR.scenarios.get('S21'), seed == null ? SEED : seed, STORY); }
   var memo = null;
   function defaultBuild() { if (!memo) memo = build(SEED); return memo; }
 

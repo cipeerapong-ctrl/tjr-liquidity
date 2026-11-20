@@ -109,7 +109,11 @@
     }
 
     if (on('bos')) {
-      C.bos(seen).forEach(function (e) {
+      // from the setup (the sweep, or S21's second swing) with the trend that setup implies: a short expects a break down of
+      // an uptrend. From bar 0 the trend state would depend on pre-setup noise and could hide the real break (P11.8-P11.14).
+      var K = T.confluence, from = K && (K.dir === 'long' || K.dir === 'short') && typeof K.origin === 'number'
+        ? { trend: K.dir === 'long' ? 'down' : 'up', from: K.origin + 1 } : undefined;
+      C.bos(seen, from).forEach(function (e) {
         out.push({ id: 'bos:' + e.at, type: 'bos', price: e.level.price, from: e.level.i, at: e.at, dir: e.dir,
                    appearAt: e.at });
       });

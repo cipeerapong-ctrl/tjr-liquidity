@@ -522,7 +522,7 @@
         ok(g.dir === 'bull' || g.dir === 'bear', 'a named direction');
         var gaps = L.gapsIn(b, g), mine = gaps.filter(function (x) { return x.dir === g.dir; });
         ok(mine.length >= 1, id + ' seed ' + seed + ' has a ' + g.dir + ' gap in the window');
-        gaps.forEach(function (x) { ok(x.from >= g.from && x.to <= g.to, 'gap inside the window and its third candle is revealed'); });
+        gaps.forEach(function (x) { ok(x.from >= L.gapViewFrom(g) && x.to <= g.to, 'gap inside the view and its third candle is revealed'); });
         eq(L.gapSlice(b, g).candles.length, g.to + 1);
         for (var i = g.from; i <= g.to; i++) {
           var hit = mine.some(function (x) { return x.i === i; });
@@ -589,15 +589,16 @@
     ok(kinds.wick > 0 && kinds.close > 0, JSON.stringify(kinds));
   });
 
-  test('lab smt: both charts are read from the candles; the answer is the lower-high index; the panel order is shuffled; chips cite clip #6', () => {
-    var lefts = { main: 0, twin: 0 };
+  test('lab smt: both charts are read from the candles; the answer is the lower-high (higher-low) index; leader, kind and panel order all vary; chips cite clip #6', () => {
+    var lefts = { main: 0, twin: 0 }, names = {}, kinds = {};
     for (var seed = 1; seed <= 60; seed++) {
       var r = L.makeRound('smt', rngOf(seed * 3203), null), b = r.built, f = L.smtFacts(b);
       eq(r.def.id, 'S21');
       eq(f.leader, TJR.grade.smtLeader(b));
-      ok((f.main.p2 < f.main.p1) !== (f.twin.p2 < f.twin.p1), 'one lower high, one higher high');
+      ok((f.main.p2 < f.main.p1) !== (f.twin.p2 < f.twin.p1), 'one index makes the lower swing, the other the higher');
       var lead = f[f.leader];
-      ok(lead.p2 < lead.p1, 'the leader made the lower high');
+      if (f.kind === 'low') ok(lead.p2 > lead.p1, 'the leader made the higher low'); else ok(lead.p2 < lead.p1, 'the leader made the lower high');
+      names[lead.name] = (names[lead.name] || 0) + 1; kinds[f.kind] = (kinds[f.kind] || 0) + 1;
       eq(TJR.grade.smt(b, f.leader).correct, true); eq(TJR.grade.smt(b, f.leader === 'main' ? 'twin' : 'main').correct, false);
       lefts[r.smt.swap ? 'twin' : 'main']++;
       eq(r.smt.reveal, b.truth.smt.at);
@@ -611,6 +612,9 @@
       ok(fb.text.indexOf(lead.name) >= 0 && fb.secs.length >= 2 && fb.secs.every(function (s) { return s[0] === 6 && s[1] <= 964; }), 'feedback names the leader and cites clip #6');
     }
     ok(lefts.main > 10 && lefts.twin > 10, 'the answer is not always on the same side: ' + JSON.stringify(lefts));
+    // M3 (final review): answering "ES" every round must not score full marks
+    ok(names.ES > 10 && names.NQ > 10, 'the leader is not always the same index: ' + JSON.stringify(names));
+    ok(kinds.high > 10 && kinds.low > 10, 'both SMT kinds occur: ' + JSON.stringify(kinds));
   });
 
   test('lab.html: seven tabs (Replay Spot Sessions Quiz + Gap finder, Break or not, Which index leads), a second chart pane for the twin, store keys through TJR.store, no chip to clip #4', () => {

@@ -302,8 +302,10 @@
     return { from: Math.max(0, ref - GAP_BEFORE), to: Math.min(n - 1, ref + GAP_AFTER) };
   }
   function gapSlice(b, g) { return { candles: b.candles.slice(0, g.to + 1), meta: b.meta, truth: b.truth }; }
-  // the gaps on screen: formed inside the window, third candle revealed
-  function gapsIn(b, g) { return TJR.confluence.fvgs(b.candles.slice(0, g.to + 1)).filter(function (x) { return x.from >= g.from; }); }
+  // the chart starts one bar before the window (so the first bar's gap shows whole): a gap is on screen when its first candle is
+  // at or after that bar and its third candle is revealed
+  function gapViewFrom(g) { return Math.max(0, g.from - 1); }
+  function gapsIn(b, g) { var v = gapViewFrom(g); return TJR.confluence.fvgs(b.candles.slice(0, g.to + 1)).filter(function (x) { return x.from >= v; }); }
   // The round: the window plus ONE named direction ('bull' | 'bear') that has a gap in it. The rule is the web site's own,
   // stricter than TJR.grade.fvg (any gap within 1 bar, which random clicks pass in 50-70% of the windows): the click must
   // land exactly on the middle candle of a gap OF THAT DIRECTION. A random click then passes in about 1 round in 7.
@@ -334,7 +336,7 @@
   }
   function gapOverlays(b, g) {
     // plain boxes: a gap's later fate (respected, IFVG) is not what this drill is about
-    return TJR.annotate.confluence(b, { upTo: g.to, show: { bos: false, eq: false, windows: false } }).filter(function (o) { return o.type === 'fvg' && o.from >= g.from; }).map(function (o) {
+    return TJR.annotate.confluence(b, { upTo: g.to, show: { bos: false, eq: false, windows: false } }).filter(function (o) { return o.type === 'fvg' && o.from >= gapViewFrom(g); }).map(function (o) {
       return { id: o.id, type: 'fvg', from: o.from, to: o.to, low: o.low, high: o.high, dir: o.dir, state: 'open', appearAt: o.appearAt };
     });
   }
@@ -442,7 +444,7 @@
   L.sessionStarts = sessionStarts; L.sessionSpan = sessionSpan; L.sessionTicks = sessionTicks; L.sessionView = sessionView; L.spotSetup = spotSetup; L.spotView = spotView;
   L.quizAnswers = quizAnswers; L.quizOptions = quizOptions; L.pickQuiz = pickQuiz; L.quizOverlay = quizOverlay; L.afterAllowed = afterAllowed;
   L.D4_L2 = D4_L2; L.isLevel2 = isLevel2; L.l2Chain = l2Chain; L.confluenceOverlays = confluenceOverlays;
-  L.gapWindow = gapWindow; L.gapRound = gapRound; L.gapSlice = gapSlice; L.gapsIn = gapsIn; L.gapGrade = gapGrade; L.gapWhy = gapWhy; L.gapOverlays = gapOverlays;
+  L.gapViewFrom = gapViewFrom; L.gapWindow = gapWindow; L.gapRound = gapRound; L.gapSlice = gapSlice; L.gapsIn = gapsIn; L.gapGrade = gapGrade; L.gapWhy = gapWhy; L.gapOverlays = gapOverlays;
   L.GAP_SECS = GAP_SECS; L.pickBos = pickBos; L.bosOverlays = bosOverlays; L.bosFeedback = bosFeedback;
   L.smtFacts = smtFacts; L.smtPanels = smtPanels; L.smtLines = smtLines; L.smtFeedback = smtFeedback;
   L.freshSeed = freshSeed; L.makeRound = makeRound;
@@ -481,7 +483,7 @@
     quiz: ['เส้นสีทองบนกราฟคือ level หนึ่ง ตอบว่ามันเป็น low-resistance, high-resistance, HTF หรือ session ตามที่คลิปแบ่ง', [2385, 2700, 1635]],
     gap: ['ระดับ 2: คลิกที่แท่งกลางของ fair value gap บนกราฟ gap คือช่องว่างระหว่างไส้ของแท่งแรกกับไส้ของแท่งที่สาม โดยมีแท่งใหญ่คั่นกลาง สีของแท่งแรกและแท่งที่สามไม่สำคัญ กติกา: คลิกตรงแท่งกลางของ gap ฝั่งที่โจทย์ระบุเท่านั้น (เกณฑ์ของเว็บนี้ ไม่ใช่จากคลิป) ตรวจแล้วจะเห็นกรอบของ gap ทุกอันในช่วงนี้', [[10, 251], [10, 189], [10, 606]]],
     bos: ['ระดับ 2: กราฟหยุดที่แท่งหนึ่ง (ลูกศร) เส้นทองคือ low หรือ high ล่าสุดที่เฝ้าอยู่ ตอบว่าแท่งนี้ทำให้เกิด break of structure หรือยัง ไส้ที่ทะลุไม่นับ ต้องมีแท่งที่ปิดเลย level', [[11, 153], [11, 263], [11, 502]]],
-    smt: ['ระดับ 2: สองกราฟคือ ES และ NQ ในช่วงเวลาเดียวกัน ลูกศรคือ high แรกและ high ที่สองของแต่ละดัชนี ตอบว่าดัชนีไหนเป็นตัวนำของการเคลื่อนไหว ซึ่งตำแหน่งซ้ายขวาสลับกันไปทุกข้อ', [[6, 316], [6, 338]]]
+    smt: ['ระดับ 2: สองกราฟคือ ES และ NQ ในช่วงเวลาเดียวกัน ลูกศรคือ high แรกและ high ที่สอง (หรือ low แรกและ low ที่สอง) ของแต่ละดัชนี ตอบว่าดัชนีไหนเป็นตัวนำของการเคลื่อนไหว ซึ่งตำแหน่งซ้ายขวาสลับกันไปทุกข้อ', [[6, 316], [6, 338]]]
   };
 
   var S = { mode: null, ch: null, tw: null, run: 0, auto: 0, round: null, answered: false, last: null, pan: false, score: L.blank(), lastOk: null, rows: null };
@@ -835,7 +837,7 @@
         '</p><p class="hint">กติกา: คลิกตรงแท่งกลางของ gap ฝั่งที่โจทย์ระบุเท่านั้น (เกณฑ์ของเว็บนี้ ไม่ใช่จากคลิป)</p>';
       S.ch.setOverlays([]);
       S.ch.reveal(g.to);
-      S.ch.view(Math.max(0, g.from - 1), g.to + 3);
+      S.ch.view(gapViewFrom(g), g.to + 3);
       el.meta.textContent = stamp(b.candles[g.to].t);
       var run = S.run;
       S.ch.on('click', function (p) { if (S.run === run) Gp.answer(p); });

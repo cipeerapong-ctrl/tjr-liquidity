@@ -188,7 +188,7 @@
     return { ok: false, why: 'other', want: want, start: s, end: e };
   }
 
-  // ---- lesson 5: which index leads (S21: the traded chart is ES, the twin NQ)
+  // ---- lesson 5: which index leads (S21 with kind 'high': the traded chart is the leader, ES or NQ by seed; the twin is the other)
   function smtRead(b) {
     var T = b.truth, s = T.smt, main = b.meta.instrument, tw = T.twin.instrument, nums = {};
     nums[main] = { p1: s.main.p1.price, p2: s.main.p2.price, bar1: s.main.p1.bar, bar2: s.main.p2.bar };
@@ -227,7 +227,7 @@
   function $$(sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
   function setPressed(btn, on) { if (btn) btn.setAttribute('aria-pressed', String(!!on)); }
   function stamp(t) { return TJR.sessions.fmtET(t) + ' ET · ' + TJR.sessions.fmtThai(t) + ' น.'; }
-  function build(id, seed) { return TJR.scenarios.safeBuild(TJR.scenarios.get(id), seed, {}); }
+  function build(id, seed, opts) { return TJR.scenarios.safeBuild(TJR.scenarios.get(id), seed, opts || {}); }
   function px(v) { return TJR.util.fmtPrice(v); }
   function chip(sec, clip) { return TJR.layout.chip(sec, clip); }
   function gapBadge() { return TJR.layout.gap(); }
@@ -641,7 +641,7 @@
       B2.setOverlays(sideOv(onB, labels).concat(onB === b.meta.instrument ? evs : []));
     }
     function load(seed, swap) {
-      b = build('S21', seed); cs = b.candles; rd = smtRead(b);
+      b = build('S21', seed, { kind: 'high' }); cs = b.candles; rd = smtRead(b);   // this lesson teaches the bearish SMT; ES or NQ leads (P6.17)
       var twinBuilt = { candles: b.truth.twin.candles, meta: Object.assign({}, b.meta, { instrument: b.truth.twin.instrument }) };
       onA = swap ? b.truth.twin.instrument : b.meta.instrument; onB = swap ? b.meta.instrument : b.truth.twin.instrument;
       tw.setData(swap ? twinBuilt : b, swap ? b : twinBuilt);

@@ -1007,7 +1007,7 @@
       var outcome = opts && opts.outcome != null ? opts.outcome : null;
       if (outcome != null && d.outcomes.indexOf(outcome) < 0) throw new Error(d.id + ': outcome "' + outcome + '" not supported');
       if (outcome == null && d.outcomes.length) outcome = 'win';
-      return script(d, seed, outcome);
+      return script(d, seed, outcome, opts);
     };
     return d;
   }
@@ -1256,20 +1256,27 @@
     var K = T.confluence, CF = TJR.confluence, n = cs.length, j;
     function inBar(x) { return typeof x === 'number' && x === Math.floor(x) && x >= 0 && x < n; }
     if (K.dir !== 'long' && K.dir !== 'short') { e.push('confluence.dir ' + K.dir); return; }
-    var L = K.dir === 'long', want = L ? 'bull' : 'bear', ref;
+    var L = K.dir === 'long', want = L ? 'bull' : 'bear', ref, from;
     if (T.side != null && T.side !== K.dir) e.push('side ' + T.side + ' != confluence.dir ' + K.dir);
-    if (T.sweep) { ref = T.sweep.bar; if (K.origin !== ref) e.push('confluence.origin ' + K.origin + ' != the sweep bar'); }
+    if (T.sweep) { ref = from = T.sweep.bar; if (K.origin !== ref) e.push('confluence.origin ' + K.origin + ' != the sweep bar'); }
     else if (T.smt && T.smt.main && T.smt.main.p2) {
-      ref = T.smt.at;
+      ref = T.smt.at; from = K.origin;   // the break is scanned from the second swing, so a close before smt.at is caught
       if (K.origin !== T.smt.main.p2.bar) e.push('confluence.origin ' + K.origin + ' != the SMT second swing');
     } else { e.push('confluence needs a sweep or an SMT'); return; }
     // confirmation (P1.37, P8.14, P11.25): the first break / inverse after the setup starts
     var cf = K.confirm;
     if (!cf || !inBar(cf.at) || !(cf.at > ref)) { e.push('confirm missing or not after bar ' + ref); return; }
     if (cf.kind === 'bos') {
-      var ev = CF.bos(cs, { trend: L ? 'down' : 'up', from: ref + 1 })[0];
+      var ev = CF.bos(cs, { trend: L ? 'down' : 'up', from: from + 1 })[0];
       if (!ev || ev.at !== cf.at || ev.dir !== (L ? 'up' : 'down') || !cf.level || ev.level.i !== cf.level.i || ev.level.price !== cf.level.price) {
-        e.push('confirm: not the first ' + (L ? 'up' : 'down') + ' BOS after bar ' + ref);
+        e.push('confirm: not the first ' + (L ? 'up' : 'down') + ' BOS after bar ' + from);
+      }
+      // P11.8: the break is the first close beyond the level once the level is known: no earlier bar did it
+      var lvs = SW.find(cs), lvl = (L ? lvs.highs : lvs.lows).filter(function (p) { return cf.level && p.i === cf.level.i && p.price === cf.level.price; })[0];
+      if (lvl) {
+        for (j = lvl.pair[1] + 1; j < cf.at; j++) {
+          if (L ? cs[j].c > lvl.price : cs[j].c < lvl.price) { e.push('confirm: bar ' + j + ' already closed beyond ' + lvl.price + ' before the break at ' + cf.at); break; }
+        }
       }
     } else if (cf.kind === 'ifvg') {
       var opp = L ? 'bear' : 'bull', first = null;

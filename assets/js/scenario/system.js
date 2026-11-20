@@ -191,7 +191,7 @@
     truth.notes = o.notes(truth, stamped).map(function (x) { return { bar: x[0], fact: x[1], text: x[2] }; });
     var mp = function (nm) { return KIT.mpt(sc, nm); };
     var poke = mp(o.poke[0]); poke.levelId = o.poke[1];
-    var meta = { id: d.id, instrument: d.instrument, tf: d.tf, tick: TICK, seed: seed, vol: sc.u, chop: sc.chop, level: 2,
+    var meta = { id: d.id, instrument: o.instrument || d.instrument, tf: d.tf, tick: TICK, seed: seed, vol: sc.u, chop: sc.chop, level: 2,
                  mess: { nearEqual: [mp(o.near[0]), mp(o.near[1])], poke: poke } };
     return { candles: stamped, meta: meta, truth: truth };
   }
@@ -473,6 +473,16 @@
     };
   }
 
+  // P8.25: an IFVG can let you enter before the BOS. True only when the first close under the most recent low comes after
+  // the IFVG bar; the note says what the chart actually shows (the same candle often does both)
+  function headStart(cs, sweep, at) {
+    var bos = C().bos(cs, { trend: 'up', from: sweep + 1 })[0];
+    if (!bos) return 'ยังไม่มีแท่งปิดใต้ low ล่าสุดในกราฟนี้ IFVG จึงมาก่อน break of structure — เข้าได้เร็วกว่ารอให้ปิดใต้ low';
+    if (bos.at > at) return 'IFVG มาก่อน break of structure: BOS ตามหลัง ' + (bos.at - at) + ' แท่ง จึงเข้าได้เร็วกว่ารอให้ปิดใต้ low';
+    if (bos.at === at) return 'แท่งเดียวกันนี้ปิดใต้ low ล่าสุดด้วย จึงเกิด BOS ในแท่งเดียวกัน — กราฟนี้ IFVG ไม่ได้มาก่อน เลยไม่ได้เข้าเร็วกว่า (คลิปว่าข้อดีของ IFVG คือบางครั้งได้เข้าก่อน BOS)';
+    return 'BOS มาก่อน: แท่งที่ ' + bos.at + ' ปิดใต้ low ล่าสุดไปแล้ว กราฟนี้ IFVG จึงไม่ได้ช่วยให้เข้าก่อน (คลิปว่าข้อดีของ IFVG คือบางครั้งได้เข้าก่อน BOS)';
+  }
+
   // S16 (P8.14, P8.24, P8.25, P7.11): short. sweep high -> the bull gap of that push is closed under (IFVG) ->
   // pullback into the bear gap of the drop -> red close out of it -> short
   function S16(d, seed, outcome) {
@@ -490,7 +500,7 @@
           [T.sweep.bar, 'P7.11', 'ราคาดันขึ้นเหนือ high = โอกาสให้ orders ถูกเติม (ขั้นที่ 1)'],
           [K.confirm.at, 'P8.24', 'แท่งนี้ปิดใต้ก้น bullish gap — นับที่แท่งที่ปิดใต้ ไม่ใช่แท่งแรกที่เข้า gap'],
           [K.confirm.at, 'P8.14', 'gap ที่ควรพาราคาขึ้นต่อโดนปิดทะลุ = inverse fair value gap ใช้เป็น confirmation แบบ break of structure'],
-          [K.confirm.at, 'P8.25', 'IFVG มาก่อน break of structure จึงเข้าได้เร็วกว่ารอให้ปิดใต้ low'],
+          [K.confirm.at, 'P8.25', headStart(cs, T.sweep.bar, K.confirm.at)],
           [K.cont.at, 'P7.11', 'ขาลงทิ้ง bearish fair value gap ไว้ = continuation confluence (ขั้นที่ 3)'],
           [K.entry.at, 'P7.11', 'ราคาขึ้นมาเข้า gap แล้วแท่งแดงปิดกลับลงใต้ gap — เทรดตามเทรนด์ใหม่ (ขั้นที่ 4)']
         ].concat(tradeTail(T, cs));
@@ -595,17 +605,41 @@
           [K.confirm.at, 'P7.28', 'แท่งปิดใต้ low ล่าสุด = break of structure ลง: ตอนนี้รู้ว่าเทรนด์เป็นขาลง'],
           [K.cont.at, 'P7.24', 'ลาก range จาก high ล่าสุดลงถึง low ล่าสุดได้แล้ว เส้นกลาง = equilibrium'],
           [touchBar(cs, K, false), 'P7.17', 'ราคาย่อขึ้นเกินเส้น 0.5 เข้าโซน premium — โซนที่เขาอยากหา short'],
-          [K.entry.at, 'P7.24', 'เข้า premium แล้วแท่งแดงปิดกลับลงใต้ equilibrium — ราคาโดน respect จึงเข้า short']
+          [K.entry.at, 'P7.24', 'ราคาขึ้นเกินเส้นกลางแล้วลงกลับ เหมือนตัวอย่าง downtrend ในคลิป — จุดเข้าในกราฟจำลองนี้คือแท่งแดงที่ปิดกลับลงใต้ equilibrium เป็นการอ่านของเว็บนี้ ไม่ใช่กฎของเขา (คลิปบอกแค่ให้รอให้ respect)']
         ].concat(tradeTail(T, cs));
       }
     });
   }
 
-  // S21 (P1.31-P1.41, P6.15-P6.21): ES (main) and NQ (twin) from the same waypoints; only the second high differs.
-  // ES makes a lower high under its high, NQ a higher high through its own (bearish SMT, ES leads) -> trade ES:
-  // BOS down -> range from the lower high to the new low -> retrace into the premium -> short
-  function S21(d, seed) {
-    var main = new Script(d.id, seed, d.salt, 'ES', 5, -1), r = main.r;
+  // S21 (P1.31-P1.41, P6.15-P6.21): the traded index (main) and the other index (twin) share the same waypoints; only
+  // the second swing differs. The traded index is the leader: it makes the lower high (bearish SMT at a high) or the
+  // higher low (bullish SMT at a low) while the other index pushes through its first swing; then BOS -> range ->
+  // retrace into the premium (discount) -> entry on the leader. Which index leads (ES or NQ, P6.17) and the kind
+  // (high / low, P6.15-P6.19) come from the seed; opts.kind ('high' | 'low') and opts.lead ('ES' | 'NQ') pin them
+  // (the strategy page tells his bearish ES trade and pins both).
+  var S21_TRIES = 16;
+  function S21(d, seed, outcome, opts) {
+    var o = opts || {}, pk = TJR.rng.make(KIT.mixSeed(seed, d.salt + 7000));
+    var kind = pk.chance(0.5) ? 'low' : 'high', lead = pk.chance(0.5) ? 'NQ' : 'ES';
+    if (o.kind != null) {
+      if (o.kind !== 'high' && o.kind !== 'low') throw new Error(d.id + ': kind "' + o.kind + '" not supported');
+      kind = o.kind;
+    }
+    if (o.lead != null) {
+      if (o.lead !== 'ES' && o.lead !== 'NQ') throw new Error(d.id + ': lead "' + o.lead + '" not supported');
+      lead = o.lead;
+    }
+    // a draw is rejected when a close beyond the watched swing already happens by the bar the SMT is known: the story
+    // needs the break to come after it (patience, P1.35), and the first such close is the break (P11.8)
+    for (var a = 0; a < S21_TRIES; a++) {
+      var b = S21try(d, seed, d.salt + a * 1000, kind, lead);
+      if (b) return b;
+    }
+    throw new Error(d.id + ': no draw with the break after the SMT in ' + S21_TRIES + ' tries (seed ' + seed + ')');
+  }
+  function S21try(d, seed, salt, kind, lead) {
+    var L = kind === 'low', dir = L ? 1 : -1, other = lead === 'ES' ? 'NQ' : 'ES';
+    var main = new Script(d.id, seed, salt, lead, 5, dir), r = main.r;
     var p2m = r.range(0.3, 0.6), p2t = -r.range(0.3, 0.6), A = p2m + r.range(2.6, 2.9), P = p2m + r.range(1.2, 1.6);
     var Tx = p2m + 9.0 + r.range(0, 0.6);
     var plan = { T: [r.int(4, 7), Tx], LA: r.range(0.8, 1.4), poke: r.int(1, 4), g: [] };
@@ -630,7 +664,7 @@
     main.go(null, main.X('R') - r.range(1.0, 2.2), 'pass', 4, 7);
     main.keep(main.B('P') + 2, END, 'P', null);
     // the twin: the same bars and long-space x after p2 (its own scale and noise); only p2 differs
-    var twin = new Script(d.id + '/twin', seed, d.salt + 100, 'NQ', 5, -1);
+    var twin = new Script(d.id + '/twin', seed, salt + 100, other, 5, dir);
     script(twin, p2t);
     main.wps.slice(w0).forEach(function (w) { twin.at(w.name, w.bar, w.x, w.lk); });
     main.cons.slice(c0).forEach(function (c) { twin.cons.push(rescale(c, main, twin)); });
@@ -642,38 +676,58 @@
     var n = main.bar + 2;
     main.run(n);
     twin.run(n);
-    var levels = [KIT.lev(main, 'T', 'liq', 'T'), KIT.lev(main, 'p1', 'liq', 'p1')];
     function pt(sc, nm) { var p = sc.pt(nm); return { bar: p.i, price: p.price, k: p.k }; }
     var m1 = pt(main, 'p1'), m2 = pt(main, 'p2'), t1 = pt(twin, 'p1'), t2 = pt(twin, 'p2');
     var smtAt = Math.max(m2.k, t2.k) + 2;
-    var res = TJR.confluence.smt({ p1: m1.price, p2: m2.price }, { p1: t1.price, p2: t2.price }, 'high');
+    var brk = C().bos(main.cs, { trend: L ? 'down' : 'up', from: m2.bar + 1 })[0];
+    if (!brk || brk.at <= smtAt) return null;
+    var levels = [KIT.lev(main, 'T', 'liq', 'T'), KIT.lev(main, 'p1', 'liq', 'p1')];
+    var res = TJR.confluence.smt({ p1: m1.price, p2: m2.price }, { p1: t1.price, p2: t2.price }, kind);
     var leader = res.leader === 'a' ? 'main' : res.leader === 'b' ? 'twin' : null;
     function strip(p) { return { bar: p.bar, price: p.price }; }
     var times = KIT.nyTimes(r, n, main.B('p2'));
     return finish(d, seed, main, {
       levels: levels, sweepIds: null, structure: ['p1', 'A', 'p2', 'X', 'P'], outcome: 'win',
-      near: ['T', 'A1'], poke: ['A1', 'T'], times: times,
-      read: eqRead(levels, false, function () { return { ref: smtAt, origin: m2.bar }; }),
+      near: ['T', 'A1'], poke: ['A1', 'T'], times: times, instrument: lead,
+      read: eqRead(levels, L, function () { return { ref: m2.bar, origin: m2.bar }; }),
       extra: function (T, ts) {
-        T.smt = { kind: 'high', type: res.type, leader: leader, at: smtAt,
+        T.smt = { kind: kind, type: res.type, leader: leader, at: smtAt,
                   main: { p1: strip(m1), p2: strip(m2) }, twin: { p1: strip(t1), p2: strip(t2) } };
-        T.twin = { instrument: 'NQ', leader: leader,
+        T.twin = { instrument: other, leader: leader,
                    candles: twin.cs.map(function (k, i) { return { t: ts[i], o: k.o, h: k.h, l: k.l, c: k.c }; }) };
       },
-      notes: function (T, cs) {
-        var K = T.confluence, s = T.smt;
-        return [
-          [s.main.p2.bar, 'P1.31', 'NQ ดันทะลุ high ของมันขึ้นไป แต่ ES ทำได้แค่ lower high ใต้ high เดิม'],
-          [s.at, 'P6.15', 'ตัวหนึ่งทำ lower high อีกตัวทำ higher high = bearish SMT divergence'],
-          [s.at, 'P6.16', 'ES (ตัวที่ทำ lower high) คือ index ที่นำขาลง NQ เป็นตัวตาม'],
-          [s.at, 'P1.35', 'มี SMT แล้วก็ยังต้องรอให้โครงสร้างเปลี่ยนก่อน — สองขาลงยังไม่พิสูจน์ว่า sell orders ถูกเติม'],
-          [K.confirm.at, 'P1.36', 'แท่งปิดใต้ low ล่าสุด: structure break ลง SMT ได้รับการยืนยัน'],
-          [K.cont.at, 'P1.41', 'ลาก range จาก high ลงถึง low แล้วรอให้ราคาเด้งขึ้นมาเติม equilibrium'],
-          [K.entry.at, 'P1.40', 'เทรดตัวที่นำ (ES) — ตัวที่ไม่มี buy orders พอจะดันทะลุ high'],
-          [K.entry.at, 'P6.21', 'short บน index ที่นำและ bearish กว่า ไม่ short ตัวที่ดันทะลุ high']
-        ].concat(tradeTail(T, cs));
-      }
+      notes: function (T, cs) { return s21Notes(T, cs, kind, lead, other); }
     });
+  }
+  // every SMT note sits on smt.at, the bar both second swings are known: a swing needs its confirming candle, so
+  // nothing says "lower high" a bar early
+  function s21Notes(T, cs, kind, lead, other) {
+    var K = T.confluence, at = T.smt.at, out;
+    if (kind === 'high') {
+      out = [
+        [at, 'P1.31', other + ' ดันทะลุ high ของมันขึ้นไป แต่ ' + lead + ' ทำได้แค่ lower high ใต้ high เดิม'],
+        [at, 'P6.15', 'ตัวหนึ่งทำ lower high อีกตัวทำ higher high = bearish SMT divergence'],
+        [at, 'P6.16', lead + ' (ตัวที่ทำ lower high) คือ index ที่นำขาลง ' + other + ' เป็นตัวตาม'],
+        [at, 'P6.17', 'index ไหนเป็นตัวนำก็ได้ ไม่ขึ้นกับว่าเป็น ES หรือ NQ — กราฟนี้ ' + lead + ' นำ'],
+        [at, 'P1.35', 'มี SMT แล้วก็ยังต้องรอให้โครงสร้างเปลี่ยนก่อน — สองขาลงยังไม่พิสูจน์ว่า sell orders ถูกเติม'],
+        [K.confirm.at, 'P1.36', 'แท่งปิดใต้ low ล่าสุด: structure break ลง SMT ได้รับการยืนยัน'],
+        [K.cont.at, 'P1.41', 'ลาก range จาก high ลงถึง low แล้วรอให้ราคาเด้งขึ้นมาเติม equilibrium'],
+        [K.entry.at, 'P1.40', 'เทรดตัวที่นำ (' + lead + ') — ตัวที่ไม่มี buy orders พอจะดันทะลุ high'],
+        [K.entry.at, 'P6.21', 'short บน index ที่นำและ bearish กว่า ไม่ short ตัวที่ดันทะลุ high']
+      ];
+    } else {
+      out = [
+        [at, 'P6.18', 'ตัวหนึ่งทำ low แล้ว lower low อีกตัวทำ higher low = bullish SMT divergence (ภาพกลับด้านของ SMT ที่ high)'],
+        [at, 'P6.19', lead + ' (ตัวที่ทำ higher low) คือ index ที่นำขาขึ้น ' + other + ' เป็นตัวตามที่คาดว่าจะขึ้น'],
+        [at, 'P6.17', 'index ไหนเป็นตัวนำก็ได้ ไม่ขึ้นกับว่าเป็น ES หรือ NQ — กราฟนี้ ' + lead + ' นำ'],
+        [at, 'P1.35', 'มี SMT แล้วก็ยังต้องรอให้โครงสร้างเปลี่ยนก่อน — สองขาขึ้นยังไม่พิสูจน์ว่า buy orders ถูกเติม (คลิปเล่าฝั่ง short ที่นี่กลับด้าน)'],
+        [K.confirm.at, 'P1.36', 'แท่งปิดเหนือ high ล่าสุด: structure break ขึ้น SMT ได้รับการยืนยัน'],
+        [K.cont.at, 'P1.41', 'ลาก range จาก low ขึ้นถึง high แล้วรอให้ราคาย่อลงมาเติม equilibrium'],
+        [K.entry.at, 'P1.40', 'เทรดตัวที่นำ (' + lead + ') — ตัวที่ไม่มี sell orders พอจะกดทะลุ low'],
+        [K.entry.at, 'P6.21', 'long บน index ที่นำและ bullish กว่า ไม่ long ตัวที่ทำ lower low (คลิปเล่าฝั่ง short ที่นี่กลับด้าน)']
+      ];
+    }
+    return out.concat(tradeTail(T, cs));
   }
   // a band in main prices -> the same long-space x in twin prices
   function rescale(c, main, twin) {
@@ -774,10 +828,10 @@
       summary: 'ในขาขึ้น ไส้เทียนแทงลงใต้ low ที่เฝ้าอยู่ลึกมากแต่ปิดเหนือ low จึงไม่ใช่ break of structure — ไม่มีเทรดตรงไส้ break จริงมาทีหลังเมื่อแท่งปิดใต้ low ล่าสุด',
       facts: ['P11.13', 'P11.14'], clip: chips([[11, 502], [11, 535]]),
       tf: 5, instrument: 'ES', lab: lab(false, ['bos']), outcomes: [], script: S20 },
-    { id: 'S21', title: 'SMT ที่ high: NQ ทำ HH, ES ทำ LH → เทรด ES → BOS → EQ → เข้า',
-      summary: 'NQ ดันทะลุ high แต่ ES ทำได้แค่ lower high (bearish SMT, ES นำ) รอ structure break ลงบน ES แล้วรอราคาเด้งเข้า premium ของ range ก่อนเข้า short ที่ ES',
-      facts: ['P1.31', 'P1.35', 'P1.36', 'P1.40', 'P1.41', 'P6.15', 'P6.16', 'P6.21'],
-      clip: chips([[1, 1479], [1, 1670], [1, 1714], [1, 1830], [1, 1881], [6, 316], [6, 338], [6, 629]]),
+    { id: 'S21', title: 'SMT divergence: index ตัวหนึ่งไม่ทำ high / low ใหม่ → เทรดตัวนำ → BOS → EQ → เข้า',
+      summary: 'index ตัวหนึ่งดันทะลุ high เดิม อีกตัวทำได้แค่ lower high (bearish SMT) หรือที่ low ตัวหนึ่งทำ lower low อีกตัวทำ higher low (bullish SMT) ตัวนำคือ ES หรือ NQ ก็ได้ รอ structure break บนตัวนำ แล้วรอราคาเด้งเข้า premium (discount) ของ range ก่อนเข้า short (long) ที่ตัวนำ',
+      facts: ['P1.31', 'P1.35', 'P1.36', 'P1.40', 'P1.41', 'P6.15', 'P6.16', 'P6.17', 'P6.18', 'P6.19', 'P6.21'],
+      clip: chips([[1, 1479], [1, 1670], [1, 1714], [1, 1830], [1, 1881], [6, 316], [6, 338], [6, 380], [6, 411], [6, 443], [6, 629]]),
       tf: 5, instrument: 'ES', lab: lab(false, ['smt']), outcomes: ['win'], script: S21 },
     { id: 'S22', title: 'Time windows: manipulation 09:30–09:50 → เข้า 09:50–10:10',
       summary: 'หลัง 09:30 ราคาลงกวาด lows ในช่วง manipulation แล้วกลับตัว (inverse FVG) ย่อเข้า bullish gap และปิดกลับขึ้นในช่วง 09:50–10:10 — เข้า long',

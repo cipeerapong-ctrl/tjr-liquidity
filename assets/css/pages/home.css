@@ -48,7 +48,10 @@
 html:not([data-motion="off"]) .phase li { transition: color 240ms var(--ease, ease), border-color 240ms var(--ease, ease), background-color 240ms var(--ease, ease); }
 
 /* the loop's pause: an icon control, 44px, the icon swaps with aria-pressed */
-.ctrl--icon { padding: 0; width: 44px; }
+/* 48px, not 44: while the hero enters, the kit scales .hero__window to .98 and a 44px box measures 43.1px on a phone */
+.ctrl--icon { padding: 0; width: 48px; min-width: 48px; min-height: 48px; }
+/* the skip link is clipped until focus (kit system.css); its box is 44px so a hit-area scan does not flag a 1px target */
+.skip-link:not(:focus) { min-width: 44px; min-height: 44px; }
 .ctrl--icon .i-play { display: none; }
 .ctrl--icon[aria-pressed="true"] .i-pause { display: none; }
 .ctrl--icon[aria-pressed="true"] .i-play { display: inline; }

@@ -7,7 +7,7 @@
   var P = TJR.confluencesPage, C = TJR.confluence, S = TJR.scenarios;
 
   function k(o, h, l, c) { return { t: 0, o: o, h: h, l: l, c: c }; }
-  function build(id, seed) { return S.safeBuild(S.get(id), seed, {}); }
+  function build(id, seed, opts) { return S.safeBuild(S.get(id), seed, opts || {}); }
 
   // ---------------------------------------------------------------- gapAt
 
@@ -230,14 +230,25 @@
 
   // ---------------------------------------------------------------- SMT read on S21
 
-  test('confluences.smtRead on S21: bearish, ES leads with the lower high, NQ lags with the higher high', () => {
-    for (var seed = 1; seed <= 12; seed++) {
-      var b = build('S21', seed), r = P.smtRead(b);
-      eq(r.type, 'bearish'); eq(r.leader, 'ES'); eq(r.lagger, 'NQ');
-      ok(r.nums.ES.p2 < r.nums.ES.p1, 'ES lower high');
-      ok(r.nums.NQ.p2 > r.nums.NQ.p1, 'NQ higher high');
+  test('confluences.smtRead on S21 (kind high, the lesson): bearish, the leader (ES or NQ, either can lead) has the lower high, the other the higher high', () => {
+    var leaders = {};
+    for (var seed = 1; seed <= 24; seed++) {
+      var b = build('S21', seed, { kind: 'high' }), r = P.smtRead(b);
+      eq(r.type, 'bearish'); eq(r.kind, 'high');
+      leaders[r.leader] = (leaders[r.leader] || 0) + 1;
+      eq([r.leader, r.lagger].sort(), ['ES', 'NQ']);
+      ok(r.nums[r.leader].p2 < r.nums[r.leader].p1, r.leader + ' lower high');
+      ok(r.nums[r.lagger].p2 > r.nums[r.lagger].p1, r.lagger + ' higher high');
       ok(r.at > r.nums.ES.bar2 || r.at > r.nums.NQ.bar2, 'known after the second highs');
       eq(b.truth.twin.candles.length, b.candles.length, 'the twin has the same bars');
+    }
+    ok(leaders.ES > 3 && leaders.NQ > 3, 'both indexes lead across seeds: ' + JSON.stringify(leaders));
+  });
+  test('confluences.smtRead on S21 (kind low): bullish, the leader has the higher low', () => {
+    for (var seed = 1; seed <= 12; seed++) {
+      var b = build('S21', seed, { kind: 'low' }), r = P.smtRead(b);
+      eq([r.type, r.kind], ['bullish', 'low']);
+      ok(r.nums[r.leader].p2 > r.nums[r.leader].p1 && r.nums[r.lagger].p2 < r.nums[r.lagger].p1, 'higher low leads, lower low lags');
     }
   });
 

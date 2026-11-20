@@ -33,6 +33,8 @@
 .facts li > .chips { display: inline-flex; vertical-align: middle; margin-left: var(--s-2); }
 .facts--gaps { gap: var(--s-3); }
 .facts__gap { border-left-style: dashed; border-left-color: var(--line-strong); }
+.see-also { font-size: 14px; color: var(--muted, var(--ink)); }
+.see-also a { text-decoration: underline; text-underline-offset: 3px; }
 .facts p, .strat-sec p { margin: 0; font-size: 15px; line-height: 1.75; color: var(--ink); }
 @media (max-width: 639px) {
   .facts li { display: grid; gap: var(--s-2); padding-left: 0; border-left: 0; padding-top: var(--s-3); border-top: 1px solid var(--line); }
