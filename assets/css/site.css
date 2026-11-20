@@ -233,6 +233,17 @@ html:not([data-motion="off"]) .ts-chip { transition: background-color var(--m-ou
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c-session, var(--ink)) 60%, transparent); color: var(--c-session, var(--ink));
 }
 
+/* nine nav links (the learning path): the kit's bar fits eight on a small laptop (1024-1179), so there the logo (already the link home)
+   stands for "หน้าแรก". The word stays in the phone menu and the footer. */
+@media (min-width: 1024px) and (max-width: 1179px) {
+  .nav--centre .nav__links > .nav__item:first-child { display: none; }
+}
+/* and at 1024-1099 the words sit a little closer still */
+@media (min-width: 1024px) and (max-width: 1099px) {
+  .nav--centre .nav__link { font-size: 14px; padding: 0 6px; }
+  .nav--centre .nav__link::before, .nav--centre .nav__link[aria-current="page"]::after { left: 6px; right: 6px; }
+}
+
 /* ---------------------------------------------------------------- step tag and prev / next bar (the learning path, layout.js PATH) */
 .step-tag {
   display: inline-flex; align-items: center; height: 26px; margin: 0; padding: 0 var(--s-3);
