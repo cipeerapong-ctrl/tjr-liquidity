@@ -20,6 +20,8 @@
   // ================================================================ 1 · pure helpers
 
   var IDS = ['S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14'];
+  // the gallery shows S01-S14; the Level 2 scenarios (system.js, S15-S22) get their own gallery section later
+  function v1List() { return TJR.scenarios.list.filter(function (d) { return IDS.indexOf(d.id) >= 0; }); }
   var SESSION_IDS = ['S06', 'S07', 'S08', 'S09'];       // charts built on session highs / lows
   var HTF_IDS = ['S05', 'S10', 'S11'];                   // daily, 4H highs, 4H high vs a 5m high
   var SHORT_IDS = ['S03', 'S10'];                        // the trade scenarios that go short
@@ -107,7 +109,7 @@
   var NO_ENTRY_IDS = ['S06', 'S07', 'S08'];
   function noTradeTag(id) { return NO_ENTRY_IDS.indexOf(id) >= 0 ? 'คลิปไม่ได้ระบุจุดเข้า' : 'ไม่มีเทรด'; }
 
-  G.IDS = IDS; G.FACT_SEC = FACT_SEC; G.D4 = D4_TEXT; G.NOTRADE = NOTRADE; G.noTradeTag = noTradeTag; G.SEEDS = SEEDS;
+  G.IDS = IDS; G.v1List = v1List; G.FACT_SEC = FACT_SEC; G.D4 = D4_TEXT; G.NOTRADE = NOTRADE; G.noTradeTag = noTradeTag; G.SEEDS = SEEDS;
   G.parseHash = parseHash; G.kindOf = kindOf; G.filterIds = filterIds; G.factSec = factSec; G.tfOptions = tfOptions;
   G.seriesIndex = seriesIndex; G.baseEnd = baseEnd; G.panelBar = panelBar; G.visibleNotes = visibleNotes; G.playRate = playRate; G.startBar = startBar;
 
@@ -151,7 +153,7 @@
       '<p class="sc__meta chips">' + chipsHtml(d.clip) + '</p></li>';
   }
   function buildCards() {
-    grid.innerHTML = TJR.scenarios.list.map(cardHtml).join('');
+    grid.innerHTML = v1List().map(cardHtml).join('');
   }
 
   // a small drawn preview: the close line of the chart each card opens, the sweep dot, the entry window.
@@ -243,7 +245,7 @@
   // ---------------------------------------------------------------- filters
   function applyFilter(key, save) {
     filterKey = key;
-    var keep = filterIds(TJR.scenarios.list, key);
+    var keep = filterIds(v1List(), key);
     $$('.sc', grid).forEach(function (li) { li.hidden = keep.indexOf(li.getAttribute('data-id')) < 0; });
     $$('[data-f]').forEach(function (b) { setPressed(b, b.getAttribute('data-f') === key); });
     if (count) count.textContent = 'แสดง ' + keep.length + ' จาก ' + IDS.length + ' สถานการณ์';
@@ -252,7 +254,7 @@
   function initFilters() {
     var saved = TJR.store.get('scenarios.filter', 'all');
     $$('[data-f]').forEach(function (b) {
-      var key = b.getAttribute('data-f'), n = filterIds(TJR.scenarios.list, key).length;
+      var key = b.getAttribute('data-f'), n = filterIds(v1List(), key).length;
       b.innerHTML = b.textContent + ' <span class="ctrl__n">' + n + '</span>';
       b.addEventListener('click', function () { applyFilter(key, true); });
     });

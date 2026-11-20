@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   (0, eval)(readText('assets/js/pages/scenarios.js'));
-  var G = TJR.gallery, LIST = TJR.scenarios.list;
+  var G = TJR.gallery, LIST = G.v1List();   // the v1 gallery (S01-S14); S15-S22 are tested in system.test.js
 
   test('gallery.parseHash: S01..S14 in any case, with or without #, nothing else', () => {
     eq(G.parseHash('#S06'), 'S06');

@@ -9,12 +9,13 @@
   const THAI = /[฀-๿]/;
   const factIds = new Set((readText('docs/source/clip-facts.md').match(/^- (F\d+\.\d+)/gm) || []).map((s) => s.slice(2)));
   const outcomesOf = (d) => (d.outcomes.length ? d.outcomes : [undefined]);
+  const V1 = S.list.filter((d) => IDS.includes(d.id));   // S15-S22 (system.js) are tested in system.test.js
   const build = (id, seed, outcome) => S.get(id).build(seed, outcome ? { outcome } : {});
 
   test('library: S01..S14 in order; get(); Thai copy; facts exist in clip-facts.md', () => {
     ok(factIds.size > 50, 'clip-facts.md parsed (' + factIds.size + ' fact ids)');
-    eq(S.list.map((d) => d.id), IDS);
-    for (const d of S.list) {
+    eq(S.list.slice(0, IDS.length).map((d) => d.id), IDS);
+    for (const d of V1) {
       ok(S.get(d.id) === d, d.id + ' get');
       ok(THAI.test(d.title) && THAI.test(d.summary), d.id + ' Thai title and summary');
       ok(d.facts.length > 0, d.id + ' has facts');
@@ -26,7 +27,7 @@
       ok(typeof d.build === 'function', d.id + ' build');
       if (d.lab.replay) ok(d.outcomes.includes('win'), d.id + ' replay scenario trades');
     }
-    eq(S.list.filter((d) => d.outcomes.includes('fail')).map((d) => d.id), FAIL_IDS, 'fail variants (D4)');
+    eq(V1.filter((d) => d.outcomes.includes('fail')).map((d) => d.id), FAIL_IDS, 'fail variants (D4)');
     eq(S.get('S99'), null, 'unknown id');
   });
 
@@ -211,7 +212,7 @@
   test('notes: the generic sweep note cites F6.3 (long) / F6.4 (short); scenario facts get their own notes', () => {
     const sweepFacts = { long: 'F6.3', short: 'F6.4' };
     let generic = null;
-    for (const d of S.list.filter((x) => x.outcomes.length)) {
+    for (const d of V1.filter((x) => x.outcomes.length)) {
       for (const outcome of d.outcomes) {
         const b = d.build(5, { outcome }), T = b.truth;
         const atSweep = T.notes.filter((n) => n.bar === T.sweep.bar).map((n) => n.fact);

@@ -1,6 +1,7 @@
 /* Truth -> chart overlays (shapes from the chart engine, Task 7). Nothing is shown before it is knowable:
    every overlay carries appearAt (a level when its swing pair has closed or its session has ended, a sweep
-   at the sweep bar, the entry zone at entryWindow.from), and annotate(built, {upTo}) returns only overlays
+   at the sweep bar, the entry zone at entryWindow.from; for a Level 2 scenario the zone is truth.confluence.cont,
+   the gap or the equilibrium half price was respected in), and annotate(built, {upTo}) returns only overlays
    with appearAt <= upTo, with states and right edges as they stand at bar upTo.
    annotate.confluence(built, {upTo?, show?, dir?}) adds the v2 shapes (fvg, bos, eq, band) from TJR.confluence. It
    runs the detectors on the candles up to upTo only, so a gap's state / stateAt / endAt, a break and an
@@ -51,7 +52,17 @@
             appearAt: T.sweep.bar });
     }
 
-    if (T.entryWindow && T.target) {
+    var K = T.confluence;
+    if (K && K.cont && T.entryWindow && T.target) {
+      // Level 2 (S15-S22): the entry zone is the continuation confluence itself - the gap, or the discount /
+      // premium half of the equilibrium range - from the entry bar (the respected close) on
+      var kw = T.entryWindow, kl = T.side === 'long', ct = K.cont;
+      var zl = ct.kind === 'eq' ? (kl ? ct.low : ct.eq) : ct.low, zh = ct.kind === 'eq' ? (kl ? ct.eq : ct.high) : ct.high;
+      add({ id: 'entry', type: 'zone', from: kw.from, to: Math.min(kw.to, upTo), low: zl, high: zh, kind: 'entry', appearAt: kw.from });
+      var kt = levels.filter(function (l) { return l.id === T.target.levelId; })[0];
+      add({ id: 'target', type: 'level', price: T.target.price, from: kw.from, to: edge(kt && kt.sweptAt), label: 'target',
+            kind: 'target', state: kt && kt.sweptAt != null && kt.sweptAt <= upTo ? 'swept' : 'active', appearAt: kw.from });
+    } else if (T.entryWindow && T.target) {
       var w = T.entryWindow, long = T.side === 'long';
       var c = (T.structure || []).filter(function (p) { return p.bar === T.confirmBar; })[0];
       // price band: from the last rule swing on the other side before the confirm swing to the confirm swing

@@ -15,7 +15,8 @@
   var MARGIN = 2.5;
   var END = 1e9;   // "to the last bar" for keep()
   var MIRROR = { H: 'L', L: 'H', HH: 'LL', LL: 'HH', HL: 'LH', LH: 'HL' };
-  var VOL = { NQ5: [7, 10], ES5: [2, 2.75], NQ1: [3, 4], NQ1440: [120, 160] };
+  var VOL = { NQ5: [7, 10], ES5: [2, 2.75], NQ1: [3, 4], NQ1440: [120, 160],
+              ES15: [3.5, 4.75], ES60: [7, 9.5] };   // v2 (system.js): ES 15m / 60m, about 5m x sqrt(tf / 5)
 
   function rt(p) { return TJR.util.roundTick(p, TICK); }
   function mixSeed(seed, salt) {
@@ -997,10 +998,11 @@
       ['F8.6', 'F8.7', 'F8.8'], [2700, 2790, 2835], 5, 'NQ', LAB(true, true, false, true), ['win'], S14]
   ];
 
-  var LIST = DEFS.map(function (x, i) {
-    var d = { id: x[0], salt: i + 1, title: x[1], summary: x[2], facts: x[3], clip: x[4], tf: x[5],
-              instrument: x[6], lab: x[7], outcomes: x[8] };
-    var script = x[9];
+  // a def row -> the public def; salt = its 1-based place in the library (fixes each scenario's random stream)
+  function define(x, salt) {
+    var d = { id: x.id, salt: salt, title: x.title, summary: x.summary, facts: x.facts, clip: x.clip, tf: x.tf,
+              instrument: x.instrument, lab: x.lab, outcomes: x.outcomes };
+    var script = x.script;
     d.build = function (seed, opts) {
       var outcome = opts && opts.outcome != null ? opts.outcome : null;
       if (outcome != null && d.outcomes.indexOf(outcome) < 0) throw new Error(d.id + ': outcome "' + outcome + '" not supported');
@@ -1008,7 +1010,20 @@
       return script(d, seed, outcome);
     };
     return d;
+  }
+  var LIST = DEFS.map(function (x, i) {
+    return define({ id: x[0], title: x[1], summary: x[2], facts: x[3], clip: x[4], tf: x[5], instrument: x[6],
+                    lab: x[7], outcomes: x[8], script: x[9] }, i + 1);
   });
+
+  // Later scripts (system.js: S15-S22) append their defs here: {id, title, summary, facts, clip, tf, instrument, lab,
+  // outcomes, script(def, seed, outcome)}. get / random / safeBuild / check work on them like on S01-S14.
+  function register(defs) {
+    defs.forEach(function (x) {
+      if (get(x.id)) throw new Error('scenarios.register: duplicate id ' + x.id);
+      LIST.push(define(x, LIST.length + 1));
+    });
+  }
 
   function get(id) {
     for (var i = 0; i < LIST.length; i++) if (LIST[i].id === id) return LIST[i];
@@ -1136,8 +1151,12 @@
     if (side == null) {
       ['confirmBar', 'entryWindow', 'target', 'outcome'].forEach(function (k) { if (T[k] != null) e.push(k + ' must be null without a side'); });
     } else if (side !== 'long' && side !== 'short') e.push('side ' + side);
+    else if (T.confluence) { /* Level 2: the confluence chain below replaces the H/L/HL/HH trade check */ }
     else if (!sl) e.push('a trade needs a sweep');
     else tradeCheck(e, cs, T, sl, typed, side === 'long');
+    if (T.confluence) confluenceCheck(e, cs, T, m, byId);
+    if (T.twin || T.smt) smtCheck(e, cs, T, m);
+    if (T.windows) windowCheck(e, cs, T);
     // resistance (controller ruling): a stacked group is >= 2 levels on one side; resistance is 'low' for its
     // levels (untaken stack) and null otherwise; resistanceAfter is 'high' for the levels the confirmed reversal
     // moved away from, else equal to resistance
@@ -1154,7 +1173,7 @@
       });
     }
     (T.notes || []).forEach(function (x, i) {
-      if (!inBar(x.bar) || !/^F\d+\.\d+$/.test(x.fact) || typeof x.text !== 'string') e.push('note ' + i + ': bad');
+      if (!inBar(x.bar) || !/^[FP]\d+\.\d+$/.test(x.fact) || typeof x.text !== 'string') e.push('note ' + i + ': bad');
     });
     messCheck(e, m, byId, swing);
     return e;
@@ -1212,6 +1231,168 @@
     else if (T.outcome !== 'win' && T.outcome !== 'fail') e.push('outcome ' + T.outcome);
   }
 
+  // ---------------------------------------------------------------- check: Level 2 (S15-S22)
+
+  // A Level 2 trade after its entry (shared with system.js): stop = the setup's extreme from `origin` to the entry bar;
+  // reach / brk = the first bar after the entry that touches the target / trades beyond the stop. win = the target
+  // first; fail = the stop broken and the target never touched. The entry window runs to the bar before either.
+  function entryOutcome(cs, L, origin, at, target) {
+    var stop = L ? Infinity : -Infinity, j, reach = null, brk = null;
+    for (j = origin; j <= at; j++) stop = L ? Math.min(stop, cs[j].l) : Math.max(stop, cs[j].h);
+    for (j = at + 1; j < cs.length; j++) {
+      if (reach == null && (L ? cs[j].h >= target : cs[j].l <= target)) reach = j;
+      if (brk == null && (L ? cs[j].l < stop : cs[j].h > stop)) brk = j;
+    }
+    var first = Math.min(reach == null ? Infinity : reach, brk == null ? Infinity : brk);
+    var outcome = reach != null && (brk == null || reach < brk) ? 'win' : brk != null && reach == null ? 'fail' : null;
+    return { stop: stop, reach: reach, brk: brk, to: isFinite(first) ? Math.max(at, first - 1) : cs.length - 1, outcome: outcome };
+  }
+  function byI(gaps, i) { for (var q = 0; q < gaps.length; q++) if (gaps[q].i === i) return gaps[q]; return null; }
+
+  // truth.confluence = {dir, origin, confirm:{kind:'bos'|'ifvg', at, level|i}, cont:{kind:'fvg'|'eq', at, low, high, ...},
+  // entry:{at, price}|null, targets:[{price, levelId}], stack?, noTrade?}. Everything is re-derived here from the
+  // candles with TJR.confluence; nothing is taken on trust.
+  function confluenceCheck(e, cs, T, m, byId) {
+    var K = T.confluence, CF = TJR.confluence, n = cs.length, j;
+    function inBar(x) { return typeof x === 'number' && x === Math.floor(x) && x >= 0 && x < n; }
+    if (K.dir !== 'long' && K.dir !== 'short') { e.push('confluence.dir ' + K.dir); return; }
+    var L = K.dir === 'long', want = L ? 'bull' : 'bear', ref;
+    if (T.side != null && T.side !== K.dir) e.push('side ' + T.side + ' != confluence.dir ' + K.dir);
+    if (T.sweep) { ref = T.sweep.bar; if (K.origin !== ref) e.push('confluence.origin ' + K.origin + ' != the sweep bar'); }
+    else if (T.smt && T.smt.main && T.smt.main.p2) {
+      ref = T.smt.at;
+      if (K.origin !== T.smt.main.p2.bar) e.push('confluence.origin ' + K.origin + ' != the SMT second swing');
+    } else { e.push('confluence needs a sweep or an SMT'); return; }
+    // confirmation (P1.37, P8.14, P11.25): the first break / inverse after the setup starts
+    var cf = K.confirm;
+    if (!cf || !inBar(cf.at) || !(cf.at > ref)) { e.push('confirm missing or not after bar ' + ref); return; }
+    if (cf.kind === 'bos') {
+      var ev = CF.bos(cs, { trend: L ? 'down' : 'up', from: ref + 1 })[0];
+      if (!ev || ev.at !== cf.at || ev.dir !== (L ? 'up' : 'down') || !cf.level || ev.level.i !== cf.level.i || ev.level.price !== cf.level.price) {
+        e.push('confirm: not the first ' + (L ? 'up' : 'down') + ' BOS after bar ' + ref);
+      }
+    } else if (cf.kind === 'ifvg') {
+      var opp = L ? 'bear' : 'bull', first = null;
+      CF.fvgs(cs).forEach(function (g) {
+        if (g.dir === opp && g.state === 'disrespected' && g.stateAt > ref &&
+            (!first || g.stateAt < first.stateAt || (g.stateAt === first.stateAt && g.i < first.i))) first = g;
+      });
+      if (!first || first.i !== cf.i || first.stateAt !== cf.at) e.push('confirm: not the first ' + opp + ' gap closed through after bar ' + ref);
+    } else { e.push('confirm kind ' + cf.kind); return; }
+    var en = K.entry, ct = K.cont;
+    if (T.side == null) { noTradeCheck(e, cs, K, L, want, ref); return; }
+    // continuation (P1.39, P1.42-P1.44): price comes into the gap / range and is respected; the entry is that close
+    if (!en || !inBar(en.at) || !(en.at > cf.at)) { e.push('entry missing or not after the confirmation'); return; }
+    if (en.price !== cs[en.at].c) e.push('entry price is not the close of bar ' + en.at);
+    var seen = cs.slice(0, en.at + 1);
+    if (!ct) e.push('a trade needs a continuation confluence');
+    else if (ct.kind === 'fvg') {
+      var g = byI(CF.fvgs(seen), ct.i);
+      if (!g || g.dir !== want || g.low !== ct.low || g.high !== ct.high || ct.at !== g.to || !(g.to > ref)) e.push('cont: not a ' + want + ' gap formed after bar ' + ref);
+      else if (g.state !== 'respected' || g.stateAt !== en.at) e.push('cont: the gap is not respected at the entry bar ' + en.at);
+    } else if (ct.kind === 'eq') {
+      var r = CF.eqRange(cs, { at: ct.at, dir: L ? 'up' : 'down' });
+      if (!r || r.knownAt !== ct.at || r.low !== ct.low || r.high !== ct.high || r.eq !== ct.eq || r.from !== ct.from || r.to !== ct.to) {
+        e.push('cont: not the equilibrium range known at bar ' + ct.at);
+      } else if (!(ct.at > cf.at)) e.push('cont: range drawn before the confirmation');
+      else {
+        var touch = null;
+        for (j = ct.at + 1; j < en.at && touch == null; j++) if (L ? cs[j].l < r.eq : cs[j].h > r.eq) touch = j;
+        if (touch == null) e.push('cont: price never entered the ' + (L ? 'discount' : 'premium') + ' before the entry');
+        else {
+          for (j = touch + 1; j <= en.at; j++) { var k = cs[j]; if (L ? k.c > k.o && k.c > r.eq : k.c < k.o && k.c < r.eq) break; }
+          if (j !== en.at) e.push('cont: the entry is not the first ' + (L ? 'bullish close above' : 'bearish close under') + ' equilibrium after the touch');
+          for (j = ct.at + 1; j <= en.at; j++) if (L ? cs[j].c < r.low : cs[j].c > r.high) { e.push('cont: the range is closed through before the entry'); break; }
+        }
+      }
+    } else e.push('cont kind ' + ct.kind);
+    // stacked gaps (P8.34, P10.29): the top gap is closed through, the far gap of the stack holds and is the entry
+    if (K.stack) {
+      var pv = CF.fvgs(seen), top = byI(pv, K.stack.top), bot = ct && byI(pv, ct.i);
+      if (!top || !bot || top === bot || top.dir !== want || top.state !== 'disrespected' || !(top.stateAt <= en.at)) e.push('stack: the top gap is not closed through by the entry');
+      else {
+        var st = CF.stacks(pv, seen).filter(function (s) { return s.gaps.indexOf(top) >= 0 && s.gaps.indexOf(bot) >= 0; })[0], far = null;
+        if (st) st.gaps.forEach(function (x) { if (!far || (L ? x.low < far.low : x.high > far.high)) far = x; });
+        if (!st || far !== bot || st.inversedAt != null) e.push('stack: the entry gap is not the holding far gap of the stack');
+      }
+    }
+    // targets and outcome (P1.51)
+    var tg = K.targets || [];
+    if (!tg.length) { e.push('a trade needs a target'); return; }
+    tg.forEach(function (t) {
+      var l = byId[t.levelId];
+      if (!l || l.price !== t.price) e.push('target ' + t.levelId + ' is not a level at its price');
+      else if (l.sweptAt != null && l.sweptAt <= en.at) e.push('target ' + t.levelId + ' taken before the entry');
+      if (L ? !(t.price > en.price) : !(t.price < en.price)) e.push('target ' + t.levelId + ' is not beyond the entry');
+    });
+    var eo = entryOutcome(cs, L, K.origin, en.at, tg[0].price);
+    if (T.outcome !== eo.outcome) e.push('outcome ' + T.outcome + ' but the candles say ' + eo.outcome);
+    if (T.confirmBar !== cf.at) e.push('confirmBar ' + T.confirmBar + ' != confirm ' + cf.at);
+    if (!T.target || T.target.price !== tg[0].price || T.target.levelId !== tg[0].levelId) e.push('target != the first confluence target');
+    if (!T.entryWindow || T.entryWindow.from !== en.at || T.entryWindow.to !== eo.to) e.push('entryWindow != ' + en.at + '..' + eo.to);
+  }
+
+  // The no-trade readings: a gap the setup pointed to is closed through before any respect (P10.25, P3.6), or a wick
+  // goes far beyond the watched swing without a close beyond it, so no BOS (P11.13, P11.14).
+  function noTradeCheck(e, cs, K, L, want, ref) {
+    var CF = TJR.confluence, nt = K.noTrade, ct = K.cont, n = cs.length, j;
+    if (K.entry != null) e.push('a no-trade setup has no entry');
+    if (!nt || typeof nt.at !== 'number' || nt.at < 1 || nt.at >= n) { e.push('noTrade missing'); return; }
+    if (nt.kind === 'disrespected') {
+      var g = ct && ct.kind === 'fvg' ? byI(CF.fvgs(cs), ct.i) : null;
+      if (!g || g.dir !== want || g.low !== ct.low || g.high !== ct.high || ct.at !== g.to || !(g.to > ref)) { e.push('noTrade: cont is not a ' + want + ' gap after bar ' + ref); return; }
+      if (g.state !== 'disrespected' || g.stateAt !== nt.at || !(nt.at > K.confirm.at)) e.push('noTrade: the gap is not closed through at bar ' + nt.at);
+      var before = byI(CF.fvgs(cs.slice(0, nt.at)), ct.i);
+      if (!before || before.state !== 'open') e.push('noTrade: the gap was respected (an entry) before it was closed through');
+      var entered = false;
+      for (j = g.to + 1; j < nt.at; j++) if (want === 'bull' ? cs[j].l < g.high : cs[j].h > g.low) entered = true;
+      if (!entered) e.push('noTrade: price never traded into the gap before closing through it');
+    } else if (nt.kind === 'wick') {
+      var lv = nt.level || {}, sw = SW.find(cs), watch = L ? sw.highs : sw.lows, cur = null, k = cs[nt.at];
+      watch.forEach(function (p) { if (p.pair[1] < nt.at) cur = p; });
+      if (!cur || cur.i !== lv.i || cur.price !== lv.price) { e.push('noTrade: the level is not the most recent swing before the wick'); return; }
+      if (L ? !(k.h > lv.price && k.c <= lv.price) : !(k.l < lv.price && k.c >= lv.price)) e.push('noTrade: bar ' + nt.at + ' is not a wick through ' + lv.price + ' without a close beyond it');
+      var evs = CF.bos(cs, { trend: L ? 'down' : 'up', from: cur.pair[1] + 1 });
+      if (!evs.length || evs[0].at <= nt.at) e.push('noTrade: a BOS fired by the wick bar');
+      else if (evs[0].at !== K.confirm.at) e.push('noTrade: the later break is not the confirmation');
+    } else e.push('noTrade kind ' + nt.kind);
+  }
+
+  // S21: the twin series shares the clock; the SMT points are real swings and TJR.confluence.smt names the leader.
+  function smtCheck(e, cs, T, m) {
+    var tw = T.twin, s = T.smt;
+    if (!tw || !s) { e.push('twin and smt come together'); return; }
+    var tc = tw.candles || [];
+    if (tc.length !== cs.length || tc.some(function (k, i) { return k.t !== cs[i].t; })) { e.push('twin: not on the main clock'); return; }
+    var bad = G.validate(tc, m.tick || TICK);
+    if (bad.length) { bad.forEach(function (x) { e.push('twin candles: ' + x); }); return; }
+    if ((tw.instrument !== 'ES' && tw.instrument !== 'NQ') || tw.instrument === m.instrument) e.push('twin instrument ' + tw.instrument);
+    var type = s.kind === 'high' ? 'high' : 'low';
+    function swingOf(series, p) {
+      var f = SW.find(series), list = type === 'high' ? f.highs : f.lows;
+      return p && list.filter(function (q) { return q.i === p.bar && q.price === p.price; })[0] || null;
+    }
+    var main = s.main || {}, twin = s.twin || {};
+    var pts = [swingOf(cs, main.p1), swingOf(cs, main.p2), swingOf(tc, twin.p1), swingOf(tc, twin.p2)];
+    if (pts.some(function (x) { return !x; })) { e.push('smt: the points are not ' + type + ' swings'); return; }
+    if (!(main.p2.bar > main.p1.bar) || !(twin.p2.bar > twin.p1.bar)) e.push('smt: second swing before the first');
+    var r = TJR.confluence.smt({ p1: main.p1.price, p2: main.p2.price }, { p1: twin.p1.price, p2: twin.p2.price }, s.kind);
+    var leader = r.leader === 'a' ? 'main' : r.leader === 'b' ? 'twin' : null;
+    if (r.type == null || r.type !== s.type || leader !== s.leader || tw.leader !== s.leader) e.push('smt: type / leader do not match the swings');
+    if (s.at !== Math.max(pts[1].pair[1], pts[3].pair[1]) + 1) e.push('smt.at ' + s.at + ' is not the bar both second swings are known');
+  }
+
+  // S22 (P5.13, P5.14): the sweep inside the 09:30-09:50 ET manipulation window, the entry inside 09:50-10:10 ET
+  function windowCheck(e, cs, T) {
+    function inWin(bar, name) {
+      if (typeof bar !== 'number' || !cs[bar]) return false;
+      var t = cs[bar].t, w = SS.nyWindows(t)[name];
+      return t >= w.from && t < w.to;
+    }
+    if (!T.sweep || !inWin(T.sweep.bar, 'manipulation')) e.push('windows: the sweep is not inside 09:30-09:50 ET');
+    if (!T.confluence || !T.confluence.entry || !inWin(T.confluence.entry.at, 'entry')) e.push('windows: the entry is not inside 09:50-10:10 ET');
+  }
+
   // messiness the spec asks for: chop, a near-equal (not equal) neighbour swing, a false poke at a level
   function messCheck(e, m, byId, swing) {
     var u = m.vol, ms = m.mess;
@@ -1229,5 +1410,13 @@
     }
   }
 
-  TJR.scenarios = { list: LIST, get: get, random: random, safeBuild: safeBuild, check: check };
+  // ---------------------------------------------------------------- kit (system.js scripts with these)
+
+  var kit = {
+    Script: Script, mixSeed: mixSeed, VOL: VOL, TICK: TICK, END: END, MARGIN: MARGIN, MIRROR: MIRROR, rt: rt,
+    firstThrough: firstThrough, lev: lev, mpt: mpt, resistanceOf: resistanceOf,
+    pickDay: pickDay, addDays: addDays, et: et, span: span, nyTimes: nyTimes, entryOutcome: entryOutcome
+  };
+
+  TJR.scenarios = { list: LIST, get: get, random: random, safeBuild: safeBuild, check: check, register: register, kit: kit };
 })(typeof window !== 'undefined' ? window : globalThis);
