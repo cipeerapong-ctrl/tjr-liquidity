@@ -25,6 +25,7 @@ Goals
 - The home page rewritten around the path.
 - Practice pages (สถานการณ์, แบบฝึก) tagged by the step they practise.
 - No visible "Level 1 / Level 2" wording left anywhere a reader can see it.
+- Copy a beginner gets in one read (the user's ask on approval): plain spoken Thai, not formal, no longer than needed.
 
 Non-goals
 - No change to the lessons' content, facts, chips or charts beyond the path framing and the wording swaps listed below.
