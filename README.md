@@ -29,6 +29,7 @@ Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.j
 ## Pages
 | Page | Level | What it does |
 |---|---|---|
+| `start.html` | 0 | Step 0, the beginner page: candle, timeframe, high / low, trend, then a short glossary that links into the lessons |
 | `index.html` | 1 + 2 | Home: hero chart, the 3-step trade of the clip, the full-system chain, lesson timeline, the tools, the two sources |
 | `learn.html` | 1 | 8 lessons in main-clip order, each with a playable chart, a short quiz and timestamp chips; session table in ET and Thai time; extra detail from playlist clips #12 and #14 |
 | `confluences.html` | 2 | Five lessons with an interactive each: break of structure, fair value gap, inverse FVG (BOS vs IFVG race), equilibrium (draggable range), SMT (twin ES / NQ charts) |
@@ -40,7 +41,7 @@ Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.j
 
 ## Folder map
 ```
-index.html learn.html confluences.html strategy.html risk.html playbook.html scenarios.html lab.html   pages
+index.html start.html learn.html confluences.html strategy.html risk.html playbook.html scenarios.html lab.html   pages
 assets/css/         tokens.css (palette, type), site.css (shared components), pages/*.css
 assets/js/core/     ns.js (TJR.util), sources.js (video table, fact id -> video), store.js, layout.js (nav/footer/chips), motion.js
 assets/js/scenario/ rng, swings, gen, sessions, confluence (FVG / BOS / EQ / SMT detectors), library (S01-S14, check),

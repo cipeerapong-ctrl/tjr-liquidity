@@ -1,0 +1,8 @@
+/*
+  TJR Liquidity: step 0, the beginner page (v3 learning path). Page CSS only for what the kit and site.css lack.
+  Tokens: assets/css/tokens.css; components: site.css (.step-tag, .ts-chip, .chips, .badge-gap).
+*/
+
+.st [hidden] { display: none !important; }
+.st p, .st h2, .st h3 { text-wrap: pretty; }
+.st-head { display: grid; gap: var(--s-4); justify-items: start; padding-bottom: var(--s-8); }

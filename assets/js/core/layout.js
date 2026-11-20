@@ -6,7 +6,7 @@
    because the kit's system.js is a module and Chrome runs no module script from file://.
 
    TJR.layout.mount({ page, base, close })
-     page   a PAGES id: 'home' | 'learn' | 'confluences' | 'strategy' | 'scenarios' | 'playbook' | 'risk' | 'lab'
+     page   a PAGES id: 'home' | 'start' | 'learn' | 'confluences' | 'strategy' | 'playbook' | 'risk' | 'scenarios' | 'lab'
             (that word gets aria-current="page"; anything else marks none)
      base   prefix for the site's own links ('' at the site root, '../' from dev/); by default the folder
             layout.js was loaded from, minus assets/js/core/
@@ -15,7 +15,7 @@
             Without it the footer is the plain dark footer at its own height.
      -> { nav, footer } (the injected elements). Calling it again replaces both and their listeners.
    Pure builders (no DOM): navHTML(opts), footerHTML(opts), chip(sec, clip?), olderNote(html, clip, sec),
-   webDef(html, url), gap(); constants NAME, PAGES, CLIP, PLAYLIST, GAP_TEXT, SOURCE_TEXT, OLDER_LABEL, WEBDEF_LABEL.
+   webDef(html, url), gap(), stepMarkerHTML(id), pathNavHTML(id, base); constants PATH (the six learning steps), NAME, PAGES, CLIP, PLAYLIST, GAP_TEXT, SOURCE_TEXT, OLDER_LABEL, WEBDEF_LABEL.
    chip(sec) is the main-clip chip; chip(sec, n) is a playlist chip "#n MM:SS" (TJR.sources, core/sources.js).
    A page puts <main id="top"> (the skip link's target) and a <noscript> copy of navHTML's bar. */
 (function (global) {
@@ -36,21 +36,27 @@
   var GAP_TEXT = 'คลิปไม่ได้ระบุ';
   var OLDER_LABEL = 'คลิปเก่า (ม.ค. 2026) พูดว่า…';
   var WEBDEF_LABEL = 'นิยามทั่วไป ไม่ใช่จากคลิป';
-  var CTA = { label: 'เริ่มบทเรียน', page: 'learn' };
+  var CTA = { label: 'เริ่มที่นี่', page: 'start' };
   var PAGES = [
     { id: 'home', label: 'หน้าแรก', href: 'index.html' },
-    { id: 'learn', label: 'บทเรียน', href: 'learn.html' },
+    { id: 'start', label: 'เริ่มที่นี่', href: 'start.html' },
+    { id: 'learn', label: 'Liquidity', href: 'learn.html' },
     { id: 'confluences', label: 'Confluences', href: 'confluences.html' },
-    { id: 'strategy', label: 'กลยุทธ์', href: 'strategy.html' },
-    { id: 'scenarios', label: 'สถานการณ์', href: 'scenarios.html' },
+    { id: 'strategy', label: 'เซ็ตอัพเต็ม', href: 'strategy.html' },
     { id: 'playbook', label: 'Playbook', href: 'playbook.html' },
     { id: 'risk', label: 'ความเสี่ยง', href: 'risk.html' },
+    { id: 'scenarios', label: 'สถานการณ์', href: 'scenarios.html' },
     { id: 'lab', label: 'แบบฝึก', href: 'lab.html' }
   ];
+  // the learning path: step 0 is the beginner page, 1..5 the lessons in teaching order (the nav, the step marker and the prev / next bar read this)
+  var PATH = ['start', 'learn', 'confluences', 'strategy', 'playbook', 'risk'].map(function (id, i) {
+    var p = PAGES.filter(function (x) { return x.id === id; })[0];
+    return { step: i, id: id, label: p.label, href: p.href };
+  });
   // footer columns, ordered as the nav
   var COLUMNS = [
-    { title: 'เรียน', ids: ['home', 'learn', 'confluences', 'strategy'] },
-    { title: 'ฝึก', ids: ['scenarios', 'playbook', 'risk', 'lab'] }
+    { title: 'เส้นทาง', ids: ['home', 'start', 'learn', 'confluences', 'strategy'] },
+    { title: 'ฝึกและใช้จริง', ids: ['playbook', 'risk', 'scenarios', 'lab'] }
   ];
 
   var ICON_BARS = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -69,6 +75,7 @@
   }
   function baseOf(opts) { return opts && typeof opts.base === 'string' ? opts.base : defaultBase(); }
   function pageById(id) { for (var i = 0; i < PAGES.length; i++) if (PAGES[i].id === id) return PAGES[i]; return null; }
+  function pathIndex(id) { for (var i = 0; i < PATH.length; i++) if (PATH[i].id === id) return i; return -1; }
   function logo(base, cls) {
     return '<a class="' + cls + '" href="' + esc(base + 'index.html') + '"><span class="mark" data-mark="ring" aria-hidden="true"></span>' + esc(NAME) + '</a>';
   }
@@ -91,6 +98,26 @@
         '<button class="nav__toggle" type="button" aria-expanded="false" aria-controls="tjr-nav-links" aria-label="เมนู">' + ICON_BARS + '</button>' +
       '</div>' +
     '</header>';
+  }
+
+  // "ขั้น 3 จาก 5 · เซ็ตอัพเต็ม" at the top of a path page ('' for a page that is not on the path)
+  function stepMarkerHTML(id) {
+    var i = pathIndex(id);
+    if (i < 0) return '';
+    var p = PATH[i];
+    return '<p class="step-tag" data-step="' + p.step + '">ขั้น ' + p.step + (p.step ? ' จาก 5' : '') + ' · ' + esc(p.label) + '</p>';
+  }
+  // the prev / next bar at the end of a path page
+  function pathNavHTML(id, base) {
+    var i = pathIndex(id);
+    if (i < 0) return '';
+    base = base == null ? '' : base;
+    var prev = i > 0 ? PATH[i - 1] : null, next = i < PATH.length - 1 ? PATH[i + 1] : null;
+    var a = prev ? '<a class="path-nav__prev" href="' + esc(base + prev.href) + '">← ขั้นก่อนหน้า: ' + esc(prev.label) + '</a>' : '';
+    var b = next
+      ? '<a class="path-nav__next" href="' + esc(base + next.href) + '">ขั้นถัดไป: ' + esc(next.label) + ' →</a>'
+      : '<a class="path-nav__next" href="' + esc(base + 'scenarios.html') + '">ไปฝึกต่อ: สถานการณ์ →</a>';
+    return '<nav class="path-nav" data-tjr-layout="path" aria-label="เส้นทางเรียน">' + a + b + '</nav>';
   }
 
   function closeHTML(close, base) {
@@ -231,6 +258,13 @@
     else if (main && main.parentNode) main.parentNode.insertBefore(footer, main.nextSibling);
     else doc.body.appendChild(footer);
 
+    var oldPath = doc.querySelector('[data-tjr-layout="path"]');
+    if (oldPath) oldPath.remove();
+    if (main && pathIndex(opts.page) >= 0) {
+      var pn = fromHTML(pathNavHTML(opts.page, baseOf(opts)));
+      if (pn) main.appendChild(pn);
+    }
+
     var unwire = wireSheet(nav);
     teardown = function () { unwire(); };
     return { nav: nav, footer: footer };
@@ -244,6 +278,9 @@
     olderNote: olderNote,
     webDef: webDef,
     gap: gap,
+    stepMarkerHTML: stepMarkerHTML,
+    pathNavHTML: pathNavHTML,
+    PATH: PATH.map(function (p) { return { step: p.step, id: p.id, label: p.label, href: p.href }; }),
     NAME: NAME,
     CLIP: CLIP,
     PLAYLIST: PLAYLIST,

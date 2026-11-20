@@ -12,13 +12,13 @@
   }
 
   test('layout: the nav lists the pages in order, with the plan\'s labels (the full list is also pinned in sources.test.js)', () => {
-    eq(TJR.layout.PAGES.map((p) => p.label), ['หน้าแรก', 'บทเรียน', 'Confluences', 'กลยุทธ์', 'สถานการณ์', 'Playbook', 'ความเสี่ยง', 'แบบฝึก']);
-    eq(TJR.layout.PAGES.map((p) => p.id), ['home', 'learn', 'confluences', 'strategy', 'scenarios', 'playbook', 'risk', 'lab']);
-    eq(TJR.layout.PAGES.map((p) => p.href), ['index.html', 'learn.html', 'confluences.html', 'strategy.html', 'scenarios.html', 'playbook.html', 'risk.html', 'lab.html']);
+    eq(TJR.layout.PAGES.map((p) => p.label), ['หน้าแรก', 'เริ่มที่นี่', 'Liquidity', 'Confluences', 'เซ็ตอัพเต็ม', 'Playbook', 'ความเสี่ยง', 'สถานการณ์', 'แบบฝึก']);
+    eq(TJR.layout.PAGES.map((p) => p.id), ['home', 'start', 'learn', 'confluences', 'strategy', 'playbook', 'risk', 'scenarios', 'lab']);
+    eq(TJR.layout.PAGES.map((p) => p.href), ['index.html', 'start.html', 'learn.html', 'confluences.html', 'strategy.html', 'playbook.html', 'risk.html', 'scenarios.html', 'lab.html']);
     const html = TJR.layout.navHTML({ page: 'home', base: '' });
-    let at = -1;
+    let at = html.indexOf('id="tjr-nav-links"');                 // the logo also reads "Liquidity": look only in the links
     TJR.layout.PAGES.forEach((p) => {
-      const i = html.indexOf('>' + p.label + '</a>');
+      const i = html.indexOf('>' + p.label + '</a>', at);
       ok(i > at, p.label + ' in order in the nav');
       at = i;
     });
@@ -39,7 +39,7 @@
     ok(html.indexOf('class="nav nav--centre"') >= 0, 'nav-centre');
     ok(html.indexOf('<a class="skip-link" href="#top">') >= 0, 'skip link to #top first');
     ok(html.indexOf('data-mark="ring"') >= 0, 'the dealt ring mark');
-    ok(html.indexOf('<a class="btn btn--primary" href="../learn.html">เริ่มบทเรียน</a>') >= 0, 'main action');
+    ok(html.indexOf('<a class="btn btn--primary" href="../start.html">เริ่มที่นี่</a>') >= 0, 'main action');
     eq(count(html, 'btn--primary'), 1, 'one filled button');
     ok(/<button class="nav__toggle" type="button" aria-expanded="false" aria-controls="tjr-nav-links" aria-label="[^"]+">/.test(html), 'toggle states itself');
     ok(html.indexOf('id="tjr-nav-links"') >= 0, 'the toggle controls the links');
@@ -65,6 +65,19 @@
     ok(html.indexOf('<h2 id="close-h">ฝึก &lt;b&gt;&amp;&lt;/b&gt;</h2>') >= 0, 'title escaped');
     ok(html.indexOf('class="footer__mark"') < 0, 'no second large name under close-word');
     ok(html.indexOf('href="learn.html">เริ่มบทเรียน<svg class="m-arrow"') >= 0, 'the close button');
+  });
+
+  test('layout.PATH: six steps 0..5 and the marker / prev-next builders', () => {
+    eq(TJR.layout.PATH.map((p) => p.id), ['start', 'learn', 'confluences', 'strategy', 'playbook', 'risk']);
+    eq(TJR.layout.PATH.map((p) => p.step), [0, 1, 2, 3, 4, 5]);
+    eq(TJR.layout.stepMarkerHTML('start'), '<p class="step-tag" data-step="0">ขั้น 0 · เริ่มที่นี่</p>');
+    eq(TJR.layout.stepMarkerHTML('strategy'), '<p class="step-tag" data-step="3">ขั้น 3 จาก 5 · เซ็ตอัพเต็ม</p>');
+    eq(TJR.layout.stepMarkerHTML('lab'), '');
+    const s = TJR.layout.pathNavHTML('start', ''), r = TJR.layout.pathNavHTML('risk', ''), c = TJR.layout.pathNavHTML('confluences', '');
+    ok(s.indexOf('ขั้นก่อนหน้า') < 0 && s.indexOf('href="learn.html"') > 0, 'start: next only');
+    ok(c.indexOf('href="learn.html"') > 0 && c.indexOf('href="strategy.html"') > 0, 'confluences: prev learn, next strategy');
+    ok(r.indexOf('href="playbook.html"') > 0 && r.indexOf('href="scenarios.html"') > 0, 'risk: prev playbook, next practice');
+    eq(TJR.layout.pathNavHTML('lab', ''), '');
   });
 
   test('layout: chip and gap builders', () => {

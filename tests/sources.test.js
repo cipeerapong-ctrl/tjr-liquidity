@@ -121,14 +121,14 @@
 
   // ---------------------------------------------------------------- nav and footer
 
-  test('layout: the nav lists the eight pages in order, with the plan\'s labels and files', () => {
+  test('layout: the nav lists the nine pages in order, with the plan\'s labels and files', () => {
     eq(TJR.layout.PAGES.map((p) => p.label),
-      ['หน้าแรก', 'บทเรียน', 'Confluences', 'กลยุทธ์', 'สถานการณ์', 'Playbook', 'ความเสี่ยง', 'แบบฝึก']);
+      ['หน้าแรก', 'เริ่มที่นี่', 'Liquidity', 'Confluences', 'เซ็ตอัพเต็ม', 'Playbook', 'ความเสี่ยง', 'สถานการณ์', 'แบบฝึก']);
     eq(TJR.layout.PAGES.map((p) => p.href),
-      ['index.html', 'learn.html', 'confluences.html', 'strategy.html', 'scenarios.html', 'playbook.html', 'risk.html', 'lab.html']);
+      ['index.html', 'start.html', 'learn.html', 'confluences.html', 'strategy.html', 'playbook.html', 'risk.html', 'scenarios.html', 'lab.html']);
     const html = TJR.layout.navHTML({ page: 'strategy', base: '' });
-    eq(count(html, 'class="nav__link"'), 8);
-    ok(html.indexOf('href="strategy.html" aria-current="page">กลยุทธ์<') >= 0, 'strategy is current');
+    eq(count(html, 'class="nav__link"'), 9);
+    ok(html.indexOf('href="strategy.html" aria-current="page">เซ็ตอัพเต็ม<') >= 0, 'strategy is current');
   });
 
   test('layout: the footer names the TJR-only rule and links the main clip and the playlist', () => {
@@ -146,7 +146,7 @@
   const PAGES = listRootHtml();
 
   test('audit: the site has its root pages to audit', () => {
-    ['index.html', 'learn.html', 'scenarios.html', 'playbook.html', 'lab.html'].forEach((f) => ok(PAGES.indexOf(f) >= 0, f));
+    ['index.html', 'start.html', 'learn.html', 'scenarios.html', 'playbook.html', 'lab.html'].forEach((f) => ok(PAGES.indexOf(f) >= 0, f));
   });
 
   PAGES.forEach((file) => {
