@@ -332,7 +332,7 @@
         if (m === 'spot') ok(r.task);
         if (m === 'sessions') eq(Object.keys(r.lines).sort(), L.SESSION_KEYS.slice().sort());
         if (m === 'quiz') ok(r.q);
-        if (m === 'gap') ok(r.gap && r.gap.from < r.gap.to);
+        if (m === 'gap') ok(r.gap && r.gap.from < r.gap.to && (r.gap.dir === 'bull' || r.gap.dir === 'bear'));
         if (m === 'bos') ok(r.bq);
         if (m === 'smt') ok(r.smt && typeof r.smt.swap === 'boolean');
         ids[r.def.id] = 1;
@@ -512,23 +512,49 @@
     });
   });
 
-  test('lab gap: the window holds the setup, shows gaps, and the click is graded on the revealed candles only', () => {
+  test('lab gap: the window holds the setup, shows gaps, and only the exact middle of a gap of the NAMED direction passes', () => {
     ['S15', 'S16', 'S19', 'S22'].forEach(function (id) {
       for (var seed = 1; seed <= 40; seed++) {
-        var b = TJR.scenarios.safeBuild(TJR.scenarios.get(id), seed, {}), g = L.gapWindow(b), n = b.candles.length;
-        ok(g.from >= 0 && g.to <= n - 1 && g.from < g.to && g.to - g.from <= 26, id + ' window ' + g.from + '..' + g.to);
-        var gaps = L.gapsIn(b, g);
-        ok(gaps.length >= 1, id + ' seed ' + seed + ' has a gap in the window');
+        var b = TJR.scenarios.safeBuild(TJR.scenarios.get(id), seed, {}), w = L.gapWindow(b), n = b.candles.length;
+        ok(w.from >= 0 && w.to <= n - 1 && w.from < w.to && w.to - w.from <= 26, id + ' window ' + w.from + '..' + w.to);
+        var g = L.gapRound(b, rngOf(seed));
+        eq([g.from, g.to], [w.from, w.to]);
+        ok(g.dir === 'bull' || g.dir === 'bear', 'a named direction');
+        var gaps = L.gapsIn(b, g), mine = gaps.filter(function (x) { return x.dir === g.dir; });
+        ok(mine.length >= 1, id + ' seed ' + seed + ' has a ' + g.dir + ' gap in the window');
         gaps.forEach(function (x) { ok(x.from >= g.from && x.to <= g.to, 'gap inside the window and its third candle is revealed'); });
-        var sl = L.gapSlice(b, g);
-        eq(sl.candles.length, g.to + 1);
-        gaps.forEach(function (x) { eq(L.gapGrade(b, g, x.i).correct, true); });
+        eq(L.gapSlice(b, g).candles.length, g.to + 1);
+        for (var i = g.from; i <= g.to; i++) {
+          var hit = mine.some(function (x) { return x.i === i; });
+          eq(L.gapGrade(b, g, i).correct, hit, id + ' seed ' + seed + ' bar ' + i);
+        }
+        mine.forEach(function (x) { eq(L.gapGrade(b, g, x.i).expected.bar, x.i); });
         eq(L.gapGrade(b, g, g.to + 3).correct, false, 'a click past the revealed bar is wrong');
+        eq(L.gapGrade(b, g, NaN).correct, false);
       }
     });
-    var b2 = TJR.scenarios.safeBuild(TJR.scenarios.get('S15'), 3, {}), g2 = L.gapWindow(b2), right = 0, wrong = 0;
-    for (var i = g2.from; i <= g2.to; i++) { if (L.gapGrade(b2, g2, i).correct) right++; else wrong++; }
-    ok(right > 0, 'some clicks are right'); ok(wrong > 0, 'some clicks are wrong: ' + right + ' / ' + wrong);
+  });
+
+  // the drill must not be guessable: a click on a random bar of the window passes in at most ~1 in 4 rounds
+  test('lab gap: a random click passes at most 30% of the time (seeds 1..60 of S15 / S16 / S19 / S22)', () => {
+    var all = 0, allHit = 0;
+    ['S15', 'S16', 'S19', 'S22'].forEach(function (id) {
+      var t = 0, hit = 0;
+      for (var seed = 1; seed <= 60; seed++) {
+        var b = TJR.scenarios.safeBuild(TJR.scenarios.get(id), seed, {}), g = L.gapRound(b, rngOf(seed * 31));
+        for (var i = g.from; i <= g.to; i++) { t++; if (L.gapGrade(b, g, i).correct) hit++; }
+      }
+      ok(hit / t > 0.02, id + ': some clicks pass (' + hit + '/' + t + ')');
+      ok(hit / t <= 0.30, id + ': random click pass rate ' + (hit / t).toFixed(2) + ' must be <= 0.30');
+      all += t; allHit += hit;
+    });
+    ok(allHit / all <= 0.30, 'overall ' + (allHit / all).toFixed(2));
+  });
+
+  test('lab gap: the rule is on the page in one Thai line and the prompt names the direction', () => {
+    var js = readText('assets/js/pages/lab.js');
+    ok(js.indexOf('กติกา: คลิกตรงแท่งกลางของ gap ฝั่งที่โจทย์ระบุเท่านั้น') > 0, 'the rule line');
+    ok(js.indexOf('ผ่านถ้าคลิกใกล้แท่งกลางของ gap จริงไม่เกิน 1 แท่ง') < 0, 'the old +/-1 rule is gone from the page');
   });
 
   test('lab gap: gapWhy reads the three reasons a bar is not a gap middle (overlap of wicks, doji, edge)', () => {

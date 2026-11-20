@@ -7,7 +7,7 @@
       spot          pickSpot / spotPrompt / spotShape
       sessions      sessionStarts / sessionTicks
       quiz          pickQuiz / quizAnswers / quizOverlay
-      Level 2       isLevel2 / l2Chain (Replay on S15 / S16 / S22), gapWindow / gapsIn / gapGrade / gapWhy (Gap finder),
+      Level 2       isLevel2 / l2Chain (Replay on S15 / S16 / S22), gapWindow / gapRound / gapsIn / gapGrade / gapWhy (Gap finder),
                     pickBos / bosOverlays / bosFeedback (Break or not), smtFacts / smtPanels / smtFeedback (Which index leads)
    2. page: seven modes on ONE live engine chart at a time (the SMT drill uses the twin pair) (a round = TJR.scenarios.random(rng, mode); the chart is
       destroyed and rebuilt every round, so no loop or listener is left behind; a run token drops late callbacks).
@@ -304,7 +304,25 @@
   function gapSlice(b, g) { return { candles: b.candles.slice(0, g.to + 1), meta: b.meta, truth: b.truth }; }
   // the gaps on screen: formed inside the window, third candle revealed
   function gapsIn(b, g) { return TJR.confluence.fvgs(b.candles.slice(0, g.to + 1)).filter(function (x) { return x.from >= g.from; }); }
-  function gapGrade(b, g, bar) { return TJR.grade.fvg(gapSlice(b, g), bar); }
+  // The round: the window plus ONE named direction ('bull' | 'bear') that has a gap in it. The rule is the web site's own,
+  // stricter than TJR.grade.fvg (any gap within 1 bar, which random clicks pass in 50-70% of the windows): the click must
+  // land exactly on the middle candle of a gap OF THAT DIRECTION. A random click then passes in about 1 round in 7.
+  function gapRound(b, rng) {
+    var g = gapWindow(b), dirs = [];
+    gapsIn(b, g).forEach(function (x) { if (dirs.indexOf(x.dir) < 0) dirs.push(x.dir); });
+    g.dir = dirs.length ? rng.pick(dirs) : null;
+    return g;
+  }
+  // expected = the nearest gap of the named direction { bar, dir, low, high }; other = a gap of the other direction whose
+  // middle was clicked (for the feedback), else null
+  function gapGrade(b, g, bar) {
+    if (typeof bar !== 'number' || !isFinite(bar)) return { correct: false, expected: null, other: null };
+    var gaps = gapsIn(b, g), mine = gaps.filter(function (x) { return !g.dir || x.dir === g.dir; }), best = null, other = null;
+    mine.forEach(function (x) { if (!best || Math.abs(x.i - bar) < Math.abs(best.i - bar)) best = x; });
+    gaps.forEach(function (x) { if (g.dir && x.dir !== g.dir && x.i === bar) other = x; });
+    return { correct: !!best && best.i === bar,
+             expected: best && { bar: best.i, dir: best.dir, low: best.low, high: best.high }, other: other };
+  }
   function ticksOf(v) { return Math.round(v / TICK); }
   // why bar i is NOT the middle of a gap (null when it is): { reason: 'edge' | 'doji' | 'overlap', dir?, first?, third?, ticks? }
   function gapWhy(cs, i) {
@@ -409,7 +427,7 @@
       if (mode === 'spot') { r.task = pickSpot(b, rng, last && last.task); if (r.task) return r; }
       if (mode === 'sessions') { r.lines = sessionStarts(b); return r; }
       if (mode === 'quiz') { r.q = pickQuiz(b, rng); if (r.q) return r; }
-      if (mode === 'gap') { r.gap = gapWindow(b); if (gapsIn(b, r.gap).length) return r; }
+      if (mode === 'gap') { r.gap = gapRound(b, rng); if (r.gap.dir) return r; }
       if (mode === 'bos') { r.bq = pickBos(b, rng); if (r.bq) return r; }
       if (mode === 'smt') { r.smt = { swap: rng.chance(0.5), reveal: b.truth.smt.at }; return r; }
     }
@@ -424,7 +442,7 @@
   L.sessionStarts = sessionStarts; L.sessionSpan = sessionSpan; L.sessionTicks = sessionTicks; L.sessionView = sessionView; L.spotSetup = spotSetup; L.spotView = spotView;
   L.quizAnswers = quizAnswers; L.quizOptions = quizOptions; L.pickQuiz = pickQuiz; L.quizOverlay = quizOverlay; L.afterAllowed = afterAllowed;
   L.D4_L2 = D4_L2; L.isLevel2 = isLevel2; L.l2Chain = l2Chain; L.confluenceOverlays = confluenceOverlays;
-  L.gapWindow = gapWindow; L.gapSlice = gapSlice; L.gapsIn = gapsIn; L.gapGrade = gapGrade; L.gapWhy = gapWhy; L.gapOverlays = gapOverlays;
+  L.gapWindow = gapWindow; L.gapRound = gapRound; L.gapSlice = gapSlice; L.gapsIn = gapsIn; L.gapGrade = gapGrade; L.gapWhy = gapWhy; L.gapOverlays = gapOverlays;
   L.GAP_SECS = GAP_SECS; L.pickBos = pickBos; L.bosOverlays = bosOverlays; L.bosFeedback = bosFeedback;
   L.smtFacts = smtFacts; L.smtPanels = smtPanels; L.smtLines = smtLines; L.smtFeedback = smtFeedback;
   L.freshSeed = freshSeed; L.makeRound = makeRound;
@@ -461,7 +479,7 @@
     spot: ['โจทย์สุ่มบนกราฟใหม่ คลิกบนกราฟเพื่อตอบ ผ่านถ้าใกล้จุดจริงไม่เกิน 1 แท่ง (เกณฑ์ของเว็บนี้) ตรวจแล้วจะเห็นตำแหน่งที่ถูกบนกราฟ', [315, 1350]],
     sessions: ['ลากเส้นสีทองสองเส้นไป Asia high กับ low และเส้นสีฟ้าสองเส้นไป London high กับ low ผ่านถ้าห่างไม่เกิน 4 tick (เกณฑ์ของเว็บนี้) แกนเวลาเป็น ET ช่วง session ตามที่คลิปใช้', [1875]],
     quiz: ['เส้นสีทองบนกราฟคือ level หนึ่ง ตอบว่ามันเป็น low-resistance, high-resistance, HTF หรือ session ตามที่คลิปแบ่ง', [2385, 2700, 1635]],
-    gap: ['ระดับ 2: คลิกที่แท่งกลางของ fair value gap บนกราฟ gap คือช่องว่างระหว่างไส้ของแท่งแรกกับไส้ของแท่งที่สาม โดยมีแท่งใหญ่คั่นกลาง สีของแท่งแรกและแท่งที่สามไม่สำคัญ ผ่านถ้าคลิกใกล้แท่งกลางของ gap จริงไม่เกิน 1 แท่ง (เกณฑ์ของเว็บนี้) ตรวจแล้วจะเห็นกรอบของ gap ทุกอันในช่วงนี้', [[10, 251], [10, 189], [10, 606]]],
+    gap: ['ระดับ 2: คลิกที่แท่งกลางของ fair value gap บนกราฟ gap คือช่องว่างระหว่างไส้ของแท่งแรกกับไส้ของแท่งที่สาม โดยมีแท่งใหญ่คั่นกลาง สีของแท่งแรกและแท่งที่สามไม่สำคัญ กติกา: คลิกตรงแท่งกลางของ gap ฝั่งที่โจทย์ระบุเท่านั้น (เกณฑ์ของเว็บนี้ ไม่ใช่จากคลิป) ตรวจแล้วจะเห็นกรอบของ gap ทุกอันในช่วงนี้', [[10, 251], [10, 189], [10, 606]]],
     bos: ['ระดับ 2: กราฟหยุดที่แท่งหนึ่ง (ลูกศร) เส้นทองคือ low หรือ high ล่าสุดที่เฝ้าอยู่ ตอบว่าแท่งนี้ทำให้เกิด break of structure หรือยัง ไส้ที่ทะลุไม่นับ ต้องมีแท่งที่ปิดเลย level', [[11, 153], [11, 263], [11, 502]]],
     smt: ['ระดับ 2: สองกราฟคือ ES และ NQ ในช่วงเวลาเดียวกัน ลูกศรคือ high แรกและ high ที่สองของแต่ละดัชนี ตอบว่าดัชนีไหนเป็นตัวนำของการเคลื่อนไหว ซึ่งตำแหน่งซ้ายขวาสลับกันไปทุกข้อ', [[6, 316], [6, 338]]]
   };
@@ -809,9 +827,12 @@
   };
   var Gp = {
     start: function (round) {
-      var g = round.gap, b = round.built;
-      el.ctrls.innerHTML = '<span class="lf__hint">คลิกที่แท่งกลางของ gap หนึ่งอัน</span>';
-      el.prompt.innerHTML = '<h2>โจทย์</h2><p>คลิกที่แท่งกลางของ fair value gap บนกราฟ (แท่งใหญ่ที่คั่นระหว่างไส้ของแท่งแรกกับไส้ของแท่งที่สาม) ' + chipsHtml([[10, 251], [10, 189]]) + '</p>';
+      var g = round.gap, b = round.built, bull = g.dir === 'bull';
+      el.ctrls.innerHTML = '<span class="lf__hint">คลิกตรงแท่งกลางของ ' + GAP_WORD[bull ? 'up' : 'down'] + ' gap หนึ่งอัน</span>';
+      el.prompt.innerHTML = '<h2>โจทย์</h2><p>คลิกที่แท่งกลางของ <b>' + GAP_WORD[bull ? 'up' : 'down'] + '</b> fair value gap บนกราฟ ' +
+        (bull ? '(แท่งขึ้นใหญ่ที่คั่นระหว่างไส้บนของแท่งแรกกับไส้ล่างของแท่งที่สาม)' : '(แท่งลงใหญ่ที่คั่นระหว่างไส้ล่างของแท่งแรกกับไส้บนของแท่งที่สาม)') + ' ' +
+        chipsHtml(bull ? L.GAP_SECS.up : L.GAP_SECS.down) +
+        '</p><p class="hint">กติกา: คลิกตรงแท่งกลางของ gap ฝั่งที่โจทย์ระบุเท่านั้น (เกณฑ์ของเว็บนี้ ไม่ใช่จากคลิป)</p>';
       S.ch.setOverlays([]);
       S.ch.reveal(g.to);
       S.ch.view(Math.max(0, g.from - 1), g.to + 3);
@@ -822,6 +843,7 @@
     answer: function (p) {
       if (S.answered) return;
       var r = S.round, b = r.built, g = r.gap, res = L.gapGrade(b, g, p.i), exp = res.expected, all = L.gapsIn(b, g);
+      var dir = g.dir === 'bull' ? 'up' : 'down';
       S.answered = true;
       scoreIt(res.correct);
       var ov = L.gapOverlays(b, g);
@@ -832,17 +854,20 @@
       }
       if (!res.correct) ov.push({ id: 'gap-you', type: 'marker', bar: p.i, price: p.price, shape: 'x', appearAt: 0 });
       S.ch.setOverlays(ov);
-      var dir = exp && exp.dir === 'bull' ? 'up' : 'down', h = '<p class="lab-verdict"><b>' + (res.correct ? 'ถูก' : 'ยังไม่ถูก') + '</b> ';
+      var h = '<p class="lab-verdict"><b>' + (res.correct ? 'ถูก' : 'ยังไม่ถูก') + '</b> ', secs = GAP_SECS_FOR(dir);
       if (res.correct) {
         h += 'นี่คือ ' + GAP_WORD[dir] + ' fair value gap ช่องว่างระหว่าง ' + (dir === 'up' ? 'ไส้บนของแท่งแรกกับไส้ล่างของแท่งที่สาม' : 'ไส้ล่างของแท่งแรกกับไส้บนของแท่งที่สาม') +
-          ' ราคา ' + fmt(exp.low) + ' – ' + fmt(exp.high) + (exp.bar !== p.i ? ' แท่งกลางจริงอยู่ที่ ' + stamp(b.candles[exp.bar].t) + ' (ลูกศร “แท่งกลาง”)' : '');
+          ' ราคา ' + fmt(exp.low) + ' – ' + fmt(exp.high);
+      } else if (res.other) {
+        h += 'แท่งที่คลิกเป็นแท่งกลางของ ' + GAP_WORD[res.other.dir === 'bull' ? 'up' : 'down'] + ' gap แต่โจทย์ถามฝั่ง ' + GAP_WORD[dir];
+        if (exp) h += ' แท่งกลางของฝั่งที่ถามอยู่ที่ ' + stamp(b.candles[exp.bar].t) + ' (ลูกศร “แท่งกลาง”)';
       } else {
-        var why = L.gapWhy(S.round.built.candles.slice(0, g.to + 1), p.i);
-        h += 'แท่งที่คลิก' + (why ? 'ไม่ใช่แท่งกลางของ gap: ' + GAP_WHY[why.reason](why) : 'ห่างจากแท่งกลางของ gap ที่ใกล้ที่สุดเกิน 1 แท่ง');
-        if (exp) h += ' gap ที่ใกล้ที่สุดอยู่ที่ ' + stamp(b.candles[exp.bar].t) + ' (ลูกศร “แท่งกลาง”)';
-        h += ' <span class="chips">' + chipsHtml(why && why.reason === 'overlap' ? [[10, 606]] : GAP_SECS_FOR(dir)) + '</span>';
+        var why = L.gapWhy(b.candles.slice(0, g.to + 1), p.i);
+        h += why ? 'แท่งที่คลิกไม่ใช่แท่งกลางของ gap: ' + GAP_WHY[why.reason](why) : 'แท่งที่คลิกไม่ตรงแท่งกลางของ ' + GAP_WORD[dir] + ' gap ต้องคลิกตรงแท่งกลางพอดี';
+        if (why && why.reason === 'overlap') secs = [[10, 606]];
+        if (exp) h += ' แท่งกลางของฝั่งที่ถามที่ใกล้ที่สุดอยู่ที่ ' + stamp(b.candles[exp.bar].t) + ' (ลูกศร “แท่งกลาง”)';
       }
-      h += ' ช่วงนี้มี gap ทั้งหมด ' + all.length + ' อัน กรอบสีเขียวคือ bullish สีแดงคือ bearish ' + '<span class="chips">' + chipsHtml(GAP_SECS_FOR(dir)) + '</span></p>';
+      h += ' <span class="chips">' + chipsHtml(secs) + '</span> ช่วงนี้มี gap ทั้งหมด ' + all.length + ' อัน กรอบสีเขียวคือ bullish สีแดงคือ bearish</p>';
       showFb(res.correct, h + scenarioLine(r));
     }
   };
