@@ -122,3 +122,9 @@ what SMT stands for; which seven advanced draws he meant (P12.2).
 - Spec and plan: a v2 spec from this map, then a plan in phases:
   - Phase A: engine (source table, chips, FVG/BOS/EQ drawings) + confluences.html + playbook rebuild + learn additions.
   - Phase B: SMT twin chart, strategy.html, risk.html, new scenarios, new lab drills, final review, republish to the same Artifact URL.
+
+## 9. Scope cuts agreed 2026-11-20 (to shorten the build)
+- M8 opening gaps & BPR: no lesson (he calls them rarely tradable / nearly useless, P9.20); one pointer sentence with a `▶ #9` chip only.
+- Lab: three new drills (Gap finder, Break or not, Which index leads); Draw-equilibrium and Time-window drills dropped (the equilibrium range stays as a lesson interactive).
+- Scenarios S15–S22 stay at 8.
+- Build order: Tasks 5, 6, 7 in parallel after Task 4; then Tasks 8, 9, 11, 12 in parallel; then Task 10; then Task 13.

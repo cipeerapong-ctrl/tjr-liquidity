@@ -155,13 +155,13 @@ Add, with playlist chips: in ch. 2 a short candle-anatomy aside (OHLC, wick = tr
 
 **Files:** Create `confluences.html`, `assets/css/pages/confluences.css`, `assets/js/pages/confluences.js`, `tests/confluences.test.js`.
 
-Same lesson layout, rail and chart-slot pattern as `learn.html` (copy its structure; at most 4 live charts). Page tag `Level 2 · Confluences`. Intro: his chain table (spec §1) with chips P1.19, P11.26, P8.39. Six lessons, each = paraphrased facts with chips + one interactive + 2-question self-check (`tjr.conf.m1`…`m6`):
+Same lesson layout, rail and chart-slot pattern as `learn.html` (copy its structure; at most 4 live charts). Page tag `Level 2 · Confluences`. Intro: his chain table (spec §1) with chips P1.19, P11.26, P8.39. Five lessons (scope cut 2026-11-20: opening gaps/BPR dropped), each = paraphrased facts with chips + one interactive + 2-question self-check (`tjr.conf.m1`…`m5`):
 1. Market structure & BOS — P11.3–P11.24; "Break or not?" stepper over S20 (wick vs close); the C8 `webDef` box (luxalgo URL from the #11 facts file).
 2. FVG — P10.1–P10.36; click-the-gap finder on a built S15 (grade with `TJR.confluence.fvgs`, any real gap within 1 bar); stacked-gap deletion demo on S19.
 3. IFVG — P8.11–P8.37; "BOS vs IFVG" race on S16 showing both entry bars and the tick difference computed from the chart (label: ตัวเลขจากกราฟจำลอง).
 4. Equilibrium — P7.1–P7.32; draggable two-handle range on S17, snaps to swings, shows 0/0.5/1 and premium/discount; the rule "most recent low → most recent high"; Gann settings → `คลิปไม่ได้ระบุ` (P7.2).
 5. SMT — P6.1–P6.29; twin chart of S21 + "which index leads?" question.
-6. Opening gaps & BPR (advanced, rarely used) — P9.1–P9.35; text + one static `จำลอง` chart; his "rarely tradable / nearly useless" verdicts stated plainly.
+(Lesson 6, opening gaps & BPR, is cut: he calls them rarely tradable / nearly useless, P9.20; add one closing sentence on the intro/"what's next" strip naming them as advanced imbalances covered in his playlist clip #9 with a `▶ #9` chip, no lesson.)
 
 - [ ] Step 1: Tests: pure helpers on `TJR.confluencesPage` (e.g. `gapAt(cs, bar)` returns the FVG whose middle is within 1 bar; `eqFromHandles(lo, hi, dir)`) with hand-built candles; content test: every lesson section has ≥ 3 playlist chips, the webDef box links the luxalgo URL, no `F`-only page claims about FVG definitions.
 - [ ] Step 2: Run → FAIL. Build. Run → PASS. Shoot 1440 and 390 once to check layout (no screenshot review rounds; final review is Task 13). Commit `feat: confluences page`.
@@ -197,9 +197,9 @@ Sections: three skills, psychology = following the two plans (P2.1–P2.10); ski
 
 **Files:** Modify `grade.js`, `tests/grade.test.js`, `lab.html`, `assets/js/pages/lab.js`, `assets/css/pages/lab.css`, `tests/lab.test.js`, scenario `lab` flags in `system.js`.
 
-**Produces:** `TJR.grade.fvg(built, bar) -> {correct, expected}` (any real FVG middle within 1 bar), `grade.bos(built, bar, answer:boolean)`, `grade.eq(range, price) -> {correct, diffTicks}` (≤ 4 ticks of `eq`), `grade.smt(built, answer:'main'|'twin')`, `grade.window(utcSec, answer:'manipulation'|'entry'|'after'|'pre')`. Lab tabs gain five drills: Gap finder, Break or not, Draw equilibrium, Which index leads, Time-window quiz; scores in `tjr.lab.<drill>`. Replay mode now also draws from S15/S16/S22 (their `lab.replay` true), keeping the v1 1-in-4 fail rule.
+**Produces:** `TJR.grade.fvg(built, bar) -> {correct, expected}` (any real FVG middle within 1 bar), `grade.bos(built, bar, answer:boolean)`, `grade.smt(built, answer:'main'|'twin')`. (Scope cut 2026-11-20: the Draw-equilibrium and Time-window drills are dropped, so no `grade.eq` / `grade.window`.) Lab tabs gain three drills: Gap finder, Break or not, Which index leads; scores in `tjr.lab.<drill>`. Replay mode now also draws from S15/S16/S22 (their `lab.replay` true), keeping the v1 1-in-4 fail rule.
 
-- [ ] Step 1: Grade tests on fixed seeds per drill (right/wrong cases, the 4-tick edge). Run → FAIL. Implement grading, then the lab tabs. Run → PASS. Commit `feat: lab drills for the full system`.
+- [ ] Step 1: Grade tests on fixed seeds per drill (right/wrong cases). Run → FAIL. Implement grading, then the lab tabs. Run → PASS. Commit `feat: lab drills for the full system`.
 
 ### Task 11: Scenario gallery (model: Sonnet)
 
