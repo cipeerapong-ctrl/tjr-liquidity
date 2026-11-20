@@ -26,7 +26,7 @@
 (function () {
   'use strict';
 
-  const PAGES = ['index.html', 'learn.html', 'confluences.html', 'strategy.html', 'scenarios.html', 'playbook.html', 'risk.html', 'lab.html'];
+  const PAGES = ['index.html', 'start.html', 'learn.html', 'confluences.html', 'strategy.html', 'scenarios.html', 'playbook.html', 'risk.html', 'lab.html'];
   const html = () => readText('index.html');
   const tagless = (s) => s.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   const section = (h, id) => {
@@ -57,14 +57,16 @@
     ok(!/คลิป liquidity ของ TJR[^<]*เฉพาะ|เฉพาะระบบในคลิป/.test(h), 'no "only the liquidity clip" claim left');
   });
 
-  test('index.html: #system draws both levels, the 8 chapters and the chain with links', () => {
-    const s = section(html(), 'system');
-    ok(/class="level-tag"[^>]*data-level="1"|data-level="1"[^>]*class="level-tag"/.test(s), 'Level 1 tag');
-    ok(/class="level-tag"[^>]*data-level="2"|data-level="2"[^>]*class="level-tag"/.test(s), 'Level 2 tag');
+  test('index.html: #path draws the six stops, the 8 chapters and the chain with links', () => {
+    const s = section(html(), 'path');
+    eq((s.match(/class="path-stop"/g) || []).length, 6, 'six stops');
+    const stops = (s.match(/<li class="path-stop"><a href="[^"]+"/g) || []).map((x) => /href="([^"]+)"/.exec(x)[1]);
+    eq(stops, ['start.html', 'learn.html', 'confluences.html', 'strategy.html', 'playbook.html', 'risk.html'], 'the stops in path order');
+    ok(/class="step-tag"[^>]*data-step="1"/.test(s) && /class="step-tag"[^>]*data-step="2"/.test(s), 'step tags on the chapter list and the chain');
     for (let m = 1; m <= 8; m++) ok(s.indexOf('href="learn.html#m' + m + '"') >= 0, 'chapter ' + m + ' link');
     eq((s.match(/class="sys-step"/g) || []).length, 6, 'six chain steps 0..5');
     eq((s.match(/class="sys-side"/g) || []).length, 2, 'timing and risk beside the chain');
-    ['confluences.html', 'strategy.html', 'playbook.html', 'risk.html'].forEach((p) => ok(hrefs(s).some((u) => u.indexOf(p) === 0), 'Level 2 page ' + p));
+    ['confluences.html', 'strategy.html', 'playbook.html', 'risk.html'].forEach((p) => ok(hrefs(s).some((u) => u.indexOf(p) === 0), 'step page ' + p));
     ['confluences.html#m1', 'confluences.html#m2', 'confluences.html#m3', 'confluences.html#m4', 'confluences.html#m5'].forEach((u) => ok(hrefs(s).indexOf(u) >= 0, u));
     const txt = tagless(s);
     ['bias', 'sweep', 'BOS', 'IFVG', 'FVG', 'equilibrium', 'Entry', 'Exit'].forEach((w) => ok(txt.indexOf(w) >= 0, 'names ' + w));
@@ -74,9 +76,9 @@
   test('index.html: the system map keeps the one-section-per-screen rule and the order', () => {
     const h = html();
     const ids = (h.match(/<section[^>]*\bid="([^"]+)"/g) || []).map((x) => /id="([^"]+)"/.exec(x)[1]);
-    eq(ids, ['core', 'system', 'course', 'practice', 'sources'], 'section order after the hero');
-    ok(/id="system"[^>]*style="--h: 1"/.test(h), '#system is one screen');
-    ok(/id="system"[^>]*aria-labelledby="system-h"/.test(h) && /id="system-h"/.test(h), '#system has its h2');
+    eq(ids, ['path', 'core', 'course', 'practice', 'sources'], 'section order after the hero: the path first');
+    ok(/id="path"[^>]*style="--h: [12]"/.test(h), '#path is one or two screens');
+    ok(/id="path"[^>]*aria-labelledby="path-h"/.test(h) && /id="path-h"/.test(h), '#path has its h2');
   });
 
   test('index.html: source strip names the clip and the playlist and the precedence', () => {
@@ -105,10 +107,19 @@
     ok(n >= 6, 'the chain steps carry playlist chips (' + n + ')');
   });
 
-  test('index.html: title and meta speak for both levels', () => {
+  test('index.html: title and meta speak for the path, no Level wording anywhere a reader sees', () => {
     const h = html();
     ok(/<title>[^<]*(TJR)[^<]*<\/title>/.test(h), 'title names TJR');
     const d = /<meta name="description" content="([^"]*)"/.exec(h)[1];
-    ok(/Level 1/.test(d) && /Level 2/.test(d), 'description names both levels');
+    ok(!/Level/.test(d) && /22/.test(d), 'description: the path, 22 scenarios, no Level');
+    const seen = h.replace(/<!--[\s\S]*?-->/g, ' ').replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ') + ' ' + (h.match(/(?:aria-label|title|alt)="[^"]*"/g) || []).join(' ');
+    ok(!/Level\s?[12]|L[12]|ระดับ\s?[12]/.test(seen), 'no Level 1 / Level 2 / ระดับ 2 left on the page');
+  });
+
+  test('index.html: the hero starts a beginner at step 0 and offers the full setup', () => {
+    const hero = /<section class="hero[\s\S]*?<\/section>/.exec(html())[0];
+    ok(/class="btn btn--primary" href="start\.html">เริ่มที่นี่</.test(hero), 'primary button: เริ่มที่นี่');
+    ok(/class="btn btn--secondary" href="strategy\.html">ดูเซ็ตอัพเต็ม</.test(hero), 'secondary button: ดูเซ็ตอัพเต็ม');
+    ok(!/<h1[^>]*>[^<]*Liquidity อยู่เหนือ High/.test(hero), 'the liquidity rule is no longer the h1');
   });
 })();
