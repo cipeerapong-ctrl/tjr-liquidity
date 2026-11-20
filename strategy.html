@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand" data-tone="dark" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>กลยุทธ์ทั้งสายของ TJR: เทรดตัวอย่างทีละขั้น | Liquidity</title>
+<meta name="description" content="เทรดเดียวที่ TJR เล่าในคลิปสุดท้ายของเพลย์ลิสต์ Path to Profitability ทีละขั้น ตั้งแต่ bias, SMT, BOS, equilibrium, จุดเข้า 1 นาที จนถึง stop และ TP บนกราฟจำลอง ทุกขั้นมีเวลาในคลิปกำกับ">
+<meta property="og:type" content="website">
+<meta property="og:title" content="กลยุทธ์ทั้งสายของ TJR: เทรดตัวอย่างทีละขั้น">
+<meta property="og:description" content="เก้าขั้นของเทรดที่เขาเล่า บนกราฟจำลองที่เดินตามลำดับเหตุการณ์ พร้อมเวลาในคลิปกำกับ">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1c1c1c">
+<!-- <link rel="canonical" href="https://[the site's domain]/"> : no domain yet -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/pages/strategy.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+</head>
+<body>
+<!--
+  software · TJR Liquidity Level 2 strategy page (v2 Task 8), an app screen: a worked trade told as a step tracker
+  deal: the site's (tokens.css): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
+        close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
+  page: head + the simulation banner, then the stage (a twin chart, ES traded and NQ beside it, a 9-step tracker, prev / next / play)
+        beside nine step cards that carry the facts and their clip chips; then the on-screen readout card (P1.59), the four-part
+        summary (P1.19), the "toolbox, not a recipe" framing next to the main clip's wording (C5), what the clips do not say.
+  moment: none dealt on this page: its motion is the chart playing step to step and one entrance per card (GSAP, once).
+-->
+<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="confluences.html">Confluences</a></div><div class="nav__item"><a class="nav__link" href="strategy.html" aria-current="page">กลยุทธ์</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="risk.html">ความเสี่ยง</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="tjr-nav-links" aria-label="เมนู"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></header></noscript>
+<main class="app strat" id="top">
+  <div class="wrap">
+    <header class="strat-head">
+      <p class="level-tag" data-level="2">Level 2 · กลยุทธ์</p>
+      <h1>กลยุทธ์ทั้งสายของ TJR: เทรดตัวอย่างทีละขั้น</h1>
+      <p class="t-lead">คลิปสุดท้ายของเพลย์ลิสต์ (#1) เขาเล่าเทรดเดียวบน trade replay ตั้งแต่ bias ก่อนเปิดตลาดจนถึง take-profit หน้านี้เดินตามลำดับเดียวกันบนกราฟจำลอง ทุกขั้นมีเวลาในคลิปกำกับ ส่วนที่เขาไม่ได้พูด เราติดป้ายไว้ ไม่เติมเอง</p>
+      <div class="strat-banner" role="note">
+        <p class="strat-banner__t">กราฟจำลองตามที่เขาเล่า ไม่ใช่ข้อมูลจริงของวันนั้น</p>
+        <p>กราฟสองช่อง (ES และ NQ) สร้างจากสถานการณ์ S21 ด้วย seed คงที่ ให้เหตุการณ์เกิดตามลำดับที่เขาอธิบาย ราคา เวลา และ stop บนกราฟเป็น <span class="sim-lab">ตัวเลขจากกราฟจำลอง</span> ไม่ใช่ที่เขาพูด ตัวเลขที่โชว์อยู่บนจอของเขาจริง ๆ อยู่ในการ์ด<a href="#readout">ตัวเลขบนจอ</a>ด้านล่าง</p>
+      </div>
+      <ul class="facts strat-facts">
+        <li data-fact="P1.64 P1.54"><p>วัน replay คือวันศุกร์ที่ 16 ม.ค. 2026 ตามป้ายบนจอ ตรงกับที่เขาบอกว่าเทรดเมื่อ “วันศุกร์” ก่อนอัปโหลดคลิป และเขาแยกคลิป recap ของเทรดเดียวกันไว้ต่างหาก</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=960" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 16:00">#1 16:00</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2103" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:03">#1 35:03</a></span></li>
+        <li data-fact="P1.17 P1.18"><p>แกนความคิดในบรรทัดเดียว: orders ถูกเติม → order flow เปลี่ยน → เทรนด์ใหม่ไปต่อ → เข้า โดยเป้าอยู่ที่ draw on liquidity อีกตัว</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=632" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 10:32">#1 10:32</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=643" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 10:43">#1 10:43</a></span></li>
+      </ul>
+    </header>
+
+    <div class="strat-shell">
+      <div class="strat-stage" data-slot="strat" role="group" aria-label="กราฟจำลองคู่ ES และ NQ ตามลำดับเหตุการณ์ที่ TJR เล่า">
+        <div class="strat-stage__top"><p class="strat-stage__no" data-k="stepno"></p><p class="strat-stage__cap" data-k="cap"></p></div>
+        <div class="twin">
+          <figure class="chart-frame lc" data-ui="chart" data-k="esframe" aria-label="กราฟซ้ายหรือบน: ES (S&amp;P 500) ตัวที่เทรด">
+            <div class="chart-frame__bar"><span class="chart-frame__sym">ES</span><span class="chart-frame__tf">5m</span><span class="chart-frame__title">S21 · ตัวที่เทรด</span><span class="lead-tag" data-k="lead" hidden>ตัวนำ</span><span class="sim-tag">จำลอง</span></div>
+            <div class="chart-frame__canvas" data-k="hostA"></div>
+          </figure>
+          <figure class="chart-frame lc" data-ui="chart" aria-label="กราฟขวาหรือล่าง: NQ (Nasdaq)">
+            <div class="chart-frame__bar"><span class="chart-frame__sym">NQ</span><span class="chart-frame__tf">5m</span><span class="chart-frame__title">S21 · อีก index</span><span class="sim-tag">จำลอง</span></div>
+            <div class="chart-frame__canvas" data-k="hostB"></div>
+          </figure>
+        </div>
+        <p class="conf-read" data-k="read" aria-live="polite"></p>
+        <div class="track-wrap">
+          <ol class="track" aria-label="เก้าขั้นของเทรด">
+            <li><button class="track__b" type="button" data-go="1" aria-label="ไปขั้นที่ 1 bias"><span>01</span></button></li>
+            <li><button class="track__b" type="button" data-go="2" aria-label="ไปขั้นที่ 2 SMT"><span>02</span></button></li>
+            <li><button class="track__b" type="button" data-go="3" aria-label="ไปขั้นที่ 3 รอ structure"><span>03</span></button></li>
+            <li><button class="track__b" type="button" data-go="4" aria-label="ไปขั้นที่ 4 BOS"><span>04</span></button></li>
+            <li><button class="track__b" type="button" data-go="5" aria-label="ไปขั้นที่ 5 ตัวนำ"><span>05</span></button></li>
+            <li><button class="track__b" type="button" data-go="6" aria-label="ไปขั้นที่ 6 equilibrium"><span>06</span></button></li>
+            <li><button class="track__b" type="button" data-go="7" aria-label="ไปขั้นที่ 7 จุดเข้า"><span>07</span></button></li>
+            <li><button class="track__b" type="button" data-go="8" aria-label="ไปขั้นที่ 8 stop และเป้า"><span>08</span></button></li>
+            <li><button class="track__b" type="button" data-go="9" aria-label="ไปขั้นที่ 9 bias ผิด"><span>09</span></button></li>
+          </ol>
+          <div class="track__bar" aria-hidden="true"></div>
+        </div>
+        <div class="chart-frame__ctrls">
+          <button class="ctrl" type="button" data-act="prev">◀ ก่อนหน้า</button>
+          <button class="ctrl" type="button" data-act="next">ถัดไป ▶</button>
+          <button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่นต่อเนื่อง</span></button>
+        </div>
+      </div>
+
+      <ol class="steps" aria-label="เก้าขั้นของเทรด">
+        <li class="step" data-step="1" data-key="bias" id="s1" data-fact="P1.24 P1.25 P1.26 P1.27 P1.28 P1.29 P1.30">
+          <header class="step__head"><span class="step__no">01</span><h3>bias ขึ้น และ draw อยู่เหนือราคา</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.24">ก่อนอื่นคือ bias: ดูเทรนด์ใหญ่จาก order flow ของกราฟ 4 ชั่วโมงและ 1 ชั่วโมง และดูว่าราคาอยู่ตรงไหนของเทรนด์นั้น <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1265" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 21:05">#1 21:05</a></span></p>
+            <p data-fact="P1.25 P1.26">วันนั้นกราฟ 4 ชั่วโมงเป็นโครงสร้างขาขึ้นที่ยังไปต่อ gap ที่ถูกเติมแล้วราคาขึ้นต่อ และ equilibrium ถูกเติมแล้วถูก respect ก่อนราคาขึ้น <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1076" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 17:56">#1 17:56</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1101" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 18:21">#1 18:21</a></span></p>
+            <p data-fact="P1.27 P1.28">แล้วทำแผนที่: วาดทุก draw on liquidity ของวัน คือ high และ low ของวันก่อน, Asia, London และ hourly high ที่ดูดี <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1163" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 19:23">#1 19:23</a></span> ถ้า London ทะลุ Asia high ไปแล้วไม่มีอะไรเกิดขึ้น เขานับ draw ตัวนั้นว่า “ไร้ประโยชน์” <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1330" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 22:10">#1 22:10</a></span></p>
+            <p data-fact="P1.29">draw คือจุดที่ราคามีโอกาสเติม orders แล้วกลับตัว เขามองแต่ละตัวเป็นจุดเข้าหรือเป้าอย่างใดอย่างหนึ่ง <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1448" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 24:08">#1 24:08</a></span></p>
+            <p data-fact="P1.30">ผลของวันนั้น: bias ขึ้น เป้าคือ high ด้านบน (London session high, hourly high ที่ซ้อนกัน, high ของวันก่อน) และเขาบอกว่าราคาเพิ่งกวาด low 1 ชั่วโมงแล้วกลับขึ้น <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1417" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 23:37">#1 23:37</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ราคาไต่ขึ้นสู่ high แรกของทั้งสอง index เส้นที่ high คือ draw ด้านบน bias ไม่ใช่สัญญาณเข้า</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="2" data-key="smt" id="s2" data-fact="P1.31 P1.32 P6.15 P6.16">
+          <header class="step__head"><span class="step__no">02</span><h3>NQ ทะลุ high แต่ ES ไม่ทะลุ: bearish SMT</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.31">Nasdaq ดันเหนือ high (London session high) ส่วน S&amp;P 500 ยังอยู่ต่ำกว่า high ที่เทียบกันได้อีกมาก เขาเรียกว่า bearish SMT divergence <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1479" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 24:39">#1 24:39</a></span></p>
+            <p data-fact="P1.32">แม้ 4 ชั่วโมงเป็นขาขึ้น เขาต้องคิดถึงอีกทางด้วย: Nasdaq อาจกวาด orders เหนือ high ไปแล้ว S&amp;P พลาดชุดนั้น และกำลังบอกให้ Nasdaq ลง อาจลงไปเอา low ของ London, Asia และของวันก่อน <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1515" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 25:15">#1 25:15</a></span></p>
+            <p data-fact="P6.15 P6.16">กฎของ SMT จากคลิป #6: ตัวที่ทำ lower high คือตัวนำ ตัวที่ยังทำ higher high คือตัวตามที่คาดว่าจะลง <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=316" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:16">#6 05:16</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=338" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:38">#6 05:38</a></span> เรียนละเอียดที่<a href="confluences.html#m5">บท SMT</a></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> เส้นประของแต่ละช่องลากจาก high แรกไป high ที่สอง ES ได้ lower high และ NQ ได้ higher high</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="3" data-key="patience" id="s3" data-fact="P1.33 P1.34 P1.35 P1.36">
+          <header class="step__head"><span class="step__no">03</span><h3>รอก่อน: SMT ยังไม่พอ ต้องให้ structure เปลี่ยน</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.33 P1.34">เขาเดินกราฟทีละแท่ง แท่งที่ไม่ชัดไม่ให้ข้อมูล bias ยังขึ้นและเขาจำ SMT ไว้ จากนั้นสองแท่งลง S&amp;P นำลง แต่ order flow 5 นาทียังเป็นขาขึ้น <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1570" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 26:10">#1 26:10</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1628" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 27:08">#1 27:08</a></span></p>
+            <p data-fact="P1.35">แม้มี SMT เขาก็ต้องการให้ order flow หรือ structure เปลี่ยนก่อน สองขาลงยังพิสูจน์ไม่ได้ว่า sell orders ถูกเติม เป็นแค่ศักยภาพ ราคาอาจย่อแล้วขึ้นต่อ ให้อดทน <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1670" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 27:50">#1 27:50</a></span></p>
+            <p data-fact="P1.36">หลังแท่งลงใหญ่แท่งเดียว structure ของทั้งสอง index หักลง SMT ถือว่า “ยืนยัน” และเขานับว่า orders ที่ high ของ Nasdaq ถูกเติมแล้ว <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1714" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 28:34">#1 28:34</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> เส้นแนวนอนในช่อง ES คือ low ล่าสุดที่รอให้มีแท่งปิดใต้ ตามกฎ BOS ใน<a href="confluences.html#m1">บท BOS</a> ตอนนี้ยังไม่มีแท่งปิดใต้เส้น</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="4" data-key="bos" id="s4" data-fact="P1.37 P1.38">
+          <header class="step__head"><span class="step__no">04</span><h3>ไม่มี gap ให้ inverse จึงรอ BOS</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.37">order flow เปลี่ยนได้สองทาง: break of structure หรือ inverse fair value gap ในขาขึ้นรอบนั้นไม่มี gap ให้ inverse เขาจึงรอ BOS และได้ทั้งสอง index <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1767" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:27">#1 29:27</a></span></p>
+            <p data-fact="P1.38">หลังนั้นเขายังอยากเห็นเทรนด์ใหม่ไปต่อ เพื่อพิสูจน์ว่า break นี้คือจุดเริ่มของเทรนด์ใหม่ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1747" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:07">#1 29:07</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> หมุด BOS อยู่ที่แท่งแรกที่ปิดใต้ low ล่าสุด แสดงเฉพาะช่อง ES (ในคลิปหักทั้งสองตัว)</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="5" data-key="leader" id="s5" data-fact="P1.40 P6.21">
+          <header class="step__head"><span class="step__no">05</span><h3>เทรดตัวที่นำ: S&amp;P 500 (ES)</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.40">ต้องเลือกว่าจะเทรด index ไหน: ตัวที่นำ divergence เขาเลือก S&amp;P 500 สำหรับ short เพราะมันมี buy orders ไม่พอจะดันเหนือ high และมี sell orders พอจะลงโดยไม่ต้องเอา high ออก เป้าก็วัดบน S&amp;P <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1830" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 30:30">#1 30:30</a></span></p>
+            <p data-fact="P6.21">หลักเดียวกับคลิป #6: เขาเทรดตัวที่นำ (ตัวที่ bearish กว่า) ไม่ short ตัวที่ดันเหนือ high <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=629" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 10:29">#6 10:29</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ช่อง ES มีป้าย “ตัวนำ” และเป็นช่องที่มี BOS</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="6" data-key="eq" id="s6" data-fact="P1.39 P1.41 P1.42 P1.43">
+          <header class="step__head"><span class="step__no">06</span><h3>equilibrium ถูกเติมแล้ว แต่ยังไม่เข้าตอนแตะ</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.39">หลัง BOS เขารอ continuation confluence ตัวเดียว คือ fair value gap ที่ถูกเติม หรือ equilibrium ตอนนั้นยังไม่มีทั้งสอง (ยังไม่มี bearish gap และยังไม่มีแท่งขึ้นให้ลาก equilibrium) <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1798" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:58">#1 29:58</a></span></p>
+            <p data-fact="P1.41">แล้วราคาเด้งกลับขึ้นมาเติม equilibrium ที่ลากจาก high ลงมาถึง low <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1881" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 31:21">#1 31:21</a></span></p>
+            <p data-fact="P1.42 P1.43">เขาไม่ sell ทันทีที่แตะ equilibrium ไม่งั้น equilibrium ไม่มีประโยชน์ ที่ลากไว้ก็เพื่อดูว่าราคาเข้ามาแล้วถูก respect ก่อนค่อยเข้า <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1913" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 31:53">#1 31:53</a></span> fair value gap ก็เหมือนกัน ถ้าเข้าตอนแท่งยังวิ่งอยู่ในช่อง อาจโดน stop เมื่อราคาไปต่อ ให้รอให้ราคาเติม confluence แล้วหาการยืนยันที่ออกมาจากมัน <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1944" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 32:24">#1 32:24</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> กล่อง 0 / 0.5 / 1 ลากจาก high ลงถึง low ตามกฎของ<a href="confluences.html#m4">บท equilibrium</a> ครึ่งบนคือ premium ราคาย่อขึ้นเข้ามาในครึ่งบนแล้ว</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="7" data-key="entry" id="s7" data-fact="P1.44 P1.45 P1.46 P1.47 P1.49">
+          <header class="step__head"><span class="step__no">07</span><h3>เข้า: การยืนยันที่ออกมาจาก confluence (พลิกลงบน 1 นาที)</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.44">มีสองทางยืนยันหลังราคาเติม confluence: (a) รอแท่ง 5 นาทีถัดไปปิดเป็นแท่งลง หรือ (b) ลงไปดูกราฟ 1 นาที ซึ่งเป็นทางที่เขาใช้ และบอกว่าคนส่วนใหญ่ก็ใช้ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1975" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 32:55">#1 32:55</a></span></p>
+            <p data-fact="P1.45 P1.46">ตรรกะของ 1 นาที: ตอนราคาเด้งเข้า confluence ขาลงของ 5 นาที กราฟ 1 นาทีกำลังเป็นขาขึ้น (BOS หรือ IFVG ขึ้น) จากนั้นเขารอให้ break หรือ inverse gap กลับลง เขาเรียกว่า entry confluence ความหมายคือฝั่ง bullish ล้มเหลวหลังเข้า confluence แปลว่า orders ด้านบนถูกเติมแล้ว ขาลงไปต่อ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1996" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 33:16">#1 33:16</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2060" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 34:20">#1 34:20</a></span></p>
+            <p data-fact="P1.49 P1.47">เขาเข้าเมื่อ gap ถูก inverse ตามที่เขาสรุปเอง นี่คือการยืนยัน 1 นาทีที่ออกมาจาก continuation confluence ของ 5 นาที บนจอเป็นกราฟ ES 1 นาทีในครึ่งชั่วโมงแรกหลัง 09:30 <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2103" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:03">#1 35:03</a></span> ผลของวิธี (b) คือจุดเข้าดีกว่าการรอแท่ง 5 นาทีปิดมาก เพราะพอแท่งนั้นปิด TP1 ของเขาก็โดนไปแล้ว <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2206" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 36:46">#1 36:46</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ไม่มีกราฟ 1 นาที หมุดทองคือจุดเข้าแบบ (a): แท่ง 5 นาทีที่ปิดกลับลงใต้เส้น 0.5 ของ range</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="8" data-key="exit" id="s8" data-fact="P1.50 P1.51 P1.20">
+          <header class="step__head"><span class="step__no">08</span><h3>stop เหนือ high และ TP1 ถึง TP3 ที่ low ด้านล่าง</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.50">stop-loss อยู่เหนือ high เหล่านั้น ตัวเลขที่แน่นอนเขาไม่ได้พูดเป็นคำ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a></span> <span class="badge-gap">คลิปไม่ได้ระบุ</span> ระยะ stop เป็น tick และกฎเลือก high ที่วาง stop</p>
+            <p data-fact="P1.51">เป้าคือ draw on liquidity ด้านล่างทั้งหมด: low ของ London, low ของ Asia ตามที่เขาเชื่อ และ low ราย hourly ของ time frame ใหญ่ เขาบอกว่า TP1, TP2 และ TP3 โดนครบ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2431" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 40:31">#1 40:31</a></span></p>
+            <p data-fact="P1.20">โซนออกที่เขาลิสต์ไว้: high และ low ของ higher time frame, high และ low ของ session ก่อนหน้า <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2474" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 41:14">#1 41:14</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> มีเป้าเดียว (low ที่ระบบสร้าง) และ stop คือ high สูงสุดตั้งแต่ high แรกถึงจุดเข้า เพราะคลิปไม่ได้บอกว่าเลือก high ตัวไหน ตัวเลขจริงที่โชว์บนจอของเขาอยู่ใน<a href="#readout">การ์ดตัวเลขบนจอ</a></p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-step="9" data-key="wrong" id="s9" data-fact="P1.52 P1.53">
+          <header class="step__head"><span class="step__no">09</span><h3>bias ผิด แต่เทรดนี้ยังไปถึงเป้า</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.52">เขายอมรับว่า bias ขาขึ้นของเขา “ถูกพิสูจน์ว่าผิด” ตลาดทำตามใจของมัน เขาปล่อยให้ตลาดพิสูจน์ว่าเขาผิดได้ และยังทำกำไรได้ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2341" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 39:01">#1 39:01</a></span></p>
+            <div class="claim" data-fact="P1.53">
+              <span class="badge-claim">คำอ้างของเขา ยังไม่ยืนยัน</span>
+              <p>เขาบอกว่าได้เงินจำนวนมากจากเทรดนี้ และนี่คือวิธีที่เขาเทรดทุกวัน หน้านี้ไม่มีหลักฐานของเรื่องนี้ จึงไม่ใส่ตัวเลข <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2431" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 40:31">#1 40:31</a></span></p>
+            </div>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ราคาลงถึงเป้าทั้งที่ bias ตอนเช้าเป็นขาขึ้น</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+      </ol>
+    </div>
+
+    <section class="strat-sec" id="readout" aria-labelledby="readout-h">
+      <header class="strat-sec__head"><h2 id="readout-h">ตัวเลขที่เห็นบนจอของเขา</h2><span class="onscreen">ตัวเลขจากเครื่องมือบนจอ ไม่ใช่ที่เขาพูด</span></header>
+      <div class="readout-grid">
+        <div class="readout" data-fact="P1.59">
+          <table class="readout__t">
+            <caption class="vh">ตัวเลขจากเครื่องมือ long/short position ของ TradingView บนกราฟ ES 1 นาทีในคลิป</caption>
+            <thead><tr><th scope="col">รายการ</th><th scope="col">ราคา</th><th scope="col">ระยะ</th><th scope="col">R:R</th></tr></thead>
+            <tbody>
+              <tr><th scope="row" data-th="รายการ">จุดเข้า (short)</th><td data-th="ราคา">ประมาณ 6993.50</td><td data-th="ระยะ">–</td><td data-th="R:R">–</td></tr>
+              <tr><th scope="row" data-th="รายการ">stop</th><td data-th="ราคา">6998.00</td><td data-th="ระยะ">4.50 จุด · 18 tick · 0.064%</td><td data-th="R:R">–</td></tr>
+              <tr><th scope="row" data-th="รายการ">เป้าแรกที่วาด</th><td data-th="ราคา">6982.50</td><td data-th="ระยะ">11.00 จุด · 44 tick</td><td data-th="R:R">2.44</td></tr>
+              <tr><th scope="row" data-th="รายการ">เป้าที่ขยายทีหลัง</th><td data-th="ราคา">6974.75</td><td data-th="ระยะ">18.75 จุด · 75 tick</td><td data-th="R:R">4.17</td></tr>
+            </tbody>
+          </table>
+          <p class="readout__chips chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2125" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:25">#1 35:25</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2180" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 36:20">#1 36:20</a></p>
+        </div>
+        <ul class="facts readout__notes">
+          <li data-fact="P1.59"><p>นี่คือป้ายของเครื่องมือวาด position บนกราฟ ES 1 นาที เขาไม่ได้พูดว่าเป็น stop, ขนาด หรือเป้าจริงของเขาหรือไม่ และไม่เห็นจำนวน contract ชัด <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          <li data-fact="P1.59"><p>ในภาพช่วง 35:40 ไส้ของแท่งหนึ่งสูงเกินเส้น stop ที่วาด จึงชี้ไม่ได้ว่า “เหนือ high เหล่านั้น” คือ high ตัวไหน <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2140" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:40">#1 35:40</a></span></p></li>
+          <li data-fact="P1.60"><p>ระดับ 6974.75 และ 6982.50 อยู่ในโซนสีเทาที่เขาวาดบนกราฟ เขาพูดแค่ว่าเป้าคือ low ของ session กับ low ราย hourly ของ time frame ใหญ่ ไม่ได้บอกว่าระดับไหนคือ draw ตัวไหน <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          <li><p>ตัวเลขบนกราฟจำลองด้านบนเป็นอีกชุด (ราคาของ S21) <span class="sim-lab">ตัวเลขจากกราฟจำลอง</span> ไม่ได้มาจากชุดนี้</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="strat-sec" id="summary" aria-labelledby="summary-h">
+      <header class="strat-sec__head"><h2 id="summary-h">สี่ส่วนที่เขาสรุปไว้ตอนท้าย</h2></header>
+      <ol class="parts">
+        <li data-part="1" data-fact="P1.19"><b>โอกาสที่ orders จะถูกเติม</b><p>คือ liquidity sweep ของ high หรือ low ที่สำคัญ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a></span></p><p class="parts__map">ในเทรดนี้: <a href="#s1">ขั้น 1</a> ถึง <a href="#s2">2</a> (high ที่ถูกดันเหนือ และ SMT ที่ตามมา)</p></li>
+        <li data-part="2" data-fact="P1.19"><b>ยืนยันว่า orders ถูกเติมแล้ว</b><p>คือ confirmation confluence: BOS หรือ inverse fair value gap บน time frame เล็กกว่า <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a></span></p><p class="parts__map">ในเทรดนี้: <a href="#s3">ขั้น 3</a> ถึง <a href="#s4">4</a></p></li>
+        <li data-part="3" data-fact="P1.19"><b>เทรนด์ใหม่ไปต่อ</b><p>คือ continuation confluence: equilibrium หรือ fair value gap <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2297" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 38:17">#1 38:17</a></span></p><p class="parts__map">ในเทรดนี้: <a href="#s6">ขั้น 6</a> และ <a href="#s7">7</a></p></li>
+        <li data-part="4" data-fact="P1.19 P1.20"><b>ออกที่จุดที่น่าจะถูกล้าง liquidity</b><p>higher time frame highs และ lows, previous session highs และ lows <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2453" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 40:53">#1 40:53</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2474" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 41:14">#1 41:14</a></span></p><p class="parts__map">ในเทรดนี้: <a href="#s8">ขั้น 8</a></p></li>
+      </ol>
+    </section>
+
+    <section class="strat-sec" id="toolbox" aria-labelledby="toolbox-h">
+      <header class="strat-sec__head"><h2 id="toolbox-h">ชุดเครื่องมือ ไม่ใช่สูตรสำเร็จ</h2></header>
+      <div class="toolbox">
+        <div class="toolbox__main">
+          <p data-fact="F6.7">ในคลิป liquidity (ก.ค. 2026) เขาบอกว่ากลยุทธ์จริงของเขามี confluence ที่เข้มงวดและมีกติกา แต่ทุกอย่างเริ่มที่ liquidity <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:45">24:45</a></span></p>
+          <p>เว็บนี้จึงเสนอ <a href="playbook.html">Playbook</a> เป็นลำดับความคิดของเขา ไม่ใช่เครื่องตัดสินใจอัตโนมัติ ขั้นทั้งเก้าข้างบนคือตัวอย่างเดียวของวันเดียว</p>
+        </div>
+        <aside class="older-note"><p class="older-note__label">คลิปเก่า (ม.ค. 2026) พูดว่า…</p><div class="older-note__body"><p data-fact="P1.3 P1.7 P1.8">เขาจะไม่ให้ลิสต์ขั้นที่ 1, 2, 3 ตายตัว เพราะกลยุทธ์ของเขาเปลี่ยนไปจากคลิปเก่า และเพราะการเทรดมีส่วนของประสบการณ์และดุลยพินิจ <a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=62" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 01:02">#1 01:02</a> เขาจงใจไม่ใส่รายละเอียดเล็ก ๆ บางส่วน เพื่อให้ผู้เรียนหาเองจากการดูกราฟ และไม่อยากมีกฎแบบ “เข้าเมื่อ A แล้ว B เท่านั้น” <a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=791" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 13:11">#1 13:11</a></p><p data-fact="P1.8">เขาเปรียบเป็นกล่องเครื่องมือ: เครื่องมือ (confluence) เหมือนเดิมทุกวัน แต่ blueprint ของแต่ละวันต่างกัน จึงไม่ได้ใช้เครื่องมือชุดเดิมทุกวัน เสรีภาพในการปรับตัวคือประเด็น</p></div><p class="older-note__src chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=832" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 13:52">#1 13:52</a></p></aside>
+        <ul class="facts toolbox__more">
+          <li data-fact="P1.4 P1.9"><p>บางวันเขาลงไปใช้ 1 นาทีแทน 5 นาที หรือรอ confirmation ตัวอื่น เช่นเมื่อมี draw ใกล้จะถูกชนหลายตัว เขาอาจเลือกเทรดสั้นลงแทนที่จะรอการยืนยันบน time frame ใหญ่ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=117" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 01:57">#1 01:57</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=558" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 09:18">#1 09:18</a></span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="strat-sec" id="gaps" aria-labelledby="gaps-h">
+      <header class="strat-sec__head"><h2 id="gaps-h">สิ่งที่คลิปนี้ไม่ได้ระบุ</h2></header>
+      <ul class="facts facts--gaps">
+        <li class="facts__gap" data-fact="P1.14"><p>ขนาดสถานะ เปอร์เซ็นต์หรือจำนวนเงินที่เสี่ยงต่อเทรด และจำนวน contract (เขาพูดแค่ว่าการ size up หรือ size down เป็นดุลยพินิจ) <span class="badge-gap">คลิปไม่ได้ระบุ</span> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=185" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 03:05">#1 03:05</a></span></p></li>
+        <li class="facts__gap" data-fact="P1.50"><p>ระยะ stop-loss เป็น tick และกฎเลือก high ที่วาง stop (เขาพูดแค่ “เหนือ high”) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+        <li class="facts__gap"><p>สัดส่วนที่ปิดที่ TP1, TP2 และ TP3 แต่ละตัว <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+        <li class="facts__gap"><p>ช่วงเวลาที่ควรเข้าหรือเลิกเทรด (บนจอเริ่ม 09:30 แต่เขาไม่พูดตารางเวลา) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+        <li class="facts__gap" data-fact="P1.35"><p>เมื่อ confirmation ล้มเหลว ทำอย่างไรต่อ (เขาพูดแค่ให้อดทน และปล่อยให้ตลาดพิสูจน์ว่าผิด) <span class="badge-gap">คลิปไม่ได้ระบุ</span> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1670" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 27:50">#1 27:50</a></span></p></li>
+        <li class="facts__gap"><p>win rate ผล backtest และกฎเรื่องข่าว <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+        <li class="facts__gap"><p>คำจำกัดความของ “significant high หรือ low” นอกจากตัวอย่าง และนิยามที่แน่นอนของ equilibrium กับ order flow ที่เขาใช้ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+      </ul>
+    </section>
+
+    <section class="strat-sec strat-next" id="next" aria-labelledby="next-h">
+      <div class="strat-next__text">
+        <h2 id="next-h">ต่อไป</h2>
+        <p class="t-lead" data-fact="P1.2">เขาบอกว่าคนที่เทรดรายวันแล้วทำกำไรได้เต็มเวลาต้องมีสามทักษะพร้อมกัน คือกลยุทธ์ การจัดการความเสี่ยง และจิตวิทยา หน้านี้ครอบคลุมแค่ข้อแรก <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=21" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 00:21">#1 00:21</a></span></p>
+        <div class="strat-next__links"><a class="btn btn--primary" href="risk.html">ดูหน้าความเสี่ยง</a><a class="btn btn--secondary" href="playbook.html">เปิด Playbook</a><a class="btn btn--secondary" href="confluences.html">กลับไป Confluences</a></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/js/core/ns.js"></script>
+<script src="assets/js/core/sources.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/scenario/rng.js"></script>
+<script src="assets/js/scenario/swings.js"></script>
+<script src="assets/js/scenario/gen.js"></script>
+<script src="assets/js/scenario/sessions.js"></script>
+<script src="assets/js/scenario/confluence.js"></script>
+<script src="assets/js/scenario/library.js"></script>
+<script src="assets/js/scenario/system.js"></script>
+<script src="assets/js/scenario/annotate.js"></script>
+<script src="assets/js/scenario/grade.js"></script>
+<script src="assets/js/chart/scale.js"></script>
+<script src="assets/js/chart/render.js"></script>
+<script src="assets/js/chart/overlays.js"></script>
+<script src="assets/js/chart/chart.js"></script>
+<script src="assets/js/core/layout.js"></script>
+<script src="assets/js/core/motion.js"></script>
+<script src="assets/js/pages/strategy.js"></script>
+</body>
+</html>
