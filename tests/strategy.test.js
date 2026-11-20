@@ -11,6 +11,29 @@
   var SEEDS = [];
   for (var s = 1; s <= 30; s++) SEEDS.push(s);
 
+  // ---------------------------------------------------------------- the current card follows the step
+
+  test('strategy.needsFollow: a card fully below the nav and above the screen bottom stays; one out of that band follows', () => {
+    // viewport 900 tall, nav 64
+    eq(P.needsFollow(200, 500, 900, 64), false, 'fully in view');
+    eq(P.needsFollow(40, 300, 900, 64), true, 'top under the nav');
+    eq(P.needsFollow(-400, -100, 900, 64), true, 'scrolled past');
+    eq(P.needsFollow(700, 1100, 900, 64), true, 'bottom below the screen');
+    eq(P.needsFollow(1500, 1800, 900, 64), true, 'far below');
+    eq(P.needsFollow(100, 1200, 900, 64), false, 'taller than the band and covering the middle');
+    eq(P.needsFollow(600, 1700, 900, 64), true, 'taller than the band, below the middle');
+  });
+
+  test('strategy.js: prev / next, the track and play bring the current card into view; the reading line waits meanwhile', () => {
+    var src = readText('assets/js/pages/strategy.js');
+    ok(/go\(k, true\); follow\(k\);/.test(src), 'play follows each step');
+    ok(/else if \(act === 'next'\)[\s\S]{0,80}follow\(S\.step\)/.test(src), 'prev / next follow');
+    ok(/data-go'\)\) - 1, true\); follow\(S\.step\)/.test(src), 'the track follows');
+    ok(/min-width: 1024px\) and \(min-height: 800px\)/.test(src), 'only where the chart sticks beside the cards');
+    ok(/!wide\.matches \|\| following\)/.test(src), 'the scroll link ignores cards crossing the line during the follow scroll');
+    ok(/M\.reduced \? 'auto' : 'smooth'/.test(src), 'reduced motion jumps');
+  });
+
   // ---------------------------------------------------------------- the steps
 
   test('strategy.META: nine steps, every one with at least one chip to the strategy clip (TEp3a-7GUds) and fact ids', () => {

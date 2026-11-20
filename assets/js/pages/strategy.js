@@ -12,7 +12,8 @@
       stopLevel / reachBar / touchBar   the stop of the simulated trade, the bar the target is reached, the first bar in the premium
       READOUT       the position-drawing numbers of P1.59 (an on-screen tool readout, not something he says)
    2. page: layout, the twin chart (created near the screen, destroyed when far), the tracker, prev / next / play,
-      the step cards (a card on the reading line moves the chart on a wide screen), one entrance per card (GSAP, once).
+      the step cards (a card on the reading line moves the chart on a wide screen, and prev / next / the track / play
+      bring the current card into view there), one entrance per card (GSAP, once).
    The facts, chips and gap badges live in strategy.html. */
 (function (global) {
   'use strict';
@@ -162,7 +163,13 @@
     return { main: main, twin: twin };
   }
 
-  P.META = META; P.READOUT = READOUT; P.SEED = SEED;
+  // the card of the current step leaves the visible band (below the nav, above the screen bottom): bring it back
+  function needsFollow(top, bottom, viewH, topInset) {
+    if (bottom - top > viewH - topInset) return !(top <= viewH / 2 && bottom >= viewH / 2);   // taller than the band: it covers the middle
+    return top < topInset || bottom > viewH;
+  }
+
+  P.META = META; P.READOUT = READOUT; P.SEED = SEED; P.needsFollow = needsFollow;
   P.build = build; P.steps = steps; P.stepState = stepState; P.overlays = overlays;
   P.stopLevel = stopLevel; P.reachBar = reachBar; P.touchBar = touchBar;
 
@@ -182,7 +189,22 @@
   var fig = $('[data-slot="strat"]');
   var cards = $$('.step'), goBtns = $$('[data-go]');
   var S = { step: 0, seed: SEED };
-  var api = null, timer = null, dead = false;
+  var api = null, timer = null, dead = false, following = 0;
+  var sticky = global.matchMedia ? global.matchMedia('(min-width: 1024px) and (min-height: 800px)') : null;
+
+  // prev / next / the track / play: on a wide screen (the chart sticks beside the cards) the current card scrolls into view.
+  // While that scroll runs, cards crossing the reading line do not move the chart (initScrollLink).
+  function follow(i) {
+    var c = cards[i];
+    if (!c || !sticky || !sticky.matches || !c.getBoundingClientRect) return;
+    var r = c.getBoundingClientRect(), nav = parseFloat(global.getComputedStyle(doc.documentElement).getPropertyValue('--nav')) || 64;
+    if (!needsFollow(r.top, r.bottom, global.innerHeight, nav)) return;
+    var mine = ++following;
+    var done = function () { if (mine === following) following = 0; };
+    if ('onscrollend' in global) global.addEventListener('scrollend', function () { setTimeout(done, 200); }, { once: true });   // late observer entries
+    setTimeout(done, 1800);
+    c.scrollIntoView({ block: 'center', behavior: M.reduced ? 'auto' : 'smooth' });
+  }
 
   function setCurrent(i) {
     cards.forEach(function (c, k) {
@@ -279,7 +301,7 @@
     if (S.step >= META.length - 1) go(0, false);
     setPlayLabel(true);
     (function tick(k) {
-      go(k, true);
+      go(k, true); follow(k);
       if (k >= META.length - 1) { timer = null; setPlayLabel(false); return; }
       var a = api, gap = a ? Math.max(1800, ((a.st[k + 1].bar - a.st[k].bar) / 9) * 1000 + 2200) : 2600;
       timer = setTimeout(function () { tick(k + 1); }, gap);
@@ -302,9 +324,11 @@
       stopTimer();
       if (act === 'prev') go(S.step - 1, false);
       else if (act === 'next') go(S.step + 1, true);
+      else return;
+      follow(S.step);
     });
     goBtns.forEach(function (g) {
-      g.addEventListener('click', function () { stopTimer(); go(Number(g.getAttribute('data-go')) - 1, true); });
+      g.addEventListener('click', function () { stopTimer(); go(Number(g.getAttribute('data-go')) - 1, true); follow(S.step); });
     });
     cards.forEach(function (c, k) {
       var see = $('[data-see]', c);
@@ -323,7 +347,7 @@
     var wide = global.matchMedia('(min-width: 1024px)');
     var io = new global.IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
-        if (!e.isIntersecting || !wide.matches) return;
+        if (!e.isIntersecting || !wide.matches || following) return;
         var k = cards.indexOf(e.target);
         if (k >= 0 && k !== S.step) { stopTimer(); go(k, true); }
       });
