@@ -266,14 +266,103 @@
     ok(box.indexOf('Vulini8xbB0') < box.indexOf('class="older-note"'), 'main framing comes first');
   });
 
-  test('strategy.html: what the clip does not say is badged, not filled; every P id is a real fact id of clip #1 or #6', () => {
+  test('strategy.html: what the clip does not say is badged, not filled; P ids: clips #1 / #6 on the BOS walk, #1 / #7 / #8 on the IFVG tab', () => {
     var g = between('id="gaps"', '</section>');
     ok((g.match(/คลิปไม่ได้ระบุ/g) || []).length >= 5, 'at least five gap badges');
     ['ขนาดสถานะ', 'ระยะ stop-loss', 'ช่วงเวลา', 'เมื่อ confirmation ล้มเหลว'].forEach(function (w) { ok(g.indexOf(w) > 0, 'gap: ' + w); });
-    (html.match(/P\d+\.\d+/g) || []).forEach(function (id) {
+    var a = html.indexOf('id="panel-ifvg"'), z = html.indexOf('id="readout"');
+    ok(a > 0 && z > a, 'the IFVG panel sits before the readout');
+    var inside = html.slice(a, z), outside = html.slice(0, a) + html.slice(z);
+    (outside.match(/P\d+\.\d+/g) || []).forEach(function (id) {
       var clip = Number(/^P(\d+)\./.exec(id)[1]);
-      ok(clip === 1 || clip === 6, 'only clips #1 and #6 are cited: ' + id);
+      ok(clip === 1 || clip === 6, 'only clips #1 and #6 are cited outside the IFVG tab: ' + id);
     });
+    (inside.match(/P\d+\.\d+/g) || []).forEach(function (id) {
+      var clip = Number(/^P(\d+)\./.exec(id)[1]);
+      ok(clip === 1 || clip === 7 || clip === 8, 'the IFVG tab cites clips #1, #7, #8: ' + id);
+    });
+  });
+
+  // ---------------------------------------------------------------- the IFVG tab (S16, simulated)
+
+  test('strategy.IMETA: six steps with known chips (never #4) and real fact ids', () => {
+    eq(P.IMETA.map(function (m) { return m.key; }), ['sweep', 'wait', 'ifvg', 'cont', 'entry', 'exit']);
+    P.IMETA.forEach(function (m) {
+      ok(m.facts.length >= 1 && m.facts.every(function (f) { return /^(P\d+|F\d+)\.\d+$/.test(f); }), m.key + ' fact ids');
+      m.chips.forEach(function (c) {
+        var src = c[1] === 0 ? TJR.sources.list.filter(function (x) { return x.main; })[0] : TJR.sources.byClip(c[1]);
+        ok(src && src.clip !== 4, 'a known clip, never #4: ' + c);
+        ok(c[0] >= 0 && c[0] <= src.dur, 'inside the video: ' + c);
+      });
+    });
+  });
+
+  test('strategy.isteps: six steps on the S16 truth, never backwards, in every seed', () => {
+    SEEDS.forEach(function (seed) {
+      var b = P.ibuild(seed), T = b.truth, K = T.confluence, st = P.isteps(b), who = 'seed ' + seed;
+      eq(st.length, 6, who);
+      st.forEach(function (x, i) { if (i) ok(x.bar >= st[i - 1].bar, who + ' step ' + (i + 1) + ' goes back'); });
+      eq(st[0].bar, T.sweep.bar, who + ': sweep');
+      ok(K.confirm.kind === 'ifvg', who + ': the confirmation is an inversed gap');
+      ok(K.confirm.i + 1 <= T.sweep.bar, who + ': the gap is known before the sweep');
+      eq(st[2].bar, K.confirm.at, who + ': IFVG step');
+      ok(st[1].bar < K.confirm.at || st[1].bar === T.sweep.bar, who + ': waiting is before the close under the gap');
+      eq(st[4].bar, K.entry.at, who + ': entry');
+      ok(st[5].bar >= P.reachBar(b), who + ': the last step shows the target reached');
+    });
+  });
+
+  test('strategy.ifvg fixed seed: the IFVG comes before the BOS, the stop is above the entry and not hit before the target', () => {
+    var b = P.ibuild(), K = b.truth.confluence, bos = P.ibos(b), cs = b.candles, sl = P.istop(b);
+    eq(b.meta.seed, P.ISEED);
+    ok(bos && bos.at > K.confirm.at, 'the BOS comes later than the IFVG on the chart every visitor sees');
+    ok(sl.price > K.entry.price && K.targets[0].price < K.entry.price, 'stop above, target below a short');
+    for (var k = K.entry.at + 1; k <= P.reachBar(b); k++) ok(cs[k].h < sl.price, 'the stop is not hit before the target');
+  });
+
+  test('strategy.ioverlays: only what is known at each step, unique ids, the gaps named, the trade drawn at the end', () => {
+    SEEDS.forEach(function (seed) {
+      var b = P.ibuild(seed), K = b.truth.confluence, st = P.isteps(b);
+      for (var i = 0; i < 6; i++) {
+        var ov = P.ioverlays(b, i), seen = {}, bar = st[i].bar;
+        ov.forEach(function (o) {
+          ok(!seen[o.id], 'seed ' + seed + ' unique id ' + o.id); seen[o.id] = true;
+          if (o.appearAt != null) ok(o.appearAt <= bar, 'seed ' + seed + ' step ' + (i + 1) + ' ' + o.id + ' appears by the step bar');
+          [o.bar, o.from, o.at, o.a && o.a.bar].forEach(function (v) { if (v != null) ok(v <= bar, 'seed ' + seed + ' step ' + (i + 1) + ' ' + o.id + ' anchored after the bar'); });
+        });
+        ok(seen['fvg:' + K.confirm.i], 'seed ' + seed + ' step ' + (i + 1) + ': the gap that gets inversed is drawn');
+        var lab = ov.filter(function (o) { return o.id === 'lab-gap'; })[0];
+        if (i < 2) eq(lab.text, 'FVG ขาขึ้น', 'seed ' + seed + ' step ' + (i + 1) + ' gap label');
+        else {
+          ok(!lab, 'seed ' + seed + ' step ' + (i + 1) + ': no second label once the chart names the inversed gap');
+          var g = ov.filter(function (o) { return o.id === 'fvg:' + K.confirm.i; })[0];
+          eq(g.state, 'disrespected', 'seed ' + seed + ' step ' + (i + 1) + ': the gap is drawn as closed through (the chart labels it IFVG)');
+        }
+        eq(!!seen['fvg:' + K.cont.i], i >= 3, 'seed ' + seed + ' step ' + (i + 1) + ': the bear gap from step 4');
+        eq(!!seen['entry-mk'], i >= 4, 'seed ' + seed + ' step ' + (i + 1) + ': entry from step 5');
+        eq(!!seen.stop && !!seen.tp, i >= 5, 'seed ' + seed + ' step ' + (i + 1) + ': stop and target at the end');
+      }
+    });
+  });
+
+  test('strategy.html: the two tabs and the IFVG panel: six cards, each with its chips and fact ids, a simulation banner', () => {
+    ok(/role="tablist"/.test(html), 'a tablist');
+    ok(/id="tab-bos"[^>]*aria-controls="panel-bos"[^>]*aria-selected="true"/.test(html), 'BOS tab first and selected');
+    ok(/id="tab-ifvg"[^>]*aria-controls="panel-ifvg"[^>]*aria-selected="false"/.test(html), 'IFVG tab');
+    ok(/id="panel-bos" role="tabpanel"/.test(html) && /id="panel-ifvg" role="tabpanel"[^>]*hidden/.test(html), 'panels');
+    var p = between('id="panel-ifvg"', 'id="readout"');
+    ok(p.indexOf('ไม่ใช่เทรดของเขา') > 0 && p.indexOf('ตัวเลขจากกราฟจำลอง') > 0, 'labelled as a simulation');
+    ok(p.indexOf('data-slot="ifvg"') > 0, 'a chart slot');
+    eq((p.match(/<li class="step" data-istep="/g) || []).length, 6, 'six cards');
+    eq((p.match(/data-igo="/g) || []).length, 6, 'six track buttons');
+    P.IMETA.forEach(function (m) {
+      var a = p.indexOf('data-istep="' + m.n + '"'), z = m.n < 6 ? p.indexOf('data-istep="' + (m.n + 1) + '"') : p.indexOf('</ol>', a), card = p.slice(a, z);
+      ok(card.indexOf('data-key="' + m.key + '"') > 0, 'card ' + m.n + ' key');
+      m.chips.forEach(function (c) { ok(card.indexOf(TJR.layout.chip(c[0], c[1])) > 0, 'card ' + m.n + ' chip ' + c); });
+      m.facts.forEach(function (f) { ok(card.indexOf(f) > 0, 'card ' + m.n + ' names ' + f); });
+    });
+    ok(p.indexOf('คลิปไม่ได้ระบุ') > 0, 'the stop rule of an IFVG trade is badged, not filled');
+    ok(html.indexOf('data-open-tab="ifvg"') > 0, 'the BOS step points to the IFVG tab');
   });
 
   test('strategy.html: simulated numbers are labelled, the chart is not his day, and no TJR footage is used', () => {

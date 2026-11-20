@@ -56,6 +56,16 @@
       </ul>
     </header>
 
+    <section class="strat-paths" aria-labelledby="paths-h">
+      <h2 id="paths-h" class="strat-paths__h">จะรู้ได้ไงว่ากลับตัวจริง? มี 2 ทาง</h2>
+      <p class="strat-paths__lead" data-fact="P1.37">หลัง sweep ต้องรอสัญญาณยืนยันก่อน ได้ทั้ง <b>BOS</b> (แท่งปิดทะลุ low ล่าสุด) หรือ <b>IFVG</b> (แท่งปิดทะลุ FVG) เทรดในคลิป #1 ที่กราฟ 5 นาทีไม่มี gap ให้ใช้ เขาเลยใช้ BOS <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1767" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:27">#1 29:27</a></span> กดแท็บ IFVG เพื่อดูอีกทางบนกราฟจำลอง</p>
+      <div class="strat-tabs" role="tablist" aria-label="ทางยืนยันการกลับตัว">
+        <button class="strat-tab" type="button" role="tab" id="tab-bos" aria-controls="panel-bos" aria-selected="true" data-tab="bos"><span class="strat-tab__t">เข้าด้วย BOS</span><span class="strat-tab__s">เทรดจริงในคลิป #1 · 9 ข้อ</span></button>
+        <button class="strat-tab" type="button" role="tab" id="tab-ifvg" aria-controls="panel-ifvg" aria-selected="false" tabindex="-1" data-tab="ifvg"><span class="strat-tab__t">เข้าด้วย IFVG</span><span class="strat-tab__s">กราฟจำลอง · 6 ข้อ</span></button>
+      </div>
+    </section>
+
+    <div class="strat-panel" id="panel-bos" role="tabpanel" aria-labelledby="tab-bos">
     <div class="strat-shell">
       <div class="strat-stage" data-slot="strat" role="group" aria-label="กราฟจำลองคู่ ES และ NQ ตามลำดับเหตุการณ์ที่ TJR เล่า">
         <div class="strat-stage__top"><p class="strat-stage__no" data-k="stepno"></p><p class="strat-stage__cap" data-k="cap"></p></div>
@@ -130,6 +140,7 @@
             <p data-fact="P1.37">order flow เปลี่ยนได้สองทาง: break of structure หรือ inverse fair value gap ในขาขึ้นรอบนั้นไม่มี gap ให้ inverse เขาจึงรอ BOS และได้ทั้งสอง index <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1767" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:27">#1 29:27</a></span></p>
             <p data-fact="P1.38">หลังนั้นเขายังอยากเห็นเทรนด์ใหม่ไปต่อ เพื่อพิสูจน์ว่า break นี้คือจุดเริ่มของเทรนด์ใหม่ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1747" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:07">#1 29:07</a></span></p>
             <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> หมุด BOS อยู่ที่แท่งแรกที่ปิดใต้ low ล่าสุด แสดงเฉพาะช่อง ES (ในคลิปหักทั้งสองตัว)</p>
+            <p class="step__alt">ถ้ามี gap ให้ inverse จะไม่ต้องรอ BOS ดูแท็บ <a href="#panel-ifvg" data-open-tab="ifvg">เข้าด้วย IFVG</a></p>
           </div>
           <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
         </li>
@@ -185,6 +196,97 @@
           <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
         </li>
       </ol>
+    </div>
+    </div>
+
+    <div class="strat-panel" id="panel-ifvg" role="tabpanel" aria-labelledby="tab-ifvg" hidden>
+    <div class="strat-banner strat-banner--ifvg" role="note">
+      <p class="strat-banner__t">อันนี้เป็นกราฟจำลอง ไม่ใช่เทรดของเขา</p>
+      <p>เขาไม่ได้เล่าเทรด IFVG ครบสายในคลิปเดียว แท็บนี้เอาลำดับจากคลิป #7 และ #8 มาเดินบนกราฟจำลอง S16 ราคาบนกราฟเป็น <span class="sim-lab">ตัวเลขจากกราฟจำลอง</span></p>
+    </div>
+    <div class="strat-shell">
+      <div class="strat-stage" data-slot="ifvg" role="group" aria-label="กราฟจำลอง ES 5 นาที เข้าด้วย IFVG">
+        <div class="strat-stage__top"><p class="strat-stage__no" data-k="stepno"></p><p class="strat-stage__cap" data-k="cap"></p></div>
+        <figure class="chart-frame lc" data-ui="chart" aria-label="กราฟจำลอง ES 5 นาที">
+          <div class="chart-frame__bar"><span class="chart-frame__sym">ES</span><span class="chart-frame__tf">5m</span><span class="chart-frame__title">S16 · เข้าด้วย IFVG</span><span class="sim-tag">จำลอง</span></div>
+          <div class="chart-frame__canvas chart-frame__canvas--solo" data-k="host"></div>
+        </figure>
+        <p class="conf-read" data-k="read" aria-live="polite"></p>
+        <div class="track-wrap track-wrap--6">
+          <ol class="track" aria-label="หกข้อของเทรดแบบ IFVG">
+            <li><button class="track__b" type="button" data-igo="1" aria-label="ไปข้อที่ 1 กวาด high"><span>01</span></button></li>
+            <li><button class="track__b" type="button" data-igo="2" aria-label="ไปข้อที่ 2 ยังไม่ short"><span>02</span></button></li>
+            <li><button class="track__b" type="button" data-igo="3" aria-label="ไปข้อที่ 3 IFVG"><span>03</span></button></li>
+            <li><button class="track__b" type="button" data-igo="4" aria-label="ไปข้อที่ 4 FVG ขาลง"><span>04</span></button></li>
+            <li><button class="track__b" type="button" data-igo="5" aria-label="ไปข้อที่ 5 จุดเข้า"><span>05</span></button></li>
+            <li><button class="track__b" type="button" data-igo="6" aria-label="ไปข้อที่ 6 stop และเป้า"><span>06</span></button></li>
+          </ol>
+          <div class="track__bar" aria-hidden="true"></div>
+        </div>
+        <div class="chart-frame__ctrls">
+          <button class="ctrl" type="button" data-act="prev">◀ ก่อนหน้า</button>
+          <button class="ctrl" type="button" data-act="next">ถัดไป ▶</button>
+          <button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่นต่อเนื่อง</span></button>
+        </div>
+      </div>
+
+      <ol class="steps steps--ifvg" aria-label="หกข้อของเทรดแบบ IFVG">
+        <li class="step" data-istep="1" data-key="sweep" id="i1" data-fact="P7.11">
+          <header class="step__head"><span class="step__no">01</span><h3>ขาขึ้นทิ้ง FVG ไว้ แล้วราคากวาด high</h3></header>
+          <div class="step__body">
+            <p data-fact="P7.11">ขาที่วิ่งขึ้นทิ้ง FVG ขาขึ้นไว้ (กรอบเขียว) จากนั้นราคาดันเหนือ high ที่มี orders รออยู่ ตรงนี้คือโอกาสให้ orders ถูกเติม เป็นข้อแรกของสาย <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=217" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 03:37">#7 03:37</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ลูกศรคือแท่งที่กวาด high กรอบเขียวคือ gap ที่จะโดนปิดทะลุในข้อ 3</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-istep="2" data-key="wait" id="i2" data-fact="F4.6 P8.24">
+          <header class="step__head"><span class="step__no">02</span><h3>กวาดแล้ว ยังไม่ short</h3></header>
+          <div class="step__body">
+            <p data-fact="F4.6">ทะลุ high ไม่ได้แปลว่าจะกลับตัวทุกครั้ง มันแค่เปิดโอกาส ต้องมีอย่างอื่นมายืนยันก่อน <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=945" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 15:45">15:45</a></span></p>
+            <p data-fact="P8.24">แท่งแรกที่ลงมาแตะ gap ยังไม่นับ ต้องรอแท่งที่ปิดใต้ก้น gap <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=548" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 09:08">#8 09:08</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ราคาเริ่มย่อลง แต่ยังไม่มีแท่งไหนปิดใต้กรอบเขียว</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-istep="3" data-key="ifvg" id="i3" data-fact="P8.14 P8.20">
+          <header class="step__head"><span class="step__no">03</span><h3>แท่งปิดใต้ FVG = IFVG ยืนยันว่ากลับตัว</h3></header>
+          <div class="step__body">
+            <p data-fact="P8.14">FVG ขาขึ้นควรดันราคาขึ้นต่อ พอโดนปิดทะลุลงมา แปลว่าเทรนด์เปลี่ยน gap นี้เลยกลายเป็น IFVG ใช้ยืนยันแทน BOS ได้ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=356" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 05:56">#8 05:56</a></span></p>
+            <p data-fact="P8.20">ต้องปิดทะลุทั้งแท่ง แค่ไส้ทะลุ หรือปิดค้างอยู่ในกรอบ ยังไม่นับ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=1234" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 20:34">#8 20:34</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ป้ายเปลี่ยนจาก FVG เป็น IFVG ตรงแท่งที่ปิดใต้กรอบ</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-istep="4" data-key="cont" id="i4" data-fact="P7.11 P1.19">
+          <header class="step__head"><span class="step__no">04</span><h3>ขาลงทิ้ง FVG ขาลงไว้ = จุดรอเข้า</h3></header>
+          <div class="step__body">
+            <p data-fact="P7.11">ยืนยันแล้วก็หาจุดที่เทรนด์ใหม่จะไปต่อ ใช้ได้ทั้ง FVG หรือ equilibrium ตัวอย่างนี้คือ FVG ขาลงที่เพิ่งเกิด (กรอบแดง) <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=217" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 03:37">#7 03:37</a></span></p>
+            <p data-fact="P1.19">ลำดับเดียวกับที่เขาสรุปในคลิป #1: sweep → ยืนยัน (BOS หรือ IFVG) → จุดไปต่อ (FVG หรือ equilibrium) → ออกที่ liquidity <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> ยังไม่เข้า รอให้ราคาเด้งกลับขึ้นมาในกรอบแดงก่อน</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-istep="5" data-key="entry" id="i5" data-fact="P7.11 P8.25 P8.27 P1.45">
+          <header class="step__head"><span class="step__no">05</span><h3>ราคาเด้งเข้า gap แล้วปิดกลับลง: เข้า short</h3></header>
+          <div class="step__body">
+            <p data-fact="P7.11">ราคาเด้งขึ้นมาในกรอบแดง แล้วกลับลง เข้าตามทางของเทรนด์ใหม่ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=217" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 03:37">#7 03:37</a></span></p>
+            <p data-fact="P8.25 P8.27">ข้อดีของ IFVG: บางครั้งได้เข้าก่อน BOS ได้ราคาดีกว่า เขาบอกว่า risk-to-reward ดีขึ้น <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=569" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 09:29">#8 09:29</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=589" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 09:49">#8 09:49</a></span></p>
+            <p data-fact="P1.45">เทรดในคลิป #1 เอง ตอนเข้าที่กราฟ 1 นาที เขาก็รอ BOS หรือ IFVG แบบนี้ เรียกว่า entry confluence <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1996" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 33:16">#1 33:16</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> หมุดทองคือแท่งแดงที่ปิดกลับลงจากกรอบ ตำแหน่งเข้านี้เป็นการอ่านของเว็บ ไม่ใช่กฎของเขา</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+        <li class="step" data-istep="6" data-key="exit" id="i6" data-fact="P1.50 P1.20">
+          <header class="step__head"><span class="step__no">06</span><h3>stop เหนือ high และเป้าที่ low ด้านล่าง</h3></header>
+          <div class="step__body">
+            <p data-fact="P1.50">ในเทรดคลิป #1 เขาวาง stop เหนือ high ที่เพิ่งทำ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a></span> <span class="badge-gap">คลิปไม่ได้ระบุ</span> กฎวาง stop ของเทรดแบบ IFVG</p>
+            <p data-fact="P1.20">เป้าคือ liquidity ฝั่งตรงข้าม: low ของ session ก่อนหน้า หรือ low ของ time frame ใหญ่ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2474" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 41:14">#1 41:14</a></span></p>
+            <p class="step__sim"><span class="sim-lab">ในกราฟจำลอง</span> stop คือ high สูงสุดตั้งแต่ sweep ถึงจุดเข้า เส้น BOS ที่โผล่มาคือจุดที่ถ้ารอ BOS จะได้เข้า ลองเทียบกับหมุดทอง</p>
+          </div>
+          <button class="ctrl" type="button" data-see>ดูบนกราฟ</button>
+        </li>
+      </ol>
+    </div>
     </div>
 
     <section class="strat-sec" id="readout" aria-labelledby="readout-h">

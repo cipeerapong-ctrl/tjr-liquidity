@@ -26,7 +26,7 @@ Needs JavaScript, and internet for GSAP 3.12.5 + ScrollTrigger 3.12.5 (cdnjs) an
 ```
 node tests/run.mjs
 ```
-Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js`: 517 tests, about 40 seconds. They cover the generators (every scenario S01-S22 x seeds 1..200 against `TJR.scenarios.check`), the swing rule, sessions and DST days, the detectors (FVG, BOS, equilibrium, SMT), grading, chart scale math and overlays, the store with blocked localStorage, rapid Play clicks, the page controllers with a stub DOM, and content rules on every page (chips point at the right video and second, nothing from the excluded list).
+Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js`: 523 tests, about 40 seconds. They cover the generators (every scenario S01-S22 x seeds 1..200 against `TJR.scenarios.check`), the swing rule, sessions and DST days, the detectors (FVG, BOS, equilibrium, SMT), grading, chart scale math and overlays, the store with blocked localStorage, rapid Play clicks, the page controllers with a stub DOM, and content rules on every page (chips point at the right video and second, nothing from the excluded list).
 
 ## Pages
 | Page | Step | What it does |
@@ -35,7 +35,7 @@ Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.j
 | `index.html` | home | Home: hero chart, the six-step path with the chain of one trade, the 3-step trade of the clip, lesson timeline, the tools, the two sources |
 | `learn.html` | Step 1 | 8 lessons in main-clip order, each with a playable chart, a short quiz and timestamp chips; session table in ET and Thai time; extra detail from playlist clips #12 and #14 |
 | `confluences.html` | Step 2 | Five lessons with an interactive each: break of structure, fair value gap, inverse FVG (BOS vs IFVG race), equilibrium (draggable range), SMT (twin ES / NQ charts) |
-| `strategy.html` | Step 3 | His worked trade of 16 Jan 2026 as a 9-step tracker over a simulated twin chart (bearish SMT, ES leads), plus the facts the clip does not state |
+| `strategy.html` | Step 3 | Two tabs. BOS: his worked trade of 16 Jan 2026 as a 9-step tracker over a simulated twin chart (bearish SMT, ES leads). IFVG: a 6-step simulated short on S16 (sweep, close under the gap, pullback into the bear gap) from clips #7 and #8. Plus the facts the clip does not state |
 | `risk.html` | Step 5 | Risk and discipline: the three skills, his sizing logic, a contract-size calculator (inputs only, no advice), win rate x R:R, the funded-account paragraph |
 | `playbook.html` | Step 4 | His order of thinking in 8 steps (bias, time, sweep, confirmation, continuation, entry, exit, risk) with "show on chart" demos, a bias worksheet, a 13-item checklist (progress saved locally), live NY clock (ET and Thailand), session table, own-rules fields |
 | `scenarios.html` | practice (Steps 1-3) | 22 scenarios: S01-S14 from the main clip, S15-S22 full-system setups (BOS + FVG, IFVG, equilibrium, stacked gaps, wick-is-not-a-break, SMT twin, time windows). Step or play bar by bar, notes appear when price reaches them, random new chart, timeframe and outcome switches |

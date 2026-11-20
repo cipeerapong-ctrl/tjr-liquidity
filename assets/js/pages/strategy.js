@@ -169,6 +169,65 @@
     return top < topInset || bottom > viewH;
   }
 
+  // ================================================================ 1b · the IFVG version (a second tab; S16, simulated)
+  // He does not tell one IFVG trade end to end, so this tab walks the order of clips #7 (P7.11) and #8 (P8.14, P8.20,
+  // P8.24, P8.25) on the S16 simulation: the bull gap of the push up, the sweep, the close under that gap (IFVG), the
+  // bear gap the drop leaves, the pullback into it and the close back out (the entry), then stop and target.
+  // Chips are [second, clip]; clip 0 = the main clip.
+  var IMETA = [
+    { n: 1, key: 'sweep', facts: ['P7.11'], chips: [[217, 7]], cap: 'ขาขึ้นทิ้ง FVG ไว้ แล้วราคากวาด high' },
+    { n: 2, key: 'wait', facts: ['F4.6', 'P8.24'], chips: [[945, 0], [548, 8]], cap: 'กวาดแล้ว ยังไม่ short' },
+    { n: 3, key: 'ifvg', facts: ['P8.14', 'P8.20'], chips: [[356, 8], [1234, 8]], cap: 'แท่งปิดใต้ FVG = IFVG ยืนยันว่ากลับตัว' },
+    { n: 4, key: 'cont', facts: ['P7.11', 'P1.19'], chips: [[217, 7], [2144, 1]], cap: 'ขาลงทิ้ง FVG ขาลงไว้ = จุดรอเข้า' },
+    { n: 5, key: 'entry', facts: ['P7.11', 'P8.25', 'P8.27', 'P1.45'], chips: [[217, 7], [569, 8], [589, 8], [1996, 1]], cap: 'ราคาเด้งเข้า gap แล้วปิดกลับลง: เข้า short' },
+    { n: 6, key: 'exit', facts: ['P1.50', 'P1.20'], chips: [[2113, 1], [2474, 1]], cap: 'stop เหนือ high และเป้าที่ low ด้านล่าง' }
+  ];
+  var ISEED = 1;                                          // fixed: the IFVG closes 7 bars before the BOS on this chart
+  function ibuild(seed) { return TJR.scenarios.safeBuild(TJR.scenarios.get('S16'), seed == null ? ISEED : seed, { outcome: 'win' }); }
+  // the first break of the most recent low after the sweep: where a trader waiting for BOS would get the signal
+  function ibos(b) {
+    var ev = TJR.confluence.bos(b.candles, { trend: 'up', from: b.truth.sweep.bar + 1 })[0];
+    return ev ? { at: ev.at, dir: ev.dir, level: { i: ev.level.i, price: ev.level.price } } : null;
+  }
+  // the stop of the simulated short: the highest high from the sweep to the entry (the site's choice, as on the BOS tab)
+  function istop(b) {
+    var K = b.truth.confluence, cs = b.candles, m = -Infinity;
+    for (var j = b.truth.sweep.bar; j <= K.entry.at; j++) if (cs[j].h > m) m = cs[j].h;
+    return { price: m, bar: K.entry.at };
+  }
+  function isteps(b) {
+    var T = b.truth, K = T.confluence, n = b.candles.length, bos = ibos(b), reach = reachBar(b);
+    var raw = [T.sweep.bar, Math.max(T.sweep.bar, K.confirm.at - 1), K.confirm.at, K.cont.at, K.entry.at, Math.max(reach, bos ? bos.at : 0)];
+    var prev = 0;
+    return IMETA.map(function (m, i) {
+      var bar = clamp(Math.max(raw[i], prev), 0, n - 1);
+      prev = bar;
+      return { n: m.n, key: m.key, bar: bar, cap: m.cap };
+    });
+  }
+  // the overlays of step i (0-based): only what is known at that step's bar
+  function ioverlays(b, i) {
+    var T = b.truth, K = T.confluence, st = isteps(b), bar = st[i].bar, out;
+    out = TJR.annotate(b, { upTo: bar }).filter(function (o) { return o.type !== 'label' && o.id !== 'entry' && o.id !== 'target'; });
+    var gapId = 'fvg:' + K.confirm.i, contId = 'fvg:' + K.cont.i;
+    TJR.annotate.confluence(b, { upTo: bar, show: { fvg: true } }).forEach(function (o) {
+      if (o.id === gapId || (i >= 3 && o.id === contId)) out.push(o);
+    });
+    var g = K.confirm;
+    // the chart writes "IFVG" in the box itself once the gap is closed through: name it only before that
+    if (i < 2) out.push({ id: 'lab-gap', type: 'label', bar: g.i, price: g.low, text: 'FVG ขาขึ้น', pos: 'below', appearAt: g.i + 1 });
+    if (i >= 3) out.push({ id: 'lab-cont', type: 'label', bar: K.cont.i, price: K.cont.high, text: 'FVG ขาลง', pos: 'above', appearAt: K.cont.at });
+    if (i >= 4) out.push({ id: 'entry-mk', type: 'marker', bar: K.entry.at, price: K.entry.price, shape: 'down', color: '#e6b84c', appearAt: K.entry.at });
+    if (i >= 5) {
+      var sl = istop(b), bos = ibos(b);
+      out.push({ id: 'stop', type: 'level', price: sl.price, from: K.entry.at, label: 'stop จำลอง', kind: 'liq', state: 'active', appearAt: bar });
+      out.push({ id: 'tp', type: 'level', price: K.targets[0].price, from: K.entry.at, label: 'เป้า จำลอง', kind: 'target', state: 'active', appearAt: bar });
+      if (bos && bos.at <= bar) out.push({ id: 'bos:' + bos.at, type: 'bos', price: bos.level.price, from: bos.level.i, at: bos.at, dir: bos.dir, appearAt: bos.at });
+    }
+    return out.filter(function (o) { return o.appearAt == null || o.appearAt <= bar; });
+  }
+
+  P.IMETA = IMETA; P.ISEED = ISEED; P.ibuild = ibuild; P.ibos = ibos; P.istop = istop; P.isteps = isteps; P.ioverlays = ioverlays;
   P.META = META; P.READOUT = READOUT; P.SEED = SEED; P.needsFollow = needsFollow;
   P.build = build; P.steps = steps; P.stepState = stepState; P.overlays = overlays;
   P.stopLevel = stopLevel; P.reachBar = reachBar; P.touchBar = touchBar;
@@ -186,8 +245,8 @@
   function $$(sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
   function stamp(t) { return TJR.sessions.fmtET(t) + ' ET · ' + TJR.sessions.fmtThai(t) + ' น.'; }
 
-  var fig = $('[data-slot="strat"]');
-  var cards = $$('.step'), goBtns = $$('[data-go]');
+  var fig = $('[data-slot="strat"]'), bosPanel = $('#panel-bos') || doc;
+  var cards = $$('.step', bosPanel), goBtns = $$('[data-go]', bosPanel);
   var S = { step: 0, seed: SEED };
   var api = null, timer = null, dead = false, following = 0;
   var sticky = global.matchMedia ? global.matchMedia('(min-width: 1024px) and (min-height: 800px)') : null;
@@ -218,7 +277,7 @@
       g.classList.toggle('is-past', k < i);
       if (k === i) g.setAttribute('aria-current', 'step'); else g.removeAttribute('aria-current');
     });
-    var bar = $('.track__bar'); if (bar) bar.style.setProperty('--p', String(i / (META.length - 1)));
+    var bar = $('.track__bar', fig); if (bar) bar.style.setProperty('--p', String(i / (META.length - 1)));
     var cap = $('[data-k="cap"]', fig), no = $('[data-k="stepno"]', fig);
     if (cap) cap.textContent = META[i].cap;
     if (no) no.textContent = 'ข้อที่ ' + (i + 1) + ' จาก ' + META.length;
@@ -369,10 +428,15 @@
   }
 
   // one entrance per card and heading (GSAP, once); whatever stalls, a card in view is never left hidden
+  var pending = [];
+  // a tab switch moves cards into view without a scroll: play the ones now on screen (and re-measure the triggers)
+  function flushReveal() {
+    if (M.ScrollTrigger && M.ScrollTrigger.refresh) M.ScrollTrigger.refresh();
+    pending.forEach(function (r) { var b = r.el.getBoundingClientRect(); if (!r.played && b.height && b.top < global.innerHeight) r.go(); });
+  }
   function reveal() {
     var ST = M.ScrollTrigger;
     if (!M.enabled || !ST) return;
-    var pending = [];
     $$('.step, .strat-sec__head').forEach(function (el) {
       var tl = M.gsap.timeline({ paused: true });
       tl.from(el, { y: 22, opacity: 0, duration: 0.7, ease: 'power3.out', clearProps: 'all' }, 0);
@@ -387,11 +451,201 @@
     }, 1500);
   }
 
+  // ---------------------------------------------------------------- the IFVG tab: one chart (S16), six steps
+  var ifig = $('[data-slot="ifvg"]'), ipanel = $('#panel-ifvg');
+  var icards = ipanel ? $$('.step', ipanel) : [], igoBtns = ipanel ? $$('[data-igo]', ipanel) : [];
+  var IS = { step: 0 }, iapi = null, itimer = null;
+
+  function imount() {
+    if (iapi || !ifig) return iapi;
+    var b = ibuild(), st = isteps(b), ch = TJR.chart.create($('[data-k="host"]', ifig), { label: 'กราฟจำลอง ES 5 นาที: sweep แล้วแท่งปิดใต้ FVG (IFVG) แล้วเข้า short ไม่ใช่เทรดของ TJR', interactive: true });
+    try { ch.setData(b); } catch (e) { ch.destroy(); if (global.console) console.error(e); return null; }
+    var run = 0;
+    iapi = {
+      b: b, st: st, ch: ch, bos: ibos(b),
+      show: function (i, animate) {
+        var my = ++run, to = st[i].bar, from = ch.info().revealed;
+        ch.setOverlays(ioverlays(b, i));
+        if (animate && !M.reduced && to > from) ch.play({ from: from, to: to, barsPerSec: 7 }).then(function (done) { if (my === run && done) ch.reveal(to); });
+        else ch.reveal(to);
+      },
+      destroy: function () { run++; ch.destroy(); }
+    };
+    return iapi;
+  }
+  function iunmount() { if (!iapi) return; istopTimer(); iapi.destroy(); iapi = null; }
+  function istopTimer() { if (itimer) { clearTimeout(itimer); itimer = null; } isetPlay(false); }
+  function isetPlay(on) {
+    var b = ifig && $('[data-act="play"]', ifig), l = b && $('[data-k="lab"]', b);
+    if (l) l.textContent = on ? 'หยุด' : (IS.step >= IMETA.length - 1 ? 'เล่นใหม่' : 'เล่นต่อเนื่อง');
+    if (b) b.setAttribute('data-state', on ? 'on' : 'off');
+  }
+  function iread(i) {
+    var box = $('[data-k="read"]', ifig);
+    if (!box || !iapi) return;
+    var b = iapi.b, cs = b.candles, K = b.truth.confluence, g = K.confirm, c = K.cont, bos = iapi.bos, px = TJR.util.fmtPrice, t = '';
+    switch (IMETA[i].key) {
+      case 'sweep': t = 'ลูกศร = แท่งที่กวาด high · กรอบเขียว = FVG ขาขึ้น ' + px(g.low) + ' ถึง ' + px(g.high); break;
+      case 'wait': t = 'ราคาย่อลงมาแล้ว แต่ยังไม่มีแท่งไหนปิดใต้ ' + px(g.low) + ' (ก้น gap) จึงยังไม่ short'; break;
+      case 'ifvg': t = 'แท่งนี้ปิดที่ ' + px(cs[g.at].c) + ' ใต้ก้น gap ' + px(g.low) + ' = IFVG' +
+        (bos && bos.at > g.at ? ' · ถ้ารอ BOS ต้องรออีก ' + (bos.at - g.at) + ' แท่ง' : bos && bos.at === g.at ? ' · แท่งนี้ปิดใต้ low ล่าสุดด้วย BOS เลยมาพร้อมกัน' : ''); break;
+      case 'cont': t = 'กรอบแดง = FVG ขาลง ' + px(c.low) + ' ถึง ' + px(c.high) + ' รอราคาเด้งกลับขึ้นมาตรงนี้'; break;
+      case 'entry': t = 'หมุดทอง = แท่งที่ปิดกลับลงจาก gap ราคา ' + px(K.entry.price) + (bos && bos.at > K.entry.at ? ' · ตอนนี้ยังไม่มี BOS เลย' : ''); break;
+      default: t = 'stop จำลอง ' + px(istop(b).price) + ' · เป้า จำลอง ' + px(K.targets[0].price) + ' ถึงเป้าที่แท่ง ' + stamp(cs[reachBar(b)].t) +
+        (bos && bos.at > K.entry.at && cs[bos.at].c < K.entry.price
+          ? ' · ถ้ารอ BOS จะได้เข้าที่ ' + px(cs[bos.at].c) + ' ต่ำกว่าจุดเข้า IFVG ' + px(K.entry.price - cs[bos.at].c) + ' จุด'
+          : bos ? ' · เส้น BOS คือจุดที่ถ้ารอ BOS จะได้เข้า' : '');
+    }
+    box.innerHTML = t + ' <span class="sim-lab">ตัวเลขจากกราฟจำลอง</span> <span class="conf-when">' + stamp(cs[iapi.st[i].bar].t) + '</span>';
+  }
+  function iset(i) {
+    icards.forEach(function (c, k) {
+      c.classList.toggle('is-current', k === i); c.classList.toggle('is-past', k < i);
+      if (k === i) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current');
+    });
+    igoBtns.forEach(function (g) {
+      var k = Number(g.getAttribute('data-igo')) - 1;
+      g.classList.toggle('is-current', k === i); g.classList.toggle('is-past', k < i);
+      if (k === i) g.setAttribute('aria-current', 'step'); else g.removeAttribute('aria-current');
+    });
+    var bar = $('.track__bar', ifig); if (bar) bar.style.setProperty('--p', String(i / (IMETA.length - 1)));
+    var cap = $('[data-k="cap"]', ifig), no = $('[data-k="stepno"]', ifig);
+    if (cap) cap.textContent = IMETA[i].cap;
+    if (no) no.textContent = 'ข้อที่ ' + (i + 1) + ' จาก ' + IMETA.length;
+    var prev = $('[data-act="prev"]', ifig), next = $('[data-act="next"]', ifig);
+    if (prev) prev.disabled = i === 0;
+    if (next) next.disabled = i === IMETA.length - 1;
+  }
+  function igo(i, animate) {
+    i = clamp(i, 0, IMETA.length - 1);
+    IS.step = i;
+    iset(i);
+    var a = imount();
+    if (a) { a.show(i, animate); iread(i); }
+    if (!itimer) isetPlay(false);
+  }
+  function ifollow(i) {
+    var c = icards[i];
+    if (!c || !sticky || !sticky.matches) return;
+    var r = c.getBoundingClientRect(), nav = parseFloat(global.getComputedStyle(doc.documentElement).getPropertyValue('--nav')) || 64;
+    if (!needsFollow(r.top, r.bottom, global.innerHeight, nav)) return;
+    var mine = ++following;
+    setTimeout(function () { if (mine === following) following = 0; }, 1800);
+    c.scrollIntoView({ block: 'center', behavior: M.reduced ? 'auto' : 'smooth' });
+  }
+  function iplay() {
+    if (itimer) { istopTimer(); return; }
+    if (M.reduced) return;
+    var start = IS.step >= IMETA.length - 1 ? 0 : IS.step;
+    if (IS.step >= IMETA.length - 1) igo(0, false);
+    (function tick(k) {
+      igo(k, true); ifollow(k);
+      if (k >= IMETA.length - 1) { itimer = null; isetPlay(false); return; }
+      var a = iapi, gap = a ? Math.max(1800, ((a.st[k + 1].bar - a.st[k].bar) / 7) * 1000 + 2200) : 2600;
+      itimer = setTimeout(function () { tick(k + 1); }, gap);
+      isetPlay(true);
+    })(start);
+  }
+  function initIfvg() {
+    if (!ifig) return;
+    ifig.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('[data-act]') : null;
+      if (!t || !ifig.contains(t) || t.disabled) return;
+      var act = t.getAttribute('data-act');
+      if (act === 'play') { iplay(); return; }
+      istopTimer();
+      if (act === 'prev') igo(IS.step - 1, false);
+      else if (act === 'next') igo(IS.step + 1, true);
+      else return;
+      ifollow(IS.step);
+    });
+    igoBtns.forEach(function (g) {
+      g.addEventListener('click', function () { istopTimer(); igo(Number(g.getAttribute('data-igo')) - 1, true); ifollow(IS.step); });
+    });
+    icards.forEach(function (c, k) {
+      var see = $('[data-see]', c);
+      if (see) see.addEventListener('click', function () {
+        istopTimer(); igo(k, true);
+        if (ifig.scrollIntoView && global.innerWidth < 1024) ifig.scrollIntoView({ block: 'start', behavior: M.reduced ? 'auto' : 'smooth' });
+      });
+    });
+    var ipb = $('[data-act="play"]', ifig);
+    function ired() { if (ipb) ipb.hidden = !!M.reduced; if (M.reduced) istopTimer(); }
+    ired(); TJR.motion.onChange(ired);
+    iset(0);
+    if (!global.IntersectionObserver) return;
+    // the chart exists only near the screen (a hidden tab never is)
+    new global.IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { var a = imount(); if (a) { a.show(IS.step, false); iread(IS.step); } }
+        else iunmount();
+      });
+    }, { rootMargin: '90% 0px 90% 0px' }).observe(ifig);
+    // a card on the reading line moves the chart (wide screens: the chart stays beside the cards)
+    var wide = global.matchMedia ? global.matchMedia('(min-width: 1024px)') : null;
+    var io = new global.IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting || !wide || !wide.matches || following) return;
+        var k = icards.indexOf(e.target);
+        if (k >= 0 && k !== IS.step) { istopTimer(); igo(k, true); }
+      });
+    }, { rootMargin: '-42% 0px -52% 0px' });
+    icards.forEach(function (c) { io.observe(c); });
+  }
+
+  // ---------------------------------------------------------------- the two tabs (BOS: clip #1's trade · IFVG: simulated)
+  var TAB_KEY = 'tjr.strategy.tab';
+  var tabs = $$('[data-tab]');
+  function selectTab(name, focus) {
+    if (!ipanel) return;
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('data-tab') === name;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    var toIfvg = name === 'ifvg';
+    if (bosPanel !== doc) bosPanel.hidden = toIfvg;
+    ipanel.hidden = !toIfvg;
+    if (toIfvg) stopTimer(); else istopTimer();
+    try { global.localStorage.setItem(TAB_KEY, name); } catch (e) { /* storage off: the tab still switches */ }
+    flushReveal();
+  }
+  function initTabs() {
+    if (!tabs.length || !ipanel) return;
+    tabs.forEach(function (t, k) {
+      t.addEventListener('click', function () { selectTab(t.getAttribute('data-tab'), false); });
+      t.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') return;
+        e.preventDefault();
+        var n = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (k + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        selectTab(tabs[n].getAttribute('data-tab'), true);
+      });
+    });
+    $$('[data-open-tab]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        selectTab(a.getAttribute('data-open-tab'), false);
+        var top = $('.strat-tabs');
+        if (top && top.scrollIntoView) top.scrollIntoView({ block: 'start', behavior: M.reduced ? 'auto' : 'smooth' });
+      });
+    });
+    var h = (global.location && global.location.hash) || '', start = null;
+    if (/^#(panel-ifvg|i[1-6])$/.test(h)) start = 'ifvg';
+    else if (/^#(panel-bos|s[1-9])$/.test(h)) start = 'bos';
+    else { try { start = global.localStorage.getItem(TAB_KEY); } catch (e) { start = null; } }
+    selectTab(start === 'ifvg' ? 'ifvg' : 'bos', false);
+    if (/^#i[1-6]$/.test(h)) { var el = $(h); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); }
+  }
+
   P.go = go; P.state = S;                                // read-only handles for the console and the headless checks
   P.chart = function () { return api; };
+  P.igo = igo; P.istate = IS; P.ichart = function () { return iapi; }; P.selectTab = selectTab;
   setCurrent(0);
   initControls();
   initSlot();
   initScrollLink();
+  initIfvg();
+  initTabs();
   reveal();
 })(typeof window !== 'undefined' ? window : globalThis);
