@@ -497,7 +497,7 @@
       ok(html.indexOf('data-step="' + k + '" id="step-' + k + '"') >= 0, 'step ' + k);
       eq(html.split('data-act="view" data-step="' + k + '"').length - 1, 1);
     }
-    eq(html.split('class="step').length - 1, 8 + (html.split('class="step__').length - 1) + 1, 'exactly eight .step cards (+ the <ol class="steps">)');
+    eq(html.split('class="step').length - 1, 8 + (html.split('class="step__').length - 1) + 1 + (html.split('class="step-tag').length - 1), 'exactly eight .step cards (+ the <ol class="steps"> and the path step marker)');
     var ids = (html.match(/(?:learn\.html#m|scenarios\.html#S)\d+/g) || []);
     ok(ids.length >= 10, 'module and scenario links present');
     ids.forEach((h) => { var n = Number(h.replace(/\D/g, '')); ok(h.indexOf('learn') === 0 ? n >= 1 && n <= 8 : n >= 1 && n <= 22, h); });

@@ -171,12 +171,12 @@
     ok(html.indexOf('ปิดทางการ 11:00') > 0, 'main clip 11:00 stays');
   });
 
-  test('learn.html: marked Level 1 and points on to the Level 2 pages; the 8 modules and 8 self-checks stay', () => {
+  test('learn.html: marked step 1 and points on to the next steps; the 8 modules and 8 self-checks stay', () => {
     var html = readText('learn.html');
-    ok(/<p class="level-tag" data-level="1">Level 1 · Liquidity<\/p>/.test(html), 'level tag');
-    ok(html.indexOf('ต่อใน Level 2') > 0, 'the Level 2 heading');
+    ok(html.indexOf(TJR.layout.stepMarkerHTML('learn')) > 0, 'step marker');
+    ok(html.indexOf('ต่อในขั้น 2') > 0, 'the next-steps heading');
     var tail = html.slice(html.indexOf('id="limits"'));
-    ok(tail.indexOf('href="confluences.html"') > 0 && tail.indexOf('href="playbook.html"') > 0, 'links to both Level 2 pages');
+    ok(tail.indexOf('href="confluences.html"') > 0 && tail.indexOf('href="playbook.html"') > 0, 'links to both next-step pages');
     ok(tail.indexOf('market structure break') > 0 && tail.indexOf('fair value gap') > 0 && tail.indexOf('inverse fair value gap') > 0, 'F9.1 list');
     ok(tail.indexOf('youtu.be/Vulini8xbB0?t=2880') > 0, 'F9.1 chip 48:00');
     ok(html.indexOf('ที่คลิปนี้ไม่ได้สอน') < 0, 'the old closing block is gone');

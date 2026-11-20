@@ -197,9 +197,9 @@
   function anchors(s) { return s.match(/<a\b[^>]*\bclass="ts-chip[^"]*"[^>]*>[^<]*<\/a>/g) || []; }
   function between(a, b) { var i = html.indexOf(a), j = html.indexOf(b, i + 1); return html.slice(i, j < 0 ? html.length : j); }
 
-  test('strategy.html: the simulation banner, the Level tag, the nine steps and the script order of the plan', () => {
+  test('strategy.html: the simulation banner, the step marker, the nine steps and the script order of the plan', () => {
     ok(html.indexOf('กราฟจำลองตามที่เขาเล่า ไม่ใช่ข้อมูลจริงของวันนั้น') > 0, 'the banner says the chart is a simulation');
-    ok(/<p class="level-tag" data-level="2">Level 2 · กลยุทธ์<\/p>/.test(html), 'level tag');
+    ok(html.indexOf(TJR.layout.stepMarkerHTML('strategy')) > 0, 'step marker');
     eq((html.match(/<li class="step" data-step="/g) || []).length, 9);
     var order = ['core/ns', 'core/sources', 'core/store', 'scenario/rng', 'scenario/swings', 'scenario/gen', 'scenario/sessions',
       'scenario/confluence', 'scenario/library', 'scenario/system', 'scenario/annotate', 'scenario/grade', 'chart/scale',

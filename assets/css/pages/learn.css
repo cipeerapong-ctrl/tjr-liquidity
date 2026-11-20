@@ -251,7 +251,7 @@ html:not([data-motion="off"]) .opt { transition: background-color var(--m-out, 1
 .lc .ctrl-group { flex-wrap: wrap; max-width: 100%; }
 
 /* ================================================================ v2: Level-1 additions from the playlist */
-.learn-head .level-tag { justify-self: start; }
+.learn-head .level-tag, .learn-head .step-tag { justify-self: start; }
 
 /* a short block of playlist detail under a chapter's own facts: a dashed rule on the left and a mono label,
    so it reads as "added from the older series" beside the main clip's solid-ruled facts */

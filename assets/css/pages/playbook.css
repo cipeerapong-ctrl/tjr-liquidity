@@ -20,6 +20,7 @@
   .clock { grid-column: 7 / span 6; }
 }
 .pb-head__text { display: grid; gap: var(--s-4); max-width: 60ch; }
+.pb-head__text .step-tag { justify-self: start; }
 .pb-head__text h1 { font-size: clamp(32px, 2.4vw + 14px, 52px); }
 .pb-head__text .t-lead { margin: 0; color: var(--ink); }
 .pb-head__text .btn { justify-self: start; }

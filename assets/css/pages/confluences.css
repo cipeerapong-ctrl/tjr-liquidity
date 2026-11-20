@@ -19,7 +19,7 @@
 .conf-head h1 { font-size: clamp(32px, 2.4vw + 14px, 52px); }
 .conf-head .t-lead { margin: 0; color: var(--ink); }
 .conf-head .btn { justify-self: start; }
-.conf-head .level-tag { justify-self: start; margin: 0; }
+.conf-head .level-tag, .conf-head .step-tag { justify-self: start; margin: 0; }
 
 /* ================================================================ the chain (his order of thinking) */
 .chain-wrap { display: grid; gap: var(--s-5); margin-bottom: var(--s-9, var(--s-8)); padding-bottom: var(--s-8); border-bottom: 1px solid var(--line); scroll-margin-top: calc(var(--nav) + var(--s-4)); }

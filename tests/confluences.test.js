@@ -273,8 +273,8 @@
   }
   function anchors(s) { return s.match(/<a\b[^>]*\bclass="ts-chip[^"]*"[^>]*>[^<]*<\/a>/g) || []; }
 
-  test('confluences.html: the Level 2 tag, five lessons with rail links, and the script order of the plan', () => {
-    ok(/<p class="level-tag" data-level="2">Level 2 · Confluences<\/p>/.test(html), 'level tag');
+  test('confluences.html: the step marker, five lessons with rail links, and the script order of the plan', () => {
+    ok(html.indexOf(TJR.layout.stepMarkerHTML('confluences')) > 0, 'step marker');
     for (var i = 1; i <= 5; i++) {
       ok(html.indexOf('<section class="module" id="m' + i + '"') > 0, 'section m' + i);
       ok(html.indexOf('href="#m' + i + '" data-m="' + i + '"') > 0, 'rail link m' + i);

@@ -17,7 +17,7 @@
 .strat-head { display: grid; gap: var(--s-4); max-width: 72ch; margin-bottom: var(--s-8); }
 .strat-head h1 { font-size: clamp(32px, 2.4vw + 14px, 52px); }
 .strat-head .t-lead { margin: 0; color: var(--ink); }
-.strat-head .level-tag { justify-self: start; margin: 0; }
+.strat-head .level-tag, .strat-head .step-tag { justify-self: start; margin: 0; }
 .strat-banner {
   display: grid; gap: var(--s-2); padding: var(--s-4); border-radius: var(--r-md);
   border: 1px dashed color-mix(in oklab, var(--c-liq) 60%, transparent); background: color-mix(in oklab, var(--c-liq) 8%, transparent);
