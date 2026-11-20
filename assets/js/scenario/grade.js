@@ -129,5 +129,86 @@
     return valid.indexOf(answer) !== -1;
   }
 
-  TJR.grade = { replay: replay, spot: spot, spotTasks: spotTasks, sessions: sessions, quiz: quiz };
+  // ---- v2 drills (Level 2). Like the rest, correctness is read from the candles with TJR.confluence / TJR.swings,
+  // never from a planned bar of the script.
+
+  // Gap finder: any real fair value gap whose middle candle is within 1 bar of the click is right (P10.3, P10.9).
+  // expected = the nearest gap { bar (its middle), dir, low, high }; call it with the candles known at that point
+  // (built.candles sliced to the revealed bar) so a gap whose third candle is not on screen yet never counts.
+  function fvg(built, bar) {
+    if (!isNum(bar)) return { correct: false, expected: null };
+    var gaps = TJR.confluence.fvgs(built.candles), best = null;
+    for (var k = 0; k < gaps.length; k++) {
+      if (!best || Math.abs(gaps[k].i - bar) < Math.abs(best.i - bar)) best = gaps[k];
+    }
+    if (!best) return { correct: false, expected: null };
+    return { correct: Math.abs(best.i - bar) <= SPOT_BARS,
+             expected: { bar: best.i, dir: best.dir, low: best.low, high: best.high } };
+  }
+
+  // Break or not: the trend being watched before the break. The confirmation of the scenario says which way price
+  // broke (dir 'down' -> an uptrend was being watched, its most recent LOW); no confirmation: an uptrend.
+  function bosTrend(built) {
+    var K = built.truth && built.truth.confluence;
+    return K && K.confirm && K.confirm.dir === 'up' ? 'down' : 'up';
+  }
+  // How bar j reads against the most recent swing known before it (P11.8-P11.10, P11.12-P11.13):
+  // null (no touch), 'wick' (an extreme beyond the level, the close still on the safe side), 'on' (closed exactly on
+  // it), 'close' (closed beyond it = a break of structure). -> { kind, trend, level: {i, price} } | null
+  function bosRead(built, j, sw) {
+    var cs = built.candles;
+    if (!isNum(j) || j < 0 || j >= cs.length) return null;
+    sw = sw || TJR.swings.find(cs);
+    var up = bosTrend(built) === 'up', list = up ? sw.lows : sw.highs, lv = null;
+    for (var k = 0; k < list.length; k++) if (list[k].pair[1] < j) lv = list[k]; else break;
+    if (!lv) return null;
+    var x = cs[j], kind = null;
+    if (up) kind = x.c < lv.price ? 'close' : x.c === lv.price ? 'on' : x.l < lv.price ? 'wick' : null;
+    else kind = x.c > lv.price ? 'close' : x.c === lv.price ? 'on' : x.h > lv.price ? 'wick' : null;
+    return kind && { kind: kind, trend: up ? 'up' : 'down', level: { i: lv.i, price: lv.price } };
+  }
+  // The questions a chart can ask: every candle from a few bars before the setup that touches the watched level, up to and
+  // including the first real break. Chart noise that already broke a minor swing before the setup is left out.
+  function bosBars(built) {
+    var T = built.truth || {}, K = T.confluence || {}, n = built.candles.length, sw = TJR.swings.find(built.candles);
+    var ref = K.origin != null ? K.origin : T.sweep ? T.sweep.bar : 0;
+    function scan(from) {
+      var out = [];
+      for (var j = Math.max(0, from); j < n; j++) {
+        var r = bosRead(built, j, sw);
+        if (!r) continue;
+        out.push({ bar: j, kind: r.kind, trend: r.trend, level: r.level });
+        if (r.kind === 'close') break;
+      }
+      return out;
+    }
+    var list = scan(ref - 10), last = list[list.length - 1];
+    if (last && last.kind === 'close' && last.bar < ref) list = scan(ref);
+    return list;
+  }
+  // answer: true = "this candle is a break of structure". Only a CLOSE beyond the level is one.
+  function bos(built, bar, answer) {
+    var r = bosRead(built, bar), expected = !!(r && r.kind === 'close');
+    return { correct: answer === expected, expected: expected };
+  }
+
+  // Which index leads: SMT bearish = the index with the LOWER high leads, bullish = the one with the HIGHER low (P6.15-P6.19).
+  // Both series are read from their candles at the two swing bars the scenario names. answer 'main' | 'twin'.
+  function smtLeader(built) {
+    var T = built.truth, s = T && T.smt;
+    if (!s || !T.twin || !T.twin.candles) return null;
+    function pt(cs, p) { var k = cs[p.bar]; return k ? (s.kind === 'low' ? k.l : k.h) : null; }
+    var m = { p1: pt(built.candles, s.main.p1), p2: pt(built.candles, s.main.p2) };
+    var t = { p1: pt(T.twin.candles, s.twin.p1), p2: pt(T.twin.candles, s.twin.p2) };
+    if (!isNum(m.p1) || !isNum(m.p2) || !isNum(t.p1) || !isNum(t.p2)) return null;
+    var r = TJR.confluence.smt(m, t, s.kind);
+    return r.leader === 'a' ? 'main' : r.leader === 'b' ? 'twin' : null;
+  }
+  function smt(built, answer) {
+    var expected = smtLeader(built);
+    return { correct: expected !== null && answer === expected, expected: expected };
+  }
+
+  TJR.grade = { replay: replay, spot: spot, spotTasks: spotTasks, sessions: sessions, quiz: quiz,
+                fvg: fvg, bos: bos, bosBars: bosBars, bosRead: bosRead, smt: smt, smtLeader: smtLeader };
 })(typeof window !== 'undefined' ? window : globalThis);

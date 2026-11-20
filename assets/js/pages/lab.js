@@ -7,7 +7,9 @@
       spot          pickSpot / spotPrompt / spotShape
       sessions      sessionStarts / sessionTicks
       quiz          pickQuiz / quizAnswers / quizOverlay
-   2. page: four modes on ONE live engine chart at a time (a round = TJR.scenarios.random(rng, mode); the chart is
+      Level 2       isLevel2 / l2Chain (Replay on S15 / S16 / S22), gapWindow / gapsIn / gapGrade / gapWhy (Gap finder),
+                    pickBos / bosOverlays / bosFeedback (Break or not), smtFacts / smtPanels / smtFeedback (Which index leads)
+   2. page: seven modes on ONE live engine chart at a time (the SMT drill uses the twin pair) (a round = TJR.scenarios.random(rng, mode); the chart is
       destroyed and rebuilt every round, so no loop or listener is left behind; a run token drops late callbacks).
    Every sentence below is a paraphrase of clip-facts.md and carries its timestamp chip; what the clip does not say
    is the gap badge; fail outcomes carry the D4 badge. */
@@ -21,11 +23,12 @@
 
   // ================================================================ 1 · pure helpers
 
-  var MODES = ['replay', 'spot', 'sessions', 'quiz'];
+  var MODES = ['replay', 'spot', 'sessions', 'quiz', 'gap', 'bos', 'smt'];
   var ANSWERS = ['low', 'high', 'htf', 'session'];
   var SESSION_KEYS = ['asiaHigh', 'asiaLow', 'londonHigh', 'londonLow'];
   var TICK = 0.25;
   var D4_TEXT = 'คลิปไม่ได้บอกวิธีจัดการเมื่อ confirmation ล้ม';
+  var D4_L2 = 'คลิปไม่ได้บอกวิธีจัดการเมื่อ setup ล้ม';
   var SIDE_SEC = { long: 1410, short: 1530 };            // F6.5 / F6.8
 
   // ---------------------------------------------------------------- score (per mode)
@@ -80,17 +83,64 @@
   }
   // overlays the chart may carry at `bar`. During the round: only what annotate() says is knowable by then, and no
   // structure labels, entry zone or target (they would answer the question); over: the whole annotated truth.
+  // Level 2 charts (S15, S16, S22) carry truth.confluence. Their truth is the chain sweep -> confirmation (BOS or IFVG) ->
+  // continuation (FVG or equilibrium) -> the close out of it, so the v1 structure labels (HH, HL, LH, LL) are not drawn
+  // on them: the end of a round shows the annotated truth plus the confluence overlays of the setup stretch instead.
+  function isLevel2(built) { return !!(built && built.truth && built.truth.confluence); }
+  function setupFrom(built) {
+    var T = built.truth, ref = T.sweep ? T.sweep.bar : T.confluence && T.confluence.origin != null ? T.confluence.origin : 0;
+    return Math.max(0, Math.min(ref, built.candles.length - 1) - 6);
+  }
+  function confluenceOverlays(built, upTo, show) {
+    var from = setupFrom(built), sh = show || { windows: !!built.truth.windows };
+    return TJR.annotate.confluence(built, { upTo: upTo, show: sh }).filter(function (o) {
+      return o.type === 'fvg' ? o.to >= from : o.type === 'bos' ? o.at >= from : o.type === 'eq' ? o.endAt == null || o.endAt > from : true;
+    });
+  }
   function replayOverlays(built, bar, over) {
-    if (over) return TJR.annotate(built, { upTo: built.candles.length - 1 });
+    if (over) {
+      var all = TJR.annotate(built, { upTo: built.candles.length - 1 });
+      if (!isLevel2(built)) return all;
+      return all.filter(function (o) { return o.type !== 'label'; }).concat(confluenceOverlays(built, built.candles.length - 1));
+    }
     return TJR.annotate(built, { upTo: bar }).filter(function (o) {
       return o.type !== 'label' && o.type !== 'zone' && o.id !== 'entry' && o.id !== 'target';
     });
   }
   function outcomeInfo(built) {
     var o = built.truth.outcome;
-    return { outcome: o, fail: o === 'fail', d4: o === 'fail' };
+    return { outcome: o, fail: o === 'fail', d4: o === 'fail', text: isLevel2(built) ? D4_L2 : D4_TEXT };
   }
-  function replayFeedback(code, side) {
+  // the three confluences of a Level 2 setup, each with the bar the candles say it happened on (never a planned bar)
+  function l2Chain(built) {
+    var T = built.truth, K = T.confluence, long = T.side === 'long', rows = [];
+    if (!K) return rows;
+    var c = K.confirm, ct = K.cont;
+    rows.push({ key: 'confirm', bar: c.at, label: 'confirmation',
+      text: c.kind === 'ifvg' ? 'inverse FVG: แท่งปิดทะลุ gap ฝั่งตรงข้ามของขาที่กวาด ใช้เป็นตัวยืนยันแทน BOS'
+        : 'BOS: แท่งปิดเลย swing ล่าสุด' + (c.dir === 'up' ? 'ขึ้นไป' : 'ลงไป') + ' ตัวยืนยันว่า order ถูกเติมแล้ว' });
+    rows.push({ key: 'cont', bar: ct ? ct.at : c.at, label: 'continuation',
+      text: ct && ct.kind === 'eq' ? 'equilibrium: ราคากลับเข้าครึ่ง ' + (long ? 'discount' : 'premium') + ' ของ range ' + TJR.util.fmtPrice(ct.low) + ' – ' + TJR.util.fmtPrice(ct.high)
+        : 'FVG ' + (long ? 'bullish' : 'bearish') + ' ที่ราคาย่อกลับเข้ามา' + (ct ? ' ' + TJR.util.fmtPrice(ct.low) + ' – ' + TJR.util.fmtPrice(ct.high) : '') });
+    rows.push({ key: 'entry', bar: K.entry.at, label: 'entry',
+      text: 'แท่งที่ปิดกลับออกจาก continuation ตามทิศ ' + (long ? 'long' : 'short') + ' ที่ราคาปิด ' + TJR.util.fmtPrice(K.entry.price) });
+    return rows;
+  }
+  // feedback texts of a Level 2 setup (chips [clip, sec] are playlist chips: P1.19 chain 35:44, P1.43 wait for the
+  // confirmation out of the confluence 32:24, P1.44 option (a) the next candle's close 32:55)
+  var L2_CHAIN = [1, 2144], L2_WAIT = [1, 1944], L2_ENTRY = [1, 1975];
+  var FB_L2 = {
+    'blind-sweep': { good: false, text: 'เข้าตั้งแต่แท่งที่ราคากวาด level ยังไม่มี confirmation (BOS หรือ inverse FVG) เลย การกวาดเป็นแค่โอกาสที่ order จะถูกเติม ยังไม่ใช่สัญญาณเข้า', secs: [1350, L2_CHAIN] },
+    'wrong-side': { good: false, text: 'ทิศนี้สวนกับ confirmation ที่ควรเกิด กวาด low แล้วรอ BOS หรือ IFVG ขึ้นเพื่อ long กวาด high แล้วรอ BOS หรือ IFVG ลงเพื่อ short', secs: [L2_CHAIN] },
+    'early': { good: false, text: 'ยังเร็วไป ต้องครบสามอย่างก่อน คือ confirmation (BOS หรือ inverse FVG) แล้วราคาย่อเข้า continuation (FVG หรือ equilibrium) แล้วรอแท่งที่ปิดกลับออกตามทิศ ไม่เข้าตอนราคาเพิ่งแตะ', secs: [L2_CHAIN, L2_WAIT] },
+    'in-window': { good: true, text: 'ถูกตามขั้นตอน confirmation ผ่านแล้ว ราคาย่อเข้า continuation และมีแท่งปิดกลับออกตามทิศ จึงเข้าได้ ช่วงเข้านี้เป็นการอ่านของเว็บนี้จากตัวอย่าง', secs: [L2_CHAIN, L2_ENTRY] },
+    'late': { good: false, text: 'ช้าไป ราคาไปถึงเป้าหรือ setup จบไปก่อนแล้ว ช่วงเข้านี้เป็นการอ่านของเว็บนี้จากตัวอย่าง', secs: [L2_CHAIN] },
+    'wait-ok': { good: true, text: 'รอได้ ยังไม่ครบสามอย่าง รอบนี้ยังไม่นับคะแนนจนกว่าจะเลือก long หรือ short หรือช่วงเข้าผ่านไป', secs: [L2_WAIT] },
+    'missed': { good: false, text: 'ช่วงเข้าผ่านไปแล้วโดยไม่ได้เข้า รอจนราคาไปถึงเป้าหรือ setup จบไปแล้ว', secs: [L2_CHAIN] },
+    'closed': { good: false, text: 'ยังเลือกไม่ได้ กดไปทีละแท่งจนราคากวาด level ก่อน', secs: [1350] }
+  };
+  function replayFeedback(code, side, level2) {
+    if (level2) return FB_L2[code] || FB_L2.closed;
     var s = SIDE_SEC[side] || 1410, both = [1410, 1530];
     var F = {
       'blind-sweep': { good: false, text: 'เข้าตั้งแต่แท่งที่ราคากวาด level ยังไม่มีสัญญาณยืนยันเลย คลิปเตือนว่าการกด buy หรือ sell ทันทีที่ low หรือ high โดนเก็บ อาจติด drawdown ยาว', secs: [1350] },
@@ -241,6 +291,115 @@
              state: q.after && l.sweptAt != null && l.sweptAt <= q.rev ? 'swept' : 'active', appearAt: l.bar };
   }
 
+  // ---------------------------------------------------------------- Gap finder (Level 2: S15, S16, S19, S22)
+  // The chart stops a few bars after the setup's continuation gap forms; the student clicks the middle candle of a fair value gap. Graded by
+  // TJR.grade.fvg on the candles revealed so far (a gap whose third candle is not on screen never counts).
+  var GAP_BEFORE = 10, GAP_AFTER = 8;
+  function gapWindow(b) {
+    var T = b.truth, K = T.confluence, n = b.candles.length;
+    // centred on the continuation gap (the one the setup uses), else the confirmation, else the sweep
+    var ref = K && K.cont ? K.cont.at : K && K.confirm ? K.confirm.at : T.sweep ? T.sweep.bar : Math.floor(n / 2);
+    return { from: Math.max(0, ref - GAP_BEFORE), to: Math.min(n - 1, ref + GAP_AFTER) };
+  }
+  function gapSlice(b, g) { return { candles: b.candles.slice(0, g.to + 1), meta: b.meta, truth: b.truth }; }
+  // the gaps on screen: formed inside the window, third candle revealed
+  function gapsIn(b, g) { return TJR.confluence.fvgs(b.candles.slice(0, g.to + 1)).filter(function (x) { return x.from >= g.from; }); }
+  function gapGrade(b, g, bar) { return TJR.grade.fvg(gapSlice(b, g), bar); }
+  function ticksOf(v) { return Math.round(v / TICK); }
+  // why bar i is NOT the middle of a gap (null when it is): { reason: 'edge' | 'doji' | 'overlap', dir?, first?, third?, ticks? }
+  function gapWhy(cs, i) {
+    if (!cs || i < 1 || i + 1 >= cs.length) return { reason: 'edge' };
+    var a = cs[i - 1], m = cs[i], c = cs[i + 1];
+    if (m.c > m.o) return a.h < c.l ? null : { reason: 'overlap', dir: 'up', first: a.h, third: c.l, ticks: ticksOf(a.h - c.l) };
+    if (m.c < m.o) return a.l > c.h ? null : { reason: 'overlap', dir: 'down', first: a.l, third: c.h, ticks: ticksOf(c.h - a.l) };
+    return { reason: 'doji' };
+  }
+  function gapOverlays(b, g) {
+    // plain boxes: a gap's later fate (respected, IFVG) is not what this drill is about
+    return TJR.annotate.confluence(b, { upTo: g.to, show: { bos: false, eq: false, windows: false } }).filter(function (o) { return o.type === 'fvg' && o.from >= g.from; }).map(function (o) {
+      return { id: o.id, type: 'fvg', from: o.from, to: o.to, low: o.low, high: o.high, dir: o.dir, state: 'open', appearAt: o.appearAt };
+    });
+  }
+  var GAP_SECS = { up: [[10, 251], [10, 189]], down: [[10, 436], [10, 189]] };
+
+  // ---------------------------------------------------------------- Break or not (Level 2: S20)
+  // The chart stops on a candle that touches the watched swing (the most recent low in an uptrend). Is it a break of
+  // structure? Only a close beyond the level is (P11.8-P11.10, P11.13). Candidates come from TJR.grade.bosBars.
+  function pickBos(b, rng) {
+    var c = TJR.grade.bosBars(b).filter(function (x) { return x.bar >= 1 && x.level.i < x.bar; });
+    if (!c.length) return null;
+    var yes = c.filter(function (x) { return x.kind === 'close'; }), no = c.filter(function (x) { return x.kind !== 'close'; });
+    var pool = yes.length && (!no.length || rng.chance(0.4)) ? yes : no;
+    var q = rng.pick(pool), x = b.candles[q.bar], tick = b.meta.tick || TICK, up = q.trend === 'up';
+    var past = q.kind === 'close' ? (up ? q.level.price - x.c : x.c - q.level.price) : q.kind === 'wick' ? (up ? q.level.price - x.l : x.h - q.level.price) : 0;
+    return { bar: q.bar, kind: q.kind, trend: q.trend, level: q.level, ticks: Math.round(past / tick) };
+  }
+  function bosOverlays(r, over) {
+    var q = r.bq, b = r.built, x = b.candles[q.bar], up = q.trend === 'up', K = b.truth.confluence;
+    var out = [
+      { id: 'bos-level', type: 'level', price: q.level.price, from: q.level.i, to: q.bar, label: up ? 'low ล่าสุด' : 'high ล่าสุด', kind: 'liq', state: 'active', appearAt: q.level.i },
+      { id: 'bos-bar', type: 'marker', bar: q.bar, price: up ? x.l : x.h, shape: up ? 'up' : 'down', appearAt: q.bar }
+    ];
+    if (over && K && K.confirm) {
+      out.push({ id: 'bos-real', type: 'bos', price: K.confirm.level.price, from: K.confirm.level.i, at: K.confirm.at, dir: K.confirm.dir, appearAt: K.confirm.at });
+    }
+    return out;
+  }
+  // the verdict text starts with the answer word; chips are clip #11 (P11.8 2:33, P11.9 3:06, P11.10 4:23, P11.11 4:54,
+  // P11.12 6:17, P11.13 8:22)
+  function bosFeedback(q) {
+    var up = q.trend === 'up', lvl = up ? 'low' : 'high', n = q.ticks;
+    if (q.kind === 'wick') {
+      return { good: false, secs: up ? [[11, 502], [11, 153]] : [[11, 377], [11, 186]],
+        text: 'ไม่ใช่ ไส้เทียนแทง' + (up ? 'ลงใต้' : 'ขึ้นเหนือ') + ' ' + lvl + ' ล่าสุดไป ' + n + ' tick แต่แท่งปิด' + (up ? 'เหนือ' : 'ใต้') + ' level นั้น ต้องมีแท่งที่ปิด' + (up ? 'ใต้' : 'เหนือ') + ' ' + lvl + ' ถึงจะนับเป็น break ' + (up ? 'ขาขึ้นยังอยู่' : 'ขาลงยังอยู่') };
+    }
+    if (q.kind === 'on') {
+      return { good: false, secs: [[11, 263]],
+        text: 'ไม่ใช่ แท่งปิดเท่ากับ ' + lvl + ' ล่าสุดพอดี ยังไม่' + (up ? 'ต่ำกว่า' : 'สูงกว่า') + ' ต้องปิด' + (up ? 'ใต้' : 'เหนือ') + ' level ถึงจะนับเป็น break' };
+    }
+    return { good: true, secs: up ? [[11, 153], [11, 294]] : [[11, 186], [11, 294]],
+      text: 'ใช่ แท่งนี้ปิด' + (up ? 'ใต้' : 'เหนือ') + ' ' + lvl + ' ล่าสุดไป ' + n + ' tick นี่คือ break of structure เทรนด์เปลี่ยนเป็น' + (up ? 'ขาลง' : 'ขาขึ้น') };
+  }
+
+  // ---------------------------------------------------------------- Which index leads (Level 2: S21, the twin pair)
+  // Both indexes are read from their own candles at the two swing bars the scenario names. The index with the lower high
+  // (bullish: the higher low) leads, whichever it is (P6.15-P6.19).
+  function smtFacts(b) {
+    var T = b.truth, s = T.smt, low = s.kind === 'low';
+    function pt(cs, p) { return low ? cs[p.bar].l : cs[p.bar].h; }
+    function side(name, cs, p) { return { name: name, p1: pt(cs, p.p1), p2: pt(cs, p.p2), bar1: p.p1.bar, bar2: p.p2.bar }; }
+    return { kind: s.kind, leader: TJR.grade.smtLeader(b),
+             main: side(b.meta.instrument, b.candles, s.main), twin: side(T.twin.instrument, T.twin.candles, s.twin) };
+  }
+  // the two charts in panel order (left, right), each with its built pair member and the two marks (swing 1, swing 2)
+  function smtPanels(r) {
+    var b = r.built, f = smtFacts(b), low = f.kind === 'low', order = r.smt.swap ? ['twin', 'main'] : ['main', 'twin'];
+    return order.map(function (which) {
+      var x = f[which], cs = which === 'main' ? b.candles : b.truth.twin.candles;
+      var built = which === 'main' ? b : { candles: cs, meta: Object.assign({}, b.meta, { instrument: x.name }) };
+      function mark(id, bar) { return { id: 'smt-' + which + id, type: 'marker', bar: bar, price: low ? cs[bar].l : cs[bar].h, shape: low ? 'up' : 'down', appearAt: bar }; }
+      return { which: which, name: x.name, built: built, marks: [mark('1', x.bar1), mark('2', x.bar2)] };
+    });
+  }
+  // after the answer: the line between the two swings and its two labels, on the chart of `which`
+  function smtLines(b, which) {
+    var s = b.truth.smt, p = s[which], f = smtFacts(b)[which], low = s.kind === 'low', tag = which === 'main' ? 'm' : 't';
+    var word = low ? (f.p2 > f.p1 ? 'higher low' : 'lower low') : (f.p2 > f.p1 ? 'higher high' : 'lower high');
+    return [
+      { id: 'smt-l-' + tag, type: 'trend', a: { bar: p.p1.bar, price: f.p1 }, b: { bar: p.p2.bar, price: f.p2 }, appearAt: s.at },
+      { id: 'smt-1-' + tag, type: 'label', bar: p.p1.bar, price: f.p1, text: low ? 'low แรก' : 'high แรก', pos: low ? 'below' : 'above', appearAt: s.at },
+      { id: 'smt-2-' + tag, type: 'label', bar: p.p2.bar, price: f.p2, text: word, pos: low ? 'below' : 'above', appearAt: s.at }
+    ];
+  }
+  // chips: P6.15 5:16, P6.16 5:38, P6.17 6:20 (either index can lead), P6.21 10:29 (trade the leader)
+  function smtFeedback(r) {
+    var f = smtFacts(r.built), lead = f[f.leader], lag = f[f.leader === 'main' ? 'twin' : 'main'], low = f.kind === 'low', fp = TJR.util.fmtPrice;
+    var type = low ? 'bullish' : 'bearish', w1 = low ? 'higher low' : 'lower high', w2 = low ? 'lower low' : 'higher high';
+    return { secs: [[6, 316], [6, 338], [6, 380], [6, 629]],
+      text: 'ตัวนำคือ ' + lead.name + ' เพราะทำ ' + w1 + ' (' + fp(lead.p1) + ' → ' + fp(lead.p2) + ') ส่วน ' + lag.name + ' ยังทำ ' + w2 + ' (' + fp(lag.p1) + ' → ' + fp(lag.p2) +
+        ') นี่คือ ' + type + ' SMT divergence ตัวเลขจากกราฟจำลอง ดัชนีไหนเป็นตัวนำก็ได้ ไม่ขึ้นกับว่าเป็น ES หรือ NQ และเขาเลือกเทรดตัวที่นำ' };
+  }
+
   // ---------------------------------------------------------------- a round (everything a page needs, DOM-free)
   function freshSeed() { return (Math.floor(Math.random() * 2147483646) + 1); }
   function makeRound(mode, rng, last) {
@@ -250,6 +409,9 @@
       if (mode === 'spot') { r.task = pickSpot(b, rng, last && last.task); if (r.task) return r; }
       if (mode === 'sessions') { r.lines = sessionStarts(b); return r; }
       if (mode === 'quiz') { r.q = pickQuiz(b, rng); if (r.q) return r; }
+      if (mode === 'gap') { r.gap = gapWindow(b); if (gapsIn(b, r.gap).length) return r; }
+      if (mode === 'bos') { r.bq = pickBos(b, rng); if (r.bq) return r; }
+      if (mode === 'smt') { r.smt = { swap: rng.chance(0.5), reveal: b.truth.smt.at }; return r; }
     }
     throw new Error('lab.makeRound: no round for ' + mode);
   }
@@ -261,6 +423,10 @@
   L.spotPrompt = spotPrompt; L.spotShape = spotShape; L.pickSpot = pickSpot;
   L.sessionStarts = sessionStarts; L.sessionSpan = sessionSpan; L.sessionTicks = sessionTicks; L.sessionView = sessionView; L.spotSetup = spotSetup; L.spotView = spotView;
   L.quizAnswers = quizAnswers; L.quizOptions = quizOptions; L.pickQuiz = pickQuiz; L.quizOverlay = quizOverlay; L.afterAllowed = afterAllowed;
+  L.D4_L2 = D4_L2; L.isLevel2 = isLevel2; L.l2Chain = l2Chain; L.confluenceOverlays = confluenceOverlays;
+  L.gapWindow = gapWindow; L.gapSlice = gapSlice; L.gapsIn = gapsIn; L.gapGrade = gapGrade; L.gapWhy = gapWhy; L.gapOverlays = gapOverlays;
+  L.GAP_SECS = GAP_SECS; L.pickBos = pickBos; L.bosOverlays = bosOverlays; L.bosFeedback = bosFeedback;
+  L.smtFacts = smtFacts; L.smtPanels = smtPanels; L.smtLines = smtLines; L.smtFeedback = smtFeedback;
   L.freshSeed = freshSeed; L.makeRound = makeRound;
 
   if (!doc || !TJR.layout || !TJR.chart || !TJR.chart.create) return;   // Node (tests): helpers only
@@ -275,7 +441,13 @@
   function $(sel, root) { return (root || doc).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
   function stamp(t) { return TJR.sessions.fmtET(t) + ' ET · ' + TJR.sessions.fmtThai(t) + ' น.'; }
-  function chipsHtml(secs) { return (secs || []).map(function (s) { return TJR.layout.chip(s); }).join(''); }
+  // a number is a second of the main clip, [clip, sec] or {clip, sec} (a scenario's chips) a playlist chip (`▶ #<clip> MM:SS`)
+  function chipsHtml(secs) {
+    return (secs || []).map(function (s) {
+      if (Array.isArray(s)) return TJR.layout.chip(s[1], s[0]);
+      return s && typeof s === 'object' ? TJR.layout.chip(s.sec, s.clip) : TJR.layout.chip(s);
+    }).join('');
+  }
   function setPressed(btn, on) { btn.setAttribute('aria-pressed', String(!!on)); }
   function fmt(p) { return TJR.util.fmtPrice(p); }
   var TF_NAME = { 1: '1m', 5: '5m', 15: '15m', 60: '1H', 240: '4H', 1440: 'D' };
@@ -284,16 +456,21 @@
 
   var INTRO = {
     replay: ['เล่นทีละแท่งจนราคากวาด level แล้วเลือก Long, Short หรือ รอ ให้ตรงกับขั้นตอนในคลิป ห้ามกดตอนที่เพิ่งกวาด รอโครงสร้างใหม่ขึ้นก่อน แล้วเข้าตอน pullback คะแนนนับที่การตัดสินใจ', [1350, 1410, 1530],
-      ' ในแบบฝึกนี้ เว็บนี้ใส่เซ็ตอัพที่ confirmation ล้มไว้ราว 1 ใน 4 ข้อ (ตัวเลขของเว็บ ไม่ใช่สถิติจากคลิป) อัตราที่ระบบนี้ชนะจริง ' + TJR.layout.gap()],
+      ' ในแบบฝึกนี้ เว็บนี้ใส่เซ็ตอัพที่ confirmation ล้มไว้ราว 1 ใน 4 ข้อ (ตัวเลขของเว็บ ไม่ใช่สถิติจากคลิป) อัตราที่ระบบนี้ชนะจริง ' + TJR.layout.gap() +
+        ' บางข้อเป็น setup ระดับ 2 (confirmation เป็น BOS หรือ inverse FVG แล้วราคาย่อเข้า FVG หรือ equilibrium) ' + chipsHtml([[1, 2144]])],
     spot: ['โจทย์สุ่มบนกราฟใหม่ คลิกบนกราฟเพื่อตอบ ผ่านถ้าใกล้จุดจริงไม่เกิน 1 แท่ง (เกณฑ์ของเว็บนี้) ตรวจแล้วจะเห็นตำแหน่งที่ถูกบนกราฟ', [315, 1350]],
     sessions: ['ลากเส้นสีทองสองเส้นไป Asia high กับ low และเส้นสีฟ้าสองเส้นไป London high กับ low ผ่านถ้าห่างไม่เกิน 4 tick (เกณฑ์ของเว็บนี้) แกนเวลาเป็น ET ช่วง session ตามที่คลิปใช้', [1875]],
-    quiz: ['เส้นสีทองบนกราฟคือ level หนึ่ง ตอบว่ามันเป็น low-resistance, high-resistance, HTF หรือ session ตามที่คลิปแบ่ง', [2385, 2700, 1635]]
+    quiz: ['เส้นสีทองบนกราฟคือ level หนึ่ง ตอบว่ามันเป็น low-resistance, high-resistance, HTF หรือ session ตามที่คลิปแบ่ง', [2385, 2700, 1635]],
+    gap: ['ระดับ 2: คลิกที่แท่งกลางของ fair value gap บนกราฟ gap คือช่องว่างระหว่างไส้ของแท่งแรกกับไส้ของแท่งที่สาม โดยมีแท่งใหญ่คั่นกลาง สีของแท่งแรกและแท่งที่สามไม่สำคัญ ผ่านถ้าคลิกใกล้แท่งกลางของ gap จริงไม่เกิน 1 แท่ง (เกณฑ์ของเว็บนี้) ตรวจแล้วจะเห็นกรอบของ gap ทุกอันในช่วงนี้', [[10, 251], [10, 189], [10, 606]]],
+    bos: ['ระดับ 2: กราฟหยุดที่แท่งหนึ่ง (ลูกศร) เส้นทองคือ low หรือ high ล่าสุดที่เฝ้าอยู่ ตอบว่าแท่งนี้ทำให้เกิด break of structure หรือยัง ไส้ที่ทะลุไม่นับ ต้องมีแท่งที่ปิดเลย level', [[11, 153], [11, 263], [11, 502]]],
+    smt: ['ระดับ 2: สองกราฟคือ ES และ NQ ในช่วงเวลาเดียวกัน ลูกศรคือ high แรกและ high ที่สองของแต่ละดัชนี ตอบว่าดัชนีไหนเป็นตัวนำของการเคลื่อนไหว ซึ่งตำแหน่งซ้ายขวาสลับกันไปทุกข้อ', [[6, 316], [6, 338]]]
   };
 
-  var S = { mode: null, ch: null, run: 0, auto: 0, round: null, answered: false, last: null, pan: false, score: L.blank(), lastOk: null, rows: null };
+  var S = { mode: null, ch: null, tw: null, run: 0, auto: 0, round: null, answered: false, last: null, pan: false, score: L.blank(), lastOk: null, rows: null };
   var el = {
     panel: $('#lab-panel'), tabs: $('[data-k="tabs"]'), score: $('[data-k="score"]'), intro: $('[data-k="intro"]'),
-    host: $('[data-k="host"]'), sym: $('[data-k="sym"]'), tf: $('[data-k="tf"]'), meta: $('[data-k="meta"]'),
+    host: $('[data-k="host"]'), hostB: $('[data-k="hostB"]'), paneB: $('[data-k="paneB"]'), stage: $('[data-k="stage"]'),
+    lblA: $('[data-k="lblA"]'), lblB: $('[data-k="lblB"]'), sym: $('[data-k="sym"]'), tf: $('[data-k="tf"]'), meta: $('[data-k="meta"]'),
     ctrls: $('[data-k="ctrls"]'), prompt: $('[data-k="prompt"]'), choices: $('[data-k="choices"]'), fb: $('[data-k="fb"]'),
     out: $('[data-k="out"]'), next: $('[data-act="next"]'), nojs: $('[data-k="nojs"]')
   };
@@ -332,6 +509,7 @@
   // ---------------------------------------------------------------- round lifecycle
   function teardown() {
     S.run++; S.auto++;
+    if (S.tw) { try { S.tw.destroy(); } catch (e) { /* already gone */ } S.tw = null; S.ch = null; }   // the pair owns both charts
     if (S.ch) { try { S.ch.destroy(); } catch (e) { /* already gone */ } S.ch = null; }
     S.round = null; S.answered = false; S.rows = null;
     el.ctrls.innerHTML = ''; el.choices.innerHTML = ''; el.prompt.innerHTML = '';
@@ -348,9 +526,18 @@
     }
     S.round = round; S.last = { task: round.task };
     var b = round.built;
-    S.ch = TJR.chart.create(el.host, { label: 'กราฟจำลองสำหรับโหมด ' + S.mode + ' คลิกหรือลากได้ตามโจทย์', interactive: true });
-    S.ch.setData(b);
-    el.sym.textContent = b.meta.instrument;
+    var twin = S.mode === 'smt';
+    el.paneB.hidden = !twin; el.lblA.hidden = !twin; el.lblB.hidden = !twin;
+    el.stage.classList.toggle('is-twin', twin);
+    if (twin) {
+      S.tw = TJR.chart.twin(el.host, el.hostB, { label: 'กราฟคู่ ES และ NQ ในช่วงเวลาเดียวกัน จุดตัดตรงกันทั้งสองกราฟ', interactive: true });
+      S.ch = S.tw.a;
+      el.sym.textContent = 'ES + NQ';
+    } else {
+      S.ch = TJR.chart.create(el.host, { label: 'กราฟจำลองสำหรับโหมด ' + S.mode + ' คลิกหรือลากได้ตามโจทย์', interactive: true });
+      S.ch.setData(b);
+      el.sym.textContent = b.meta.instrument;
+    }
     el.tf.textContent = TF_NAME[b.meta.tf] || '';
     el.meta.textContent = '';
     MODE[S.mode].start(round);
@@ -387,9 +574,10 @@
       var nx = $('[data-rp="next"]', el.ctrls), au = $('[data-rp="auto"]', el.ctrls);
       if (nx) nx.disabled = !step;
       if (au) au.disabled = !step && !S.ch.info().playing;
-      el.prompt.innerHTML = open
+      var l2 = L.isLevel2(b) ? '<p class="hint"><span class="tag">ระดับ 2</span> ข้อนี้ต้องครบสามอย่าง: confirmation (BOS หรือ inverse FVG) แล้วราคาย่อเข้า continuation (FVG หรือ equilibrium) แล้วแท่งปิดกลับออกตามทิศ <span class="chips">' + chipsHtml([[1, 2144]]) + '</span></p>' : '';
+      el.prompt.innerHTML = (open
         ? '<h2>ตัดสินใจ</h2><p>ราคากวาด level แล้ว (ลูกศรบนกราฟ) เลือก Long, Short หรือ รอ รอได้ทีละแท่ง ตัวเลือกเปิดต่อไปทุกแท่ง</p>'
-        : '<h2>กดไปจนราคากวาด level</h2><p>กด Next หรือ Auto เพื่อเดินทีละแท่ง ตัวเลือก Long, Short, รอ จะเปิดเมื่อราคากวาด level ' + chipsHtml([1350]) + '</p>';
+        : '<h2>กดไปจนราคากวาด level</h2><p>กด Next หรือ Auto เพื่อเดินทีละแท่ง ตัวเลือก Long, Short, รอ จะเปิดเมื่อราคากวาด level ' + chipsHtml([1350]) + '</p>') + l2;
     },
     next: function () {
       var r = S.round.replay;
@@ -421,7 +609,7 @@
       var r = S.round.replay, b = r.built, T = b.truth;
       S.auto++; S.ch.pause(); setAuto(false);
       var o = L.decide(r, choice);
-      var fb = L.replayFeedback(o.code, T.side);
+      var l2 = L.isLevel2(b), fb = L.replayFeedback(o.code, T.side, l2);
       if (!o.final) {
         showFb(true, '<p><b>รอถูกแล้ว</b> ' + fb.text + ' <span class="chips">' + chipsHtml(fb.secs) + '</span></p>');
         Rp.show();
@@ -440,8 +628,12 @@
       $$('button', el.ctrls).forEach(function (x) { x.disabled = true; });
       var w = T.entryWindow, h = '<p class="lab-verdict"><b>' + (o.correct ? 'ถูก' : 'ยังไม่ถูก') + '</b> ' + fb.text + ' <span class="chips">' + chipsHtml(fb.secs) + '</span></p>';
       if (w) {
-        h += '<dl class="kv"><div><dt>ช่วงเข้า (อ่านจากตัวอย่าง)</dt><dd>' + stamp(b.candles[w.from].t) + '<br>ถึง ' + stamp(b.candles[w.to].t) + '</dd></div>' +
-          '<div><dt>จุดเข้าเป๊ะ ๆ</dt><dd>' + TJR.layout.gap() + ' <span class="chips">' + chipsHtml([1485]) + '</span></dd></div></dl>';
+        h += '<dl class="kv">';
+        if (l2) {                                           // the chain, read from the candles (never the v1 HH / HL wording)
+          L.l2Chain(b).forEach(function (row) { h += '<div><dt>' + row.label + '</dt><dd>' + row.text + '<br>' + stamp(b.candles[row.bar].t) + '</dd></div>'; });
+        }
+        h += '<div><dt>ช่วงเข้า (อ่านจากตัวอย่าง)</dt><dd>' + stamp(b.candles[w.from].t) + '<br>ถึง ' + stamp(b.candles[w.to].t) + '</dd></div>' +
+          '<div><dt>จุดเข้าเป๊ะ ๆ</dt><dd>' + TJR.layout.gap() + ' <span class="chips">' + chipsHtml(l2 ? [L2_ENTRY] : [1485]) + '</span></dd></div></dl>';
       }
       showFb(o.correct, h + scenarioLine(S.round));
       var run = S.run, n = b.candles.length;
@@ -450,12 +642,12 @@
     },
     // the trade's result, shown apart from the score (D4)
     outcome: function () {
-      var T = S.round.built.truth, info = L.outcomeInfo(S.round.built), long = T.side === 'long';
+      var T = S.round.built.truth, info = L.outcomeInfo(S.round.built), long = T.side === 'long', l2 = L.isLevel2(S.round.built);
       var tag = '<span class="tag ' + (long ? 'tag--long' : 'tag--short') + '">' + (long ? 'Long' : 'Short') + '</span>';
       var h = '<h3>ผลของเทรดนี้ <span class="muted">แยกจากคะแนน</span></h3>';
       if (info.fail) {
-        h += '<p>' + tag + ' <span class="tag tag--fail">confirmation ล้ม</span></p><p>ในกราฟจำลองนี้ โครงสร้างที่ยืนยันแล้วไปต่อไม่ได้</p>' +
-          '<p class="lab-d4"><span class="badge-gap">' + L.D4 + '</span></p>';
+        h += '<p>' + tag + ' <span class="tag tag--fail">' + (l2 ? 'setup ล้ม' : 'confirmation ล้ม') + '</span></p><p>' + (l2 ? 'ในกราฟจำลองนี้ confluence ที่ใช้เข้าไปต่อไม่ได้ ราคาไม่ถึงเป้า' : 'ในกราฟจำลองนี้ โครงสร้างที่ยืนยันแล้วไปต่อไม่ได้') + '</p>' +
+          '<p class="lab-d4"><span class="badge-gap">' + info.text + '</span></p>';
       } else if (info.outcome === 'win' && T.target) {
         h += '<p>' + tag + ' <span class="tag tag--long">ถึงเป้า</span></p><p>ราคาไปถึง ' + fmt(T.target.price) + ' (' + levelLabel(T, T.target.levelId) + ')</p>';
       } else return;
@@ -608,7 +800,121 @@
     }
   };
 
-  var MODE = { replay: Rp, spot: Sp, sessions: Se, quiz: Qz };
+  // ---------------------------------------------------------------- Gap finder (Level 2)
+  var GAP_WORD = { up: 'bullish', down: 'bearish' };
+  var GAP_WHY = {
+    overlap: function (w) { return 'ไส้ของแท่งแรกกับแท่งที่สามซ้อนกัน ' + w.ticks + ' tick (ตัวเลขจากกราฟจำลอง) จึงไม่มีช่องว่าง'; },
+    doji: function () { return 'แท่งกลางเป็นแท่งที่เปิดเท่าปิด ไม่ใช่แท่งใหญ่ที่พุ่งผ่านช่อง'; },
+    edge: function () { return 'อยู่ขอบกราฟ ยังไม่มีแท่งแรกหรือแท่งที่สามครบ'; }
+  };
+  var Gp = {
+    start: function (round) {
+      var g = round.gap, b = round.built;
+      el.ctrls.innerHTML = '<span class="lf__hint">คลิกที่แท่งกลางของ gap หนึ่งอัน</span>';
+      el.prompt.innerHTML = '<h2>โจทย์</h2><p>คลิกที่แท่งกลางของ fair value gap บนกราฟ (แท่งใหญ่ที่คั่นระหว่างไส้ของแท่งแรกกับไส้ของแท่งที่สาม) ' + chipsHtml([[10, 251], [10, 189]]) + '</p>';
+      S.ch.setOverlays([]);
+      S.ch.reveal(g.to);
+      S.ch.view(Math.max(0, g.from - 1), g.to + 3);
+      el.meta.textContent = stamp(b.candles[g.to].t);
+      var run = S.run;
+      S.ch.on('click', function (p) { if (S.run === run) Gp.answer(p); });
+    },
+    answer: function (p) {
+      if (S.answered) return;
+      var r = S.round, b = r.built, g = r.gap, res = L.gapGrade(b, g, p.i), exp = res.expected, all = L.gapsIn(b, g);
+      S.answered = true;
+      scoreIt(res.correct);
+      var ov = L.gapOverlays(b, g);
+      if (exp) {
+        var m = b.candles[exp.bar], bull = exp.dir === 'bull';
+        ov.push({ id: 'gap-exp', type: 'marker', bar: exp.bar, price: bull ? m.l : m.h, shape: bull ? 'up' : 'down', appearAt: 0 });
+        ov.push({ id: 'gap-exp-l', type: 'label', bar: exp.bar, price: bull ? m.l : m.h, text: 'แท่งกลาง', pos: bull ? 'below' : 'above', appearAt: 0 });
+      }
+      if (!res.correct) ov.push({ id: 'gap-you', type: 'marker', bar: p.i, price: p.price, shape: 'x', appearAt: 0 });
+      S.ch.setOverlays(ov);
+      var dir = exp && exp.dir === 'bull' ? 'up' : 'down', h = '<p class="lab-verdict"><b>' + (res.correct ? 'ถูก' : 'ยังไม่ถูก') + '</b> ';
+      if (res.correct) {
+        h += 'นี่คือ ' + GAP_WORD[dir] + ' fair value gap ช่องว่างระหว่าง ' + (dir === 'up' ? 'ไส้บนของแท่งแรกกับไส้ล่างของแท่งที่สาม' : 'ไส้ล่างของแท่งแรกกับไส้บนของแท่งที่สาม') +
+          ' ราคา ' + fmt(exp.low) + ' – ' + fmt(exp.high) + (exp.bar !== p.i ? ' แท่งกลางจริงอยู่ที่ ' + stamp(b.candles[exp.bar].t) + ' (ลูกศร “แท่งกลาง”)' : '');
+      } else {
+        var why = L.gapWhy(S.round.built.candles.slice(0, g.to + 1), p.i);
+        h += 'แท่งที่คลิก' + (why ? 'ไม่ใช่แท่งกลางของ gap: ' + GAP_WHY[why.reason](why) : 'ห่างจากแท่งกลางของ gap ที่ใกล้ที่สุดเกิน 1 แท่ง');
+        if (exp) h += ' gap ที่ใกล้ที่สุดอยู่ที่ ' + stamp(b.candles[exp.bar].t) + ' (ลูกศร “แท่งกลาง”)';
+        h += ' <span class="chips">' + chipsHtml(why && why.reason === 'overlap' ? [[10, 606]] : GAP_SECS_FOR(dir)) + '</span>';
+      }
+      h += ' ช่วงนี้มี gap ทั้งหมด ' + all.length + ' อัน กรอบสีเขียวคือ bullish สีแดงคือ bearish ' + '<span class="chips">' + chipsHtml(GAP_SECS_FOR(dir)) + '</span></p>';
+      showFb(res.correct, h + scenarioLine(r));
+    }
+  };
+  function GAP_SECS_FOR(dir) { return L.GAP_SECS[dir] || L.GAP_SECS.up; }
+
+  // ---------------------------------------------------------------- Break or not (Level 2)
+  var Bo = {
+    start: function (round) {
+      var q = round.bq, b = round.built, up = q.trend === 'up';
+      el.ctrls.innerHTML = '<span class="lf__hint">ดูแท่งที่มีลูกศร เทียบกับเส้นทอง แล้วตอบ</span>';
+      el.prompt.innerHTML = '<h2>โจทย์</h2><p>เทรนด์ตอนนี้คือ' + (up ? 'ขาขึ้น' : 'ขาลง') + ' เส้นทองคือ ' + (up ? 'low' : 'high') + ' ล่าสุดที่เฝ้าอยู่ แท่งที่มีลูกศรทำให้เกิด break of structure หรือยัง ' + chipsHtml([[11, 153], [11, 186]]) + '</p>';
+      el.choices.innerHTML =
+        '<button class="ctrl lab-opt" type="button" data-yn="yes">ใช่ เป็น break</button>' +
+        '<button class="ctrl lab-opt" type="button" data-yn="no">ยังไม่ใช่</button>';
+      S.ch.setOverlays(L.bosOverlays(round, false));
+      S.ch.reveal(q.bar);
+      el.meta.textContent = stamp(b.candles[q.bar].t);
+    },
+    answer: function (yes) {
+      if (S.answered) return;
+      var r = S.round, q = r.bq, b = r.built, res = TJR.grade.bos(b, q.bar, yes), right = res.expected;
+      S.answered = true;
+      scoreIt(res.correct);
+      $$('[data-yn]', el.choices).forEach(function (x) {
+        var v = x.getAttribute('data-yn') === 'yes';
+        x.disabled = true;
+        x.setAttribute('data-state', v === right ? 'right' : v === yes ? 'wrong' : '');
+      });
+      var fb = L.bosFeedback(q);
+      S.ch.setOverlays(L.bosOverlays(r, true));
+      showFb(res.correct, '<p class="lab-verdict"><b>' + (res.correct ? 'ถูก' : 'ยังไม่ถูก') + '</b> ' + fb.text + ' <span class="chips">' + chipsHtml(fb.secs) + '</span></p>' + scenarioLine(r));
+      var n = b.candles.length, run = S.run;
+      S.ch.play({ from: q.bar, to: n - 1, barsPerSec: clamp((n - q.bar) / 6, 8, 60), onBar: function (j) { if (S.run === run) el.meta.textContent = stamp(b.candles[Math.min(j, n - 1)].t); } });
+    }
+  };
+
+  // ---------------------------------------------------------------- Which index leads (Level 2, twin charts)
+  var Sm = {
+    start: function (round) {
+      var b = round.built, ps = L.smtPanels(round), at = round.smt.reveal, low = b.truth.smt.kind === 'low';
+      el.ctrls.innerHTML = '<span class="lf__hint">ดูลูกศรสองจุดบนแต่ละกราฟ แล้วเลือกดัชนีที่เป็นตัวนำ</span>';
+      el.prompt.innerHTML = '<h2>โจทย์</h2><p>ลูกศรบนแต่ละกราฟคือ ' + (low ? 'low แรกและ low ที่สอง' : 'high แรกและ high ที่สอง') + ' ของดัชนีนั้น ในช่วงเวลาเดียวกัน ดัชนีไหนเป็นตัวนำของการเคลื่อนไหว ' + chipsHtml([[6, 316], [6, 338]]) + '</p>';
+      el.choices.innerHTML = ps.map(function (p) {
+        return '<button class="ctrl lab-opt" type="button" data-sm="' + p.which + '">' + p.name + '</button>';
+      }).join('');
+      el.lblA.textContent = ps[0].name + ' · ซ้าย'; el.lblB.textContent = ps[1].name + ' · ขวา';
+      S.tw.setData(ps[0].built, ps[1].built);
+      S.tw.a.setOverlays(ps[0].marks); S.tw.b.setOverlays(ps[1].marks);
+      S.tw.reveal(at);
+      el.sym.textContent = ps[0].name + ' + ' + ps[1].name;
+      el.meta.textContent = stamp(b.candles[at].t);
+    },
+    answer: function (which) {
+      if (S.answered) return;
+      var r = S.round, b = r.built, ps = L.smtPanels(r), res = TJR.grade.smt(b, which), right = res.expected;
+      S.answered = true;
+      scoreIt(res.correct);
+      $$('[data-sm]', el.choices).forEach(function (x) {
+        var v = x.getAttribute('data-sm');
+        x.disabled = true;
+        x.setAttribute('data-state', v === right ? 'right' : v === which ? 'wrong' : '');
+      });
+      S.tw.a.setOverlays(ps[0].marks.concat(L.smtLines(b, ps[0].which)));
+      S.tw.b.setOverlays(ps[1].marks.concat(L.smtLines(b, ps[1].which)));
+      var fb = L.smtFeedback(r);
+      showFb(res.correct, '<p class="lab-verdict"><b>' + (res.correct ? 'ถูก' : 'ยังไม่ถูก') + '</b> ' + fb.text + ' <span class="chips">' + chipsHtml(fb.secs) + '</span></p>' + scenarioLine(r));
+      var n = b.candles.length, run = S.run, at = r.smt.reveal;
+      S.tw.play({ from: at, to: n - 1, barsPerSec: clamp((n - at) / 6, 8, 60), onBar: function (j) { if (S.run === run) el.meta.textContent = stamp(b.candles[Math.min(j, n - 1)].t); } });
+    }
+  };
+
+  var MODE = { replay: Rp, spot: Sp, sessions: Se, quiz: Qz, gap: Gp, bos: Bo, smt: Sm };
 
   // ---------------------------------------------------------------- tabs, clicks
   function setMode(m, focus) {
@@ -652,6 +958,8 @@
     else if ((v = t.getAttribute('data-rp')) != null) { if (v === 'next') Rp.next(); else Rp.auto(); }
     else if ((v = t.getAttribute('data-se')) != null) { if (v === 'check') Se.check(); else Se.pan(t); }
     else if ((v = t.getAttribute('data-ans')) != null) Qz.answer(v);
+    else if ((v = t.getAttribute('data-yn')) != null) Bo.answer(v === 'yes');
+    else if ((v = t.getAttribute('data-sm')) != null) Sm.answer(v);
   });
   el.panel.addEventListener('change', function (e) {
     if (e.target && e.target.classList && e.target.classList.contains('lab-in') && S.mode === 'sessions') Se.input(e.target);

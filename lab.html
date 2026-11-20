@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>แบบฝึก liquidity: Replay, Spot, Sessions, Quiz | Liquidity</title>
-<meta name="description" content="แบบฝึก 4 โหมดบนกราฟสุ่มใหม่ทุกข้อ เล่นทีละแท่งแล้วเลือก Long Short รอ, คลิกหา swing, ลากเส้น session, ตอบชนิด liquidity ตรวจคำตอบตามคลิป TJR">
+<title>แบบฝึก liquidity: Replay, Spot, Sessions, Quiz, Gap, BOS, SMT | Liquidity</title>
+<meta name="description" content="แบบฝึก 7 โหมดบนกราฟสุ่มใหม่ทุกข้อ เล่นทีละแท่งแล้วเลือก Long Short รอ, คลิกหา swing, ลากเส้น session, ตอบชนิด liquidity, หา fair value gap, แยก break of structure จากไส้เทียน, ดูว่า ES หรือ NQ เป็นตัวนำ ตรวจคำตอบตามคลิป TJR">
 <meta property="og:type" content="website">
-<meta property="og:title" content="แบบฝึก liquidity บนกราฟสุ่ม">
+<meta property="og:title" content="แบบฝึก liquidity และ confluence บนกราฟสุ่ม">
 <meta property="og:description" content="ตัดสินใจทีละแท่ง ตรวจคำตอบตามคลิป คะแนนและ streak แยกตามโหมด">
 <meta property="og:image" content="share.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -34,7 +34,8 @@
   software · TJR Liquidity exercise lab (Task 13), an app screen (spec 7.5, 10)
   deal: the home page's (Task 8/9): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
         close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
-  page: four modes (Replay, Spot, Sessions, Quiz) as tabs over ONE engine chart on a fresh random scenario each round;
+  page: seven modes (Replay, Spot, Sessions, Quiz, then the Level 2 drills Gap finder, Break or not, Which index leads) as tabs over
+        ONE engine chart (two panes for the ES / NQ drill) on a fresh random scenario each round;
         a side panel carries the prompt, the choices and the feedback; per-mode score and streak are saved locally.
   moment: none dealt on this page: its motion is the chart itself and the feedback arriving.
 -->
@@ -52,6 +53,9 @@
         <button class="lab-tab" type="button" role="tab" id="tab-spot" data-mode="spot" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Spot</button>
         <button class="lab-tab" type="button" role="tab" id="tab-sessions" data-mode="sessions" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Sessions</button>
         <button class="lab-tab" type="button" role="tab" id="tab-quiz" data-mode="quiz" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Quiz</button>
+        <button class="lab-tab lab-tab--l2" type="button" role="tab" id="tab-gap" data-mode="gap" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Gap finder</button>
+        <button class="lab-tab lab-tab--l2" type="button" role="tab" id="tab-bos" data-mode="bos" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Break or not</button>
+        <button class="lab-tab lab-tab--l2" type="button" role="tab" id="tab-smt" data-mode="smt" aria-selected="false" aria-controls="lab-panel" tabindex="-1">Which index leads</button>
       </div>
       <div class="lab-score" data-k="score" role="status" aria-live="polite" aria-label="คะแนนของโหมดนี้"></div>
       <button class="ctrl" type="button" data-act="reset" aria-label="รีเซ็ตคะแนนของโหมดนี้">รีเซ็ตคะแนน</button>
@@ -66,7 +70,10 @@
             <span class="sim-tag">จำลอง</span>
             <span class="chart-frame__meta" data-k="meta"></span>
           </div>
-          <div class="chart-frame__canvas" data-k="host"></div>
+          <div class="lab-stage" data-k="stage">
+            <div class="lab-pane"><p class="lab-lbl" data-k="lblA" hidden></p><div class="chart-frame__canvas" data-k="host"></div></div>
+            <div class="lab-pane" data-k="paneB" hidden><p class="lab-lbl" data-k="lblB"></p><div class="chart-frame__canvas" data-k="hostB"></div></div>
+          </div>
           <div class="chart-frame__ctrls lf__ctrls" data-k="ctrls"></div>
         </figure>
         <aside class="lab-side" aria-label="โจทย์และผลตรวจ">

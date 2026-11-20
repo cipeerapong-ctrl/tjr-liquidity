@@ -47,9 +47,12 @@
       });
       ok([5, 15, 60].includes(d.tf), id + ' tf');
       ok(['NQ', 'ES'].includes(d.instrument), id + ' instrument');
-      ['replay', 'spot', 'sessions', 'quiz'].forEach((m) => ok(typeof d.lab[m] === 'boolean', id + ' lab.' + m));
+      ['replay', 'spot', 'sessions', 'quiz', 'gap', 'bos', 'smt'].forEach((m) => ok(typeof d.lab[m] === 'boolean', id + ' lab.' + m));
       eq(d.lab.replay, ['S15', 'S16', 'S22'].includes(id), id + ' lab.replay');
       eq([d.lab.spot, d.lab.sessions, d.lab.quiz], [false, false, false], id + ' other lab modes off');
+      eq(d.lab.gap, ['S15', 'S16', 'S19', 'S22'].includes(id), id + ' lab.gap');
+      eq(d.lab.bos, id === 'S20', id + ' lab.bos');
+      eq(d.lab.smt, id === 'S21', id + ' lab.smt');
     }
     eq(IDS.map((id) => S.get(id).outcomes), [['win', 'fail'], ['win', 'fail'], ['win'], [], ['win'], [], ['win'], ['win']], 'outcomes');
     eq(IDS.map((id) => [S.get(id).tf, S.get(id).instrument]),

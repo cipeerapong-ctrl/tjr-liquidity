@@ -741,17 +741,23 @@
 
   // ---------------------------------------------------------------- definitions
 
-  function lab(replay) { return { replay: replay, spot: false, sessions: false, quiz: false }; }
+  // lab flags: the v1 modes (replay / spot / sessions / quiz) plus the Level 2 drills gap (Gap finder), bos (Break or
+  // not) and smt (Which index leads); `extra` names the drills a scenario feeds
+  function lab(replay, extra) {
+    var o = { replay: replay, spot: false, sessions: false, quiz: false, gap: false, bos: false, smt: false };
+    (extra || []).forEach(function (k) { o[k] = true; });
+    return o;
+  }
   function chips(list) { return list.map(function (x) { return { clip: x[0], sec: x[1] }; }); }
   TJR.scenarios.register([
     { id: 'S15', title: 'Long ครบสาย: sweep lows → BOS ขึ้น → ย่อเข้า bull FVG → เข้า',
       summary: 'ราคากวาด lows แล้วปิดเหนือ high ล่าสุด (BOS) ขาขึ้นทิ้ง bullish FVG ไว้ ราคาย่อเข้า gap แล้วปิดกลับขึ้น — เข้า long เป้าคือ highs ด้านบน',
       facts: ['P1.19', 'P10.21', 'P11.21', 'P1.51'], clip: chips([[1, 2144], [10, 816], [11, 610], [1, 2113]]),
-      tf: 5, instrument: 'NQ', lab: lab(true), outcomes: ['win', 'fail'], script: S15 },
+      tf: 5, instrument: 'NQ', lab: lab(true, ['gap']), outcomes: ['win', 'fail'], script: S15 },
     { id: 'S16', title: 'Short ด้วย IFVG: sweep high → bull FVG โดนปิดใต้ → ย่อเข้า bear FVG',
       summary: 'ราคาดันเหนือ high แล้วแท่งปิดใต้ bullish gap ของขานั้น (inverse FVG = confirmation) ขาลงทิ้ง bearish gap ราคาเด้งเข้า gap แล้วปิดกลับลง — เข้า short',
       facts: ['P8.14', 'P8.24', 'P8.25', 'P7.11'], clip: chips([[8, 356], [8, 548], [8, 569], [7, 217]]),
-      tf: 5, instrument: 'ES', lab: lab(true), outcomes: ['win', 'fail'], script: S16 },
+      tf: 5, instrument: 'ES', lab: lab(true, ['gap']), outcomes: ['win', 'fail'], script: S16 },
     { id: 'S17', title: 'Equilibrium: BOS ลง → ย่อขึ้นเกิน 0.5 เข้า premium → ลง',
       summary: 'หลัง break of structure ลง ลาก range จาก high ล่าสุดถึง low ล่าสุด ราคาย่อขึ้นเกิน equilibrium เข้า premium แล้วแท่งแดงปิดกลับลงใต้ 0.5 — เข้า short',
       facts: ['P7.17', 'P7.24', 'P7.28'], clip: chips([[7, 435], [7, 602], [7, 690]]),
@@ -763,20 +769,20 @@
     { id: 'S19', title: 'Stacked FVG: ปิดใต้ gap บน แต่ gap ล่างยังยืน → เทรนด์ยังขึ้น',
       summary: 'ขาขึ้นทิ้ง gap สองอันติดกัน ราคาปิดใต้ gap บน (ยังไม่ใช่ inverse) แล้วลงไปเข้า gap ล่างและปิดกลับขึ้น — เทรนด์ยังขึ้น เข้า long',
       facts: ['P10.29', 'P8.34', 'P8.36'], clip: chips([[10, 1221], [8, 922], [8, 1024]]),
-      tf: 60, instrument: 'ES', lab: lab(false), outcomes: ['win'], script: S19 },
+      tf: 60, instrument: 'ES', lab: lab(false, ['gap']), outcomes: ['win'], script: S19 },
     { id: 'S20', title: 'ไส้ทะลุ low ≠ BOS: ไส้ลึกแต่ไม่ปิดใต้ → ยังขาขึ้น',
       summary: 'ในขาขึ้น ไส้เทียนแทงลงใต้ low ที่เฝ้าอยู่ลึกมากแต่ปิดเหนือ low จึงไม่ใช่ break of structure — ไม่มีเทรดตรงไส้ break จริงมาทีหลังเมื่อแท่งปิดใต้ low ล่าสุด',
       facts: ['P11.13', 'P11.14'], clip: chips([[11, 502], [11, 535]]),
-      tf: 5, instrument: 'ES', lab: lab(false), outcomes: [], script: S20 },
+      tf: 5, instrument: 'ES', lab: lab(false, ['bos']), outcomes: [], script: S20 },
     { id: 'S21', title: 'SMT ที่ high: NQ ทำ HH, ES ทำ LH → เทรด ES → BOS → EQ → เข้า',
       summary: 'NQ ดันทะลุ high แต่ ES ทำได้แค่ lower high (bearish SMT, ES นำ) รอ structure break ลงบน ES แล้วรอราคาเด้งเข้า premium ของ range ก่อนเข้า short ที่ ES',
       facts: ['P1.31', 'P1.35', 'P1.36', 'P1.40', 'P1.41', 'P6.15', 'P6.16', 'P6.21'],
       clip: chips([[1, 1479], [1, 1670], [1, 1714], [1, 1830], [1, 1881], [6, 316], [6, 338], [6, 629]]),
-      tf: 5, instrument: 'ES', lab: lab(false), outcomes: ['win'], script: S21 },
+      tf: 5, instrument: 'ES', lab: lab(false, ['smt']), outcomes: ['win'], script: S21 },
     { id: 'S22', title: 'Time windows: manipulation 09:30–09:50 → เข้า 09:50–10:10',
       summary: 'หลัง 09:30 ราคาลงกวาด lows ในช่วง manipulation แล้วกลับตัว (inverse FVG) ย่อเข้า bullish gap และปิดกลับขึ้นในช่วง 09:50–10:10 — เข้า long',
       facts: ['P5.13', 'P5.14', 'P5.16', 'P5.17', 'P5.18', 'P5.21', 'P5.22'],
       clip: chips([[5, 200], [5, 221], [5, 276], [5, 286], [5, 317], [5, 341], [5, 426]]),
-      tf: 5, instrument: 'NQ', lab: lab(true), outcomes: ['win'], script: S22 }
+      tf: 5, instrument: 'NQ', lab: lab(true, ['gap']), outcomes: ['win'], script: S22 }
   ]);
 })(typeof window !== 'undefined' ? window : globalThis);

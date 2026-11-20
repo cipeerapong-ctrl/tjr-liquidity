@@ -237,4 +237,84 @@
     const pdh = day.truth.levels.find((l) => l.kind === 'pdh');
     eq(G.quiz(pdh, 'htf'), true);
   });
+  // ---- v2 drills: Gap finder, Break or not, Which index leads (Level 2 scenarios; truth read from the candles)
+  const C = TJR.confluence;
+  const nearestGap = (cs, bar) => C.fvgs(cs).reduce((a, g) => (!a || Math.abs(g.i - bar) < Math.abs(a.i - bar) ? g : a), null);
+
+  test('grade.fvg: any real gap middle within 1 bar is right; the expected gap is the nearest; seeds 1..30 of S15 / S16 / S19 / S22', () => {
+    for (const id of ['S15', 'S16', 'S19', 'S22']) {
+      for (let seed = 1; seed <= 30; seed++) {
+        const b = S.safeBuild(S.get(id), seed, {}), gaps = C.fvgs(b.candles), n = b.candles.length;
+        ok(gaps.length >= 1, id + ' has gaps');
+        gaps.forEach((g) => {
+          [g.i - 1, g.i, g.i + 1].forEach((bar) => {
+            const r = G.fvg(b, bar);
+            eq(r.correct, true, id + ' seed ' + seed + ' bar ' + bar);
+            ok(r.expected && typeof r.expected.bar === 'number' && Math.abs(r.expected.bar - bar) <= 1);
+          });
+        });
+        for (let bar = 0; bar < n; bar++) {
+          const near = gaps.some((g) => Math.abs(g.i - bar) <= 1), r = G.fvg(b, bar);
+          eq(r.correct, near, id + ' seed ' + seed + ' bar ' + bar);
+          const e = nearestGap(b.candles, bar);
+          eq(r.expected.bar, e.i); eq(r.expected.dir, e.dir); eq(r.expected.low, e.low); eq(r.expected.high, e.high);
+        }
+      }
+    }
+  });
+
+  test('grade.fvg: out of range, non-numbers and a chart with no gap never throw', () => {
+    const b = S.safeBuild(S.get('S15'), 3, {});
+    eq(G.fvg(b, -50).correct, false); eq(G.fvg(b, 1e6).correct, false);
+    eq(G.fvg(b, NaN), { correct: false, expected: null });
+    eq(G.fvg(b, undefined), { correct: false, expected: null });
+    const flat = { candles: [0, 1, 2, 3].map((i) => ({ t: 1700000000 + i * 300, o: 100, h: 101, l: 99, c: 100.25 })), meta: b.meta, truth: {} };
+    eq(G.fvg(flat, 1), { correct: false, expected: null });
+  });
+
+  test('grade.bos: a candle CLOSING beyond the most recent opposite swing is a break; a wick or a close on the level is not (S20 seeds 1..60)', () => {
+    let kinds = { wick: 0, on: 0, close: 0 };
+    for (let seed = 1; seed <= 60; seed++) {
+      const b = S.safeBuild(S.get('S20'), seed, {}), cands = G.bosBars(b);
+      ok(cands.length >= 2, 'seed ' + seed + ' has candidates');
+      eq(cands[cands.length - 1].kind, 'close', 'seed ' + seed + ' ends on the real break');
+      eq(cands[cands.length - 1].bar, b.truth.confluence.confirm.at, 'seed ' + seed + ': that break is the scripted confirmation');
+      cands.forEach((c) => {
+        kinds[c.kind]++;
+        const x = b.candles[c.bar], up = c.trend === 'up';
+        if (c.kind === 'close') ok(up ? x.c < c.level.price : x.c > c.level.price);
+        if (c.kind === 'on') eq(x.c, c.level.price);
+        if (c.kind === 'wick') ok(up ? x.l < c.level.price && x.c > c.level.price : x.h > c.level.price && x.c < c.level.price);
+        const isBreak = c.kind === 'close';
+        eq(G.bos(b, c.bar, isBreak), { correct: true, expected: isBreak }, 'seed ' + seed + ' bar ' + c.bar);
+        eq(G.bos(b, c.bar, !isBreak), { correct: false, expected: isBreak });
+      });
+    }
+    ok(kinds.wick > 0 && kinds.close > 0, 'both a wick and a close are exercised: ' + JSON.stringify(kinds));
+  });
+
+  test('grade.bos: edges. the first bar, a bar with no swing known yet, and non-numbers answer false without throwing', () => {
+    const b = S.safeBuild(S.get('S20'), 2, {});
+    eq(G.bos(b, 0, false), { correct: true, expected: false });
+    eq(G.bos(b, 0, true), { correct: false, expected: false });
+    eq(G.bos(b, -3, true).expected, false); eq(G.bos(b, 1e6, true).expected, false);
+    eq(G.bos(b, NaN, false).expected, false);
+  });
+
+  test('grade.smt: the leader is the index with the lower high, read from both candle series (S21 seeds 1..60)', () => {
+    for (let seed = 1; seed <= 60; seed++) {
+      const b = S.safeBuild(S.get('S21'), seed, {}), s = b.truth.smt, tw = b.truth.twin.candles;
+      const mHigher = b.candles[s.main.p2.bar].h > b.candles[s.main.p1.bar].h;
+      const tHigher = tw[s.twin.p2.bar].h > tw[s.twin.p1.bar].h;
+      ok(mHigher !== tHigher, 'seed ' + seed + ': one index makes a higher high, the other a lower high');
+      const lead = mHigher ? 'twin' : 'main';
+      eq(G.smt(b, lead), { correct: true, expected: lead });
+      eq(G.smt(b, lead === 'main' ? 'twin' : 'main'), { correct: false, expected: lead });
+      eq(lead, s.leader, 'truth agrees with the candles');
+    }
+    const b = S.safeBuild(S.get('S21'), 1, {});
+    eq(G.smt(b, 'x'), { correct: false, expected: 'main' });
+    eq(G.smt(b, undefined).correct, false);
+    eq(G.smt({ candles: b.candles, meta: b.meta, truth: {} }, 'main'), { correct: false, expected: null });
+  });
 })();
