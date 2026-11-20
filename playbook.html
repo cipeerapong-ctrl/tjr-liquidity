@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Playbook เทรด liquidity 7 ขั้นจากคลิป TJR | Liquidity</title>
-<meta name="description" content="ลำดับเทรด liquidity 7 ขั้นจากคลิป TJR 49 นาที พร้อมเช็คลิสต์ก่อนเข้าเทรด และนาฬิกา session ที่นับถอยหลังถึง NY open ทุกข้อมีเวลาในคลิปกำกับ">
+<title>Playbook ลำดับเทรดเต็มระบบจากคลิป TJR | Liquidity</title>
+<meta name="description" content="ลำดับความคิดเต็มระบบของ TJR: ตั้ง bias และมาร์กแผนที่ → เวลา → sweep → confirmation → continuation → entry → exit พร้อม bias worksheet เช็คลิสต์ และนาฬิกา session กับช่วงเวลา NY ทุกข้อมีเวลาในคลิปกำกับ">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Playbook เทรด liquidity 7 ขั้นจากคลิป TJR">
-<meta property="og:description" content="ลำดับเทรด เช็คลิสต์ และนาฬิกา session ตามคลิป ส่วนที่คลิปไม่ได้บอก เขียนกฎของคุณเอง">
+<meta property="og:title" content="Playbook ลำดับเทรดเต็มระบบจากคลิป TJR">
+<meta property="og:description" content="ลำดับเทรด bias worksheet เช็คลิสต์ และนาฬิกาช่วงเวลา NY ตามคลิป ส่วนที่คลิปไม่ได้บอก เขียนกฎของคุณเอง">
 <meta property="og:image" content="share.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -31,15 +31,17 @@
 </head>
 <body>
 <!--
-  software · TJR Liquidity playbook page (Task 12), an app screen with long content (spec 7.4, 10)
-  deal: the home page's (Task 8/9): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
+  software · TJR Liquidity playbook page, rebuilt in v2 around the full chain (an app screen with long content)
+  deal: the home page's: palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
         close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
-  page: head (h1 + the live session clock) · the 7-step procedure as a numbered rail beside ONE engine chart that
-        steps through a worked trade (S01 long / S03 short) · the pre-trade checklist (ticks, progress ring, the
-        user's own rules for stop-loss, size and risk, saved in TJR.store) · today's session table (ET and Thailand
-        time) · what the clip does not say.
+  page: head (h1 + the live session clock with the New York window) · the chain as a numbered rail beside ONE engine
+        chart that steps through a worked Level 2 trade (S15 / S16 / S22), step 0 carrying the bias worksheet (a built
+        60m scenario) · the pre-trade checklist (ticks, progress ring, the user's own rules for stop-loss, TP split and
+        max daily loss, saved in TJR.store under playbook.v2.*) · today's session table and the New York windows
+        (ET and Thailand time) · what the clips do not say.
   moment: none dealt on this page: its motion is the clock, the chart's step-through, the progress ring and the
         rail's active step, none of it under reduced motion.
+  sources: every claim carries a chip to its own video (main clip: MM:SS, playlist: #clip MM:SS). Clip #4 is never chipped.
 -->
 <noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="confluences.html">Confluences</a></div><div class="nav__item"><a class="nav__link" href="strategy.html">กลยุทธ์</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html" aria-current="page">Playbook</a></div><div class="nav__item"><a class="nav__link" href="risk.html">ความเสี่ยง</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div></div></header></noscript>
 <main class="app pb" id="top">
@@ -47,8 +49,9 @@
 
     <header class="pb-head">
       <div class="pb-head__text">
-        <h1>Playbook เทรด liquidity 7 ขั้นจากคลิป TJR</h1>
-        <p class="t-lead">ลำดับตั้งแต่มาร์ก level ก่อน NY open จนถึงเป้า พร้อมเช็คลิสต์ก่อนเข้าเทรดและนาฬิกา session ส่วน stop-loss ขนาดสถานะ และความเสี่ยง คลิปไม่ได้สอน คุณเขียนกฎของตัวเองลงเช็คลิสต์ได้</p>
+        <h1>Playbook ลำดับเทรดเต็มระบบของ TJR</h1>
+        <p class="t-lead">ลำดับความคิดของเขาตั้งแต่ตั้ง bias ก่อนตลาดเปิด จนถึงเป้า TP ทุกขั้นบอกคลิปที่มาของมัน ส่วนที่คลิปไม่ได้บอกยังเป็นช่องว่าง คุณเขียนกฎของตัวเองลงเช็คลิสต์ได้</p>
+        <p class="pb-head__src">คลิปหลักบอกว่ากลยุทธ์จริงของเขามี confluence และกฎที่เข้มกว่าที่สอนในคลิปนั้น <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" data-fact="F6.7" aria-label="ดูในคลิปที่ 24:45">24:45</a> ส่วนที่เหลือมาจากเพลย์ลิสต์ Path to Profitability ซึ่งเป็นคลิปเก่ากว่า</p>
         <a class="btn btn--primary" href="#checklist">เปิดเช็คลิสต์</a>
       </div>
 
@@ -66,120 +69,220 @@
           <p class="clock__count" data-k="count">--:--:--</p>
           <p class="clock__at" data-k="openat">นาฬิกานี้ต้องใช้ JavaScript</p>
         </div>
-        <p class="clock__rule">คลิปเทรด US index เฉพาะตอน NY open <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></p>
+        <p class="clock__win" role="status" aria-live="polite"><span data-k="win">ช่วงเวลา NY ต้องใช้ JavaScript</span> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=200" target="_blank" rel="noopener" data-fact="P5.13" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:20">#5 03:20</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=221" target="_blank" rel="noopener" data-fact="P5.14" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:41">#5 03:41</a></span></p>
+        <p class="clock__rule">คลิปเทรด US index เฉพาะตอน NY open <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" data-fact="F7.11" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></p>
       </section>
     </header>
 
     <section class="pb-sec" id="procedure" aria-labelledby="proc-h">
       <header class="pb-sec__head">
-        <h2 id="proc-h">ลำดับเทรด 7 ขั้น</h2>
-        <p>เรียงตามที่คลิปสอน กด ดูบนกราฟ ที่แต่ละขั้น กราฟตัวอย่างจะเดินไปถึงจังหวะนั้นและโชว์เฉพาะสิ่งที่รู้ได้ ณ ตอนนั้น</p>
+        <h2 id="proc-h">ลำดับเทรดเต็มระบบ 8 ขั้น</h2>
+        <p>เรียงตามที่เขาคิด: bias และแผนที่ → เวลา → sweep → confirmation → continuation → entry → exit → ความเสี่ยง กด ดูบนกราฟ ที่แต่ละขั้น กราฟตัวอย่างจะเดินไปถึงจังหวะนั้นและโชว์เฉพาะสิ่งที่รู้ได้ ณ ตอนนั้น ขั้นที่มี <span class="level-tag" data-level="1">L1</span> บอกว่าคลิปหลักสอนอะไรในจุดเดียวกัน และ <span class="level-tag" data-level="2">L2</span> คือส่วนที่มาจากเพลย์ลิสต์</p>
+        <aside class="older-note"><p class="older-note__label">คลิปเก่า (ม.ค. 2026) พูดว่า…</p>
+          <div class="older-note__body"><p>เขาจะไม่ให้สูตรขั้น 1, 2, 3 ตายตัว เครื่องมือเหมือนเดิมทุกวันแต่แผนของแต่ละวันต่างกัน และเขาตั้งใจเว้นรายละเอียดบางส่วนไว้ให้หาเองจากการดูกราฟ หน้านี้จึงเป็นลำดับความคิดของเขา ไม่ใช่เครื่องจักรที่ทำตามกฎ</p></div>
+          <p class="older-note__src chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=62" target="_blank" rel="noopener" data-fact="P1.3" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 01:02">#1 01:02</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=791" target="_blank" rel="noopener" data-fact="P1.7" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 13:11">#1 13:11</a></p></aside>
       </header>
       <div class="proc">
         <ol class="steps" data-k="steps">
+
           <li class="step is-active" data-step="1" id="step-1">
-            <span class="step__no" aria-hidden="true">01</span>
+            <span class="step__no" aria-hidden="true">0</span>
             <div class="step__body">
-              <h3>มาร์กระดับ liquidity ก่อน NY open</h3>
-              <p>ก่อนตลาดสหรัฐเปิด มาร์ก high และ low ของ Asia กับ London, high/low ของ session ก่อนหน้ารวมทั้ง previous-day high, และ high/low ของ 1H กับ 4H แล้วจดว่ามี high หรือ low ที่เรียงซ้อนกันและยังไม่ถูกเก็บ (stacked, low-resistance) อยู่ตรงไหน</p>
-              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1965" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 32:45">32:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 28:30">28:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 39:45">39:45</a></p>
+              <h3>ขั้น 0 · ตั้ง bias และมาร์กแผนที่ก่อนเทรด <span class="level-tag" data-level="2">L2</span></h3>
+              <p>ก่อนมองหาเทรด เขาถามสามข้อ: ราคา sweep liquidity แล้วหรือยัง, draws ของวันอยู่ตรงไหน, และราคาอยู่ตรงไหนของโครงสร้างตอนนี้ แล้วไล่ตามลำดับ: เทรนด์ของ higher time frame (4h และ 1h) → draws ในทิศเทรนด์ → ราคาต้องย่อเข้า FVG หรือ equilibrium → ดูว่าถูก respect หรือโดนปิดทะลุ ผลลัพธ์คือ bias และเป้า ไม่ใช่จุดเข้า</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=57" target="_blank" rel="noopener" data-fact="P3.3" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 00:57">#3 00:57</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=78" target="_blank" rel="noopener" data-fact="P3.4" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 01:18">#3 01:18</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=197" target="_blank" rel="noopener" data-fact="P3.5" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 03:17">#3 03:17</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=155" target="_blank" rel="noopener" data-fact="P3.6" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 02:35">#3 02:35</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=11" target="_blank" rel="noopener" data-fact="P3.8" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 00:11">#3 00:11</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1007" target="_blank" rel="noopener" data-fact="P1.23" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 16:47">#1 16:47</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1265" target="_blank" rel="noopener" data-fact="P1.24" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 21:05">#1 21:05</a></p>
+              <p>แผนที่คือการมาร์กทุก draw ของวัน: previous-day high/low, high/low ของ Asia กับ London และ hourly highs ที่ดูดี ถ้า London ทะลุ Asia high แล้วไม่มีอะไรตอบสนอง draw นั้นก็ไม่มีประโยชน์ draw แต่ละอันเป็นได้ทั้งจุดเข้าและเป้า</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1163" target="_blank" rel="noopener" data-fact="P1.27" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 19:23">#1 19:23</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1330" target="_blank" rel="noopener" data-fact="P1.28" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 22:10">#1 22:10</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1448" target="_blank" rel="noopener" data-fact="P1.29" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 24:08">#1 24:08</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1417" target="_blank" rel="noopener" data-fact="P1.30" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 23:37">#1 23:37</a></p>
+              <p class="step__l1"><span class="level-tag" data-level="1">L1</span> คลิปหลักสอนส่วนนี้ในรูปแบบย่อ: มาร์ก high/low ของ session, previous-day, 1H/4H และ stacked highs/lows ที่ยังไม่ถูกเก็บ <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1965" target="_blank" rel="noopener" data-fact="F7.8" aria-label="ดูในคลิปที่ 32:45">32:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" data-fact="F7.12" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" data-fact="F7.4" aria-label="ดูในคลิปที่ 28:30">28:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" data-fact="F8.1" aria-label="ดูในคลิปที่ 39:45">39:45</a></span></p>
+              <p class="step__note"><b>bias ยังไม่ใช่ entry:</b> ตั้ง bias ก่อนเทรด ส่วนทุกเทรดยังเริ่มที่ sweep เหมือนเดิม <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" data-fact="F6.4" aria-label="ดูในคลิปที่ 23:15">23:15</a></span> ในตัวอย่างของคลิปเก่า เขาตั้ง bias จากเทรนด์ draws และ gap โดยยังไม่พูดถึง sweep ก่อน (ตัวอย่าง A และ D) เว็บนี้อ่านว่านั่นคือเรื่อง bias ไม่ใช่ entry คลิปไม่ได้ยืนยันตรง ๆ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=144" target="_blank" rel="noopener" data-fact="P3.16" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 02:24">#3 02:24</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=1135" target="_blank" rel="noopener" data-fact="P3.32" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 18:55">#3 18:55</a></span></p>
+
+              <section class="bw" id="bias" aria-labelledby="bw-h" data-state="incomplete">
+                <h4 id="bw-h">Bias worksheet · ตอบ 4 ข้อ แล้วสรุป bias และเป้า</h4>
+                <p class="bw__lead">ตอบจากกราฟ 60m ที่เห็นถึงแท่งที่รู้คำตอบครบ ตัวอย่างแรกคือเทรนด์ขึ้นที่มี gap ซ้อนกันสองอัน ราคาปิดใต้ gap บนแล้ว แต่ gap ล่างยังไม่โดนปิดใต้ ซึ่งยังไม่ใช่ inverse <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1221" target="_blank" rel="noopener" data-fact="P10.29" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 20:21">#10 20:21</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=922" target="_blank" rel="noopener" data-fact="P8.34" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 15:22">#8 15:22</a></span> ตัวอย่างที่สองคือ gap ที่ราคาปิดทะลุ</p>
+                <div class="bw__bar">
+                  <div class="ctrl-group" role="group" aria-label="ตัวอย่างของ worksheet">
+                    <button class="ctrl" type="button" data-bw-sample="S19" aria-pressed="true">ตัวอย่าง 1 · gap ซ้อนกัน (S19)</button>
+                    <button class="ctrl" type="button" data-bw-sample="S18" aria-pressed="false">ตัวอย่าง 2 · gap โดนปิดทะลุ (S18)</button>
+                  </div>
+                  <button class="ctrl" type="button" data-bw-act="reseed">สุ่มกราฟใหม่</button>
+                  <button class="ctrl" type="button" data-bw-act="reset">ล้างคำตอบ</button>
+                </div>
+                <figure class="chart-frame bw__chart" data-ui="chart" aria-label="กราฟ 60m ประกอบ bias worksheet">
+                  <div class="chart-frame__bar">
+                    <span class="chart-frame__sym" data-k="bw-sym">ES</span><span class="chart-frame__tf">60m</span>
+                    <span class="sim-tag">จำลอง</span>
+                    <span class="chart-frame__meta" data-k="bw-meta"></span>
+                  </div>
+                  <div class="chart-frame__canvas"></div>
+                </figure>
+                <fieldset class="bw__q">
+                  <legend><span class="bw__n" aria-hidden="true">1</span><span data-k="bw-q1">บน 60m ราคาทำ higher high และ higher low อยู่ (เทรนด์ขึ้นชัด)?</span> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=57" target="_blank" rel="noopener" data-fact="P3.3" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 00:57">#3 00:57</a></span></legend>
+                  <div class="ctrl-group" role="group" aria-label="คำตอบข้อ 1"><button class="ctrl" type="button" data-bq="1" data-bv="1" aria-pressed="false">ใช่</button><button class="ctrl" type="button" data-bq="1" data-bv="0" aria-pressed="false">ไม่ใช่</button></div>
+                </fieldset>
+                <fieldset class="bw__q">
+                  <legend><span class="bw__n" aria-hidden="true">2</span><span>มี draws ในทิศเทรนด์นั้นที่ยังไม่ถูกเก็บ (stacked highs เหนือราคา หรือ lows ใต้ราคา) ให้ราคาวิ่งไปหา?</span> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=78" target="_blank" rel="noopener" data-fact="P3.4" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 01:18">#3 01:18</a></span></legend>
+                  <div class="ctrl-group" role="group" aria-label="คำตอบข้อ 2"><button class="ctrl" type="button" data-bq="2" data-bv="1" aria-pressed="false">ใช่</button><button class="ctrl" type="button" data-bq="2" data-bv="0" aria-pressed="false">ไม่ใช่</button></div>
+                </fieldset>
+                <fieldset class="bw__q">
+                  <legend><span class="bw__n" aria-hidden="true">3</span><span>หลัง swing ล่าสุด ราคาย่อกลับเข้า FVG หรือ equilibrium แล้วหรือยัง?</span> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=197" target="_blank" rel="noopener" data-fact="P3.5" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 03:17">#3 03:17</a></span></legend>
+                  <div class="ctrl-group" role="group" aria-label="คำตอบข้อ 3"><button class="ctrl" type="button" data-bq="3" data-bv="1" aria-pressed="false">ใช่</button><button class="ctrl" type="button" data-bq="3" data-bv="0" aria-pressed="false">ยัง</button></div>
+                </fieldset>
+                <fieldset class="bw__q">
+                  <legend><span class="bw__n" aria-hidden="true">4</span><span>ราคา respect มัน (ปิดกลับออกมาในทิศเทรนด์) ไม่ใช่ปิดทะลุ gap?</span> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=155" target="_blank" rel="noopener" data-fact="P3.6" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 02:35">#3 02:35</a></span></legend>
+                  <div class="ctrl-group" role="group" aria-label="คำตอบข้อ 4"><button class="ctrl" type="button" data-bq="4" data-bv="1" aria-pressed="false">respect</button><button class="ctrl" type="button" data-bq="4" data-bv="0" aria-pressed="false">ปิดทะลุ</button></div>
+                </fieldset>
+                <div class="bw__out" role="status" aria-live="polite">
+                  <p class="bw__bias" data-k="bw-bias">ตอบครบ 4 ข้อเพื่อดู bias และเป้า</p>
+                  <p class="bw__draw" data-k="bw-draw"></p>
+                  <p class="bw__check" data-k="bw-check"></p>
+                  <p class="bw__gap"><span class="badge-gap" data-k="bw-gap" hidden>คลิปไม่ได้ระบุ</span></p>
+                </div>
+                <p class="bw__src chips"><span class="bw__srclab">ที่มาของการสรุป</span><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=155" target="_blank" rel="noopener" data-fact="P3.6" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 02:35">#3 02:35</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=484" target="_blank" rel="noopener" data-fact="P3.21" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 08:04">#3 08:04</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=1764" target="_blank" rel="noopener" data-fact="P3.41" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 29:24">#3 29:24</a></p>
+                <p class="bw__note">เฉลยเป็นการอ่านกราฟจำลองโดยเว็บนี้ ไม่ใช่ของ TJR</p>
+              </section>
+
               <div class="step__row">
                 <button class="ctrl" type="button" data-act="view" data-step="1">ดูบนกราฟ</button>
                 <a class="ctrl" href="learn.html#m7" aria-label="อ่านบทที่ 7">บทที่ 7</a>
                 <a class="ctrl" href="learn.html#m8" aria-label="อ่านบทที่ 8">บทที่ 8</a>
-                <a class="ctrl" href="scenarios.html#S06" aria-label="เปิดสถานการณ์ S06">S06</a>
+                <a class="ctrl" href="scenarios.html#S19" aria-label="เปิดสถานการณ์ S19">S19</a>
               </div>
             </div>
           </li>
+
           <li class="step" data-step="2" id="step-2">
-            <span class="step__no" aria-hidden="true">02</span>
+            <span class="step__no" aria-hidden="true">เวลา</span>
             <div class="step__body">
-              <h3>เทรด US index เฉพาะช่วง NY open</h3>
-              <p>TJR เทรด US index จึงเทรดตอนตลาดสหรัฐเปิดเท่านั้น เขาบอกว่าเทรดดัชนีนี้ตอน Asia หรือ London ไม่สมเหตุสมผล เพราะดัชนีขยับตอน NY open ขั้นนี้เป็นเรื่องเวลา ดูนาฬิกาด้านบน</p>
-              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></p>
+              <h3>เวลา · NY open และช่วง 09:30–10:10 ET <span class="level-tag" data-level="2">L2</span></h3>
+              <p>เขาเทรด US index จึงสนใจเฉพาะ New York ตลาดเปิด 09:30 ET ช่วง manipulation คือ 09:30–09:50 ที่เงินใหม่เข้ามาและมักเห็นการกวาด liquidity ตามด้วยช่วงเข้า 09:50–10:10 ที่เขาเรียกว่า macro และบอกว่าเป็นเวลาเข้าที่เหมาะ ถ้าเขายังไม่เจอเทรดเมื่อถึง 10:30 เขาเลิกในวันนั้นเพราะตลาดชะลอ (พูดถึงตัวเขาเอง) ส่วน PM เริ่มราว 13:00 ซึ่งเขาไม่เทรด</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=186" target="_blank" rel="noopener" data-fact="P5.12" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:06">#5 03:06</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=200" target="_blank" rel="noopener" data-fact="P5.13" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:20">#5 03:20</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=221" target="_blank" rel="noopener" data-fact="P5.14" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:41">#5 03:41</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=317" target="_blank" rel="noopener" data-fact="P5.18" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 05:17">#5 05:17</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=317" target="_blank" rel="noopener" data-fact="P5.19" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 05:17">#5 05:17</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=233" target="_blank" rel="noopener" data-fact="P5.15" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:53">#5 03:53</a></p>
+              <p>ช่วงเวลาไม่เข้มงวด: บางวัน manipulation มาช้ากว่าไปสองนาที บางวันเขาเข้า 09:45 หรือ 10:20</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=521" target="_blank" rel="noopener" data-fact="P5.25" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 08:41">#5 08:41</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=566" target="_blank" rel="noopener" data-fact="P5.26" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 09:26">#5 09:26</a></p>
+              <p class="step__l1"><span class="level-tag" data-level="1">L1</span> คลิปหลักบอกแค่ว่าเขาเทรด US index เฉพาะตอน NY open ไม่มีช่วงเวลาย่อยกว่านี้ <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" data-fact="F7.11" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></p>
               <div class="step__row">
                 <button class="ctrl" type="button" data-act="view" data-step="2">ดูบนกราฟ</button>
                 <a class="ctrl" href="#clock">ดูนาฬิกา</a>
-                <a class="ctrl" href="learn.html#m7" aria-label="อ่านบทที่ 7">บทที่ 7</a>
+                <a class="ctrl" href="#sessions">ตารางช่วงเวลา</a>
+                <a class="ctrl" href="scenarios.html#S22" aria-label="เปิดสถานการณ์ S22">S22</a>
               </div>
             </div>
           </li>
+
           <li class="step" data-step="3" id="step-3">
-            <span class="step__no" aria-hidden="true">03</span>
+            <span class="step__no" aria-hidden="true">1</span>
             <div class="step__body">
-              <h3>รอให้ราคา sweep ระดับที่มาร์กไว้</h3>
-              <p>ราคาทะลุ high หรือ low ที่มาร์กไว้ เปิดโอกาสให้ตลาดกลับตัว แต่ไม่ได้รับประกันว่าจะกลับ อย่ากด buy หรือ sell ทันทีที่โดน sweep เพราะถ้าราคาไปต่อ คุณจะติด drawdown</p>
-              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=945" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 15:45">15:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:30">22:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:15">23:15</a></p>
+              <h3>ขั้น 1 · sweep ของ high/low ที่สำคัญ (SMT เป็นตัวเสริม) <span class="level-tag" data-level="1">L1</span></h3>
+              <p>ทุกเทรดเริ่มที่ราคาทะลุ liquidity ที่มีนัยสำคัญ ได้แก่ high/low ของ higher time frame, ของ session และของข่าว นี่คือโอกาสที่ orders จะถูกเติม ไม่ใช่สัญญาณให้กด buy หรือ sell ทันที เพราะถ้าราคาไปต่อ คุณจะติด drawdown</p>
+              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" data-fact="F6.3" aria-label="ดูในคลิปที่ 22:30">22:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" data-fact="F6.4" aria-label="ดูในคลิปที่ 23:15">23:15</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1635" target="_blank" rel="noopener" data-fact="F7.2" aria-label="ดูในคลิปที่ 27:15">27:15</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" data-fact="P1.19" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a></p>
+              <p>SMT (ใช้กับ S&amp;P 500 และ Nasdaq เท่านั้น) ช่วยดูว่าเทรนด์กำลังจะเปลี่ยนก่อนเห็น BOS หรือ IFVG: ถ้าดัชนีหนึ่งทำ higher high เหนือ draw แต่อีกตัวทำได้แค่ lower high คือ bearish divergence (bullish เป็นภาพสะท้อน) ตัวที่ทำ lower high เป็นตัวนำและเป็นตัวที่เขาเลือกเทรด มีประโยชน์เมื่อเกิดตอน sweep draw สำคัญ ถ้าไม่มีการ sweep divergence แบบนี้เกิดบ่อยและแทบไม่มีประโยชน์</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=31" target="_blank" rel="noopener" data-fact="P6.3" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 00:31">#6 00:31</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=281" target="_blank" rel="noopener" data-fact="P6.12" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 04:41">#6 04:41</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=316" target="_blank" rel="noopener" data-fact="P6.15" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:16">#6 05:16</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=338" target="_blank" rel="noopener" data-fact="P6.16" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:38">#6 05:38</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=305" target="_blank" rel="noopener" data-fact="P6.14" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:05">#6 05:05</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1479" target="_blank" rel="noopener" data-fact="P1.31" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 24:39">#1 24:39</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1830" target="_blank" rel="noopener" data-fact="P1.40" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 30:30">#1 30:30</a></p>
+              <p class="step__l1"><span class="level-tag" data-level="1">L1</span> คลิปหลักสอน sweep เช่นเดียวกัน แล้วรอ confirmation ก่อนเข้า <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" data-fact="F6.3" aria-label="ดูในคลิปที่ 22:30">22:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" data-fact="F6.4" aria-label="ดูในคลิปที่ 23:15">23:15</a></span></p>
               <div class="step__row">
                 <button class="ctrl" type="button" data-act="view" data-step="3">ดูบนกราฟ</button>
                 <a class="ctrl" href="learn.html#m4" aria-label="อ่านบทที่ 4">บทที่ 4</a>
                 <a class="ctrl" href="learn.html#m6" aria-label="อ่านบทที่ 6">บทที่ 6</a>
-                <a class="ctrl" href="scenarios.html#S04" aria-label="เปิดสถานการณ์ S04">S04</a>
+                <a class="ctrl" href="scenarios.html#S21" aria-label="เปิดสถานการณ์ S21">S21 · SMT</a>
               </div>
             </div>
           </li>
+
           <li class="step" data-step="4" id="step-4">
-            <span class="step__no" aria-hidden="true">04</span>
+            <span class="step__no" aria-hidden="true">2</span>
             <div class="step__body">
-              <h3>รอโครงสร้างใหม่บน 5m หรือ 1m</h3>
-              <p>หลังโดน sweep รอให้เทรนด์ใหม่ก่อตัว ฝั่งขึ้นเรียง L, H, HL, HH ฝั่งลงเรียง H, L, LL, LH คลิปยกตัวอย่างที่เริ่มนับต่างกันเล็กน้อย แต่ทั้งหมดต้องเห็นโครงสร้างครบก่อนจึงจะคิดเรื่องเข้า</p>
-              <p class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 25:30">25:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2250" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 37:30">37:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 28:30">28:30</a></p>
+              <h3>ขั้น 2 · confirmation: BOS หรือ IFVG <span class="level-tag" data-level="2">L2</span></h3>
+              <p>หลัง sweep ต้องมีหลักฐานว่า orders ถูกเติมแล้ว คือโครงสร้างเปลี่ยน มีสองแบบ: break of structure (BOS) บน lower time frame และ inverse FVG (IFVG) เขาเรียกทั้งสองว่า confirmation confluence</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1767" target="_blank" rel="noopener" data-fact="P1.37" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:27">#1 29:27</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=695" target="_blank" rel="noopener" data-fact="P11.25" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 11:35">#11 11:35</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=356" target="_blank" rel="noopener" data-fact="P8.14" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 05:56">#8 05:56</a></p>
+              <p>BOS คือแท่งที่ปิดทะลุ swing ล่าสุดของฝั่งตรงข้ามในเทรนด์ ไส้เทียนที่ทะลุไม่นับ และ lower high หรือ higher low เฉย ๆ ก็ยังไม่ใช่ BOS ส่วน IFVG คือ FVG ที่โดนปิดทะลุในเทรนด์ของมัน ใช้เป็น BOS ได้ ต้องเป็นแท่งที่ปิดพ้นขอบไกลของ gap เท่านั้น และมักเกิดก่อน BOS</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=153" target="_blank" rel="noopener" data-fact="P11.8" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 02:33">#11 02:33</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=377" target="_blank" rel="noopener" data-fact="P11.12" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 06:17">#11 06:17</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=502" target="_blank" rel="noopener" data-fact="P11.13" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 08:22">#11 08:22</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=420" target="_blank" rel="noopener" data-fact="P11.16" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 07:00">#11 07:00</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=548" target="_blank" rel="noopener" data-fact="P8.19" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 09:08">#8 09:08</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=683" target="_blank" rel="noopener" data-fact="P8.29" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 11:23">#8 11:23</a></p>
+              <aside class="web-def"><p class="web-def__label">นิยามทั่วไป ไม่ใช่จากคลิป</p>
+                <div class="web-def__body"><p>บนเว็บ BOS มักถูกอธิบายว่าเป็นสัญญาณต่อเทรนด์เดิม (ปิดเลย swing ไปในทิศเทรนด์) ส่วน TJR ใช้คำนี้กับการเปลี่ยนเทรนด์ อ่านให้ตรงกันก่อนนำไปใช้</p></div>
+                <p class="web-def__src"><a href="https://www.luxalgo.com/library/concept/break-of-structure/" target="_blank" rel="noopener">ที่มา: https://www.luxalgo.com/library/concept/break-of-structure/</a></p></aside>
+              <p class="step__l1"><span class="level-tag" data-level="1">L1</span> ที่คลิปหลักสอนคือแพทเทิร์น H, L, HL, HH สำหรับ long และ H, L, LL, LH สำหรับ short ซึ่งเป็นฉบับย่อของเขา Level 2 เพิ่ม BOS และ IFVG ไว้ข้างกัน ไม่ได้แทนที่ <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" data-fact="F6.5" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" data-fact="F6.8" aria-label="ดูในคลิปที่ 25:30">25:30</a></span></p>
               <div class="step__row">
                 <button class="ctrl" type="button" data-act="view" data-step="4">ดูบนกราฟ</button>
                 <a class="ctrl" href="learn.html#m6" aria-label="อ่านบทที่ 6">บทที่ 6</a>
-                <a class="ctrl" href="scenarios.html#S01" aria-label="เปิดสถานการณ์ S01">S01</a>
-                <a class="ctrl" href="scenarios.html#S03" aria-label="เปิดสถานการณ์ S03">S03</a>
-                <a class="ctrl" href="scenarios.html#S09" aria-label="เปิดสถานการณ์ S09">S09</a>
+                <a class="ctrl" href="confluences.html">Confluences</a>
+                <a class="ctrl" href="scenarios.html#S15" aria-label="เปิดสถานการณ์ S15">S15 · BOS</a>
+                <a class="ctrl" href="scenarios.html#S16" aria-label="เปิดสถานการณ์ S16">S16 · IFVG</a>
+                <a class="ctrl" href="scenarios.html#S20" aria-label="เปิดสถานการณ์ S20">S20</a>
               </div>
             </div>
           </li>
+
           <li class="step" data-step="5" id="step-5">
-            <span class="step__no" aria-hidden="true">05</span>
+            <span class="step__no" aria-hidden="true">3</span>
             <div class="step__body">
-              <h3>เข้าที่ pullback หลังโครงสร้างครบ</h3>
-              <p>TJR เรียกจุดนี้ว่า average entry คือเข้าตอนราคาพักตัวหลังโครงสร้างใหม่ปรากฏ ส่วนเงื่อนไขเข้าเป๊ะ ๆ ไม่อยู่ในคลิป เขาบอกว่ากลยุทธ์จริงมี confluence และกฎที่เข้มกว่า ช่วงเข้าบนกราฟตัวอย่างเป็นการอ่านของเว็บนี้ ไม่ใช่กฎของ TJR</p>
-              <p class="chips"><span class="badge-gap">จุดเข้าเป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:45">24:45</a></p>
+              <h3>ขั้น 3 · continuation: FVG หรือ equilibrium แล้วรอให้ถูก respect <span class="level-tag" data-level="2">L2</span></h3>
+              <p>BOS ครั้งเดียวยังไม่พอ เขาอยากเห็นว่าเทรนด์ใหม่ไปต่อได้ จึงรอ continuation confluence อย่างใดอย่างหนึ่ง: FVG (ช่องว่างราคาสามแท่งที่ไส้ของแท่งแรกกับแท่งที่สามไม่ซ้อนกัน) หรือ equilibrium (เส้น 50% ของช่วงจาก low ล่าสุดถึง high ล่าสุดในเทรนด์ขึ้น และกลับด้านในเทรนด์ลง) ใช้อันใดอันหนึ่งหรือทั้งสองก็ได้</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1798" target="_blank" rel="noopener" data-fact="P1.39" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:58">#1 29:58</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=381" target="_blank" rel="noopener" data-fact="P10.15" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 06:21">#10 06:21</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=185" target="_blank" rel="noopener" data-fact="P7.4" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 03:05">#7 03:05</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=288" target="_blank" rel="noopener" data-fact="P7.14" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 04:48">#7 04:48</a></p>
+              <p>ห้ามเข้าทันทีที่ราคาแตะ ถ้าเข้าตอนแตะ equilibrium หรือตอนแท่งยังวิ่งเข้า gap อยู่ คุณอาจโดน stop ต้องรอให้ราคาเข้าไปแล้วถูก respect คือมีแท่งปิดกลับออกมาในทิศเทรนด์ ถ้าแท่งปิดทะลุ gap แปลว่า gap โดน disrespect และเทรนด์ไม่ไปต่อ</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1913" target="_blank" rel="noopener" data-fact="P1.42" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 31:53">#1 31:53</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1944" target="_blank" rel="noopener" data-fact="P1.43" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 32:24">#1 32:24</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=858" target="_blank" rel="noopener" data-fact="P10.27" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 14:18">#10 14:18</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=970" target="_blank" rel="noopener" data-fact="P10.22" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 16:10">#10 16:10</a></p>
+              <p class="step__l1"><span class="level-tag" data-level="1">L1</span> เทียบได้กับ HL หรือ LH ที่ย่อกลับก่อนไปต่อ ซึ่งคลิปหลักเรียกว่าจุดที่ average entry อาจอยู่ตรงนั้น <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" data-fact="F6.5" aria-label="ดูในคลิปที่ 23:30">23:30</a></span></p>
               <div class="step__row">
                 <button class="ctrl" type="button" data-act="view" data-step="5">ดูบนกราฟ</button>
-                <a class="ctrl" href="learn.html#m6" aria-label="อ่านบทที่ 6">บทที่ 6</a>
-                <a class="ctrl" href="scenarios.html#S01" aria-label="เปิดสถานการณ์ S01">S01</a>
-                <a class="ctrl" href="scenarios.html#S09" aria-label="เปิดสถานการณ์ S09">S09</a>
+                <a class="ctrl" href="confluences.html">Confluences</a>
+                <a class="ctrl" href="scenarios.html#S15" aria-label="เปิดสถานการณ์ S15">S15</a>
+                <a class="ctrl" href="scenarios.html#S17" aria-label="เปิดสถานการณ์ S17">S17 · EQ</a>
+                <a class="ctrl" href="scenarios.html#S18" aria-label="เปิดสถานการณ์ S18">S18</a>
               </div>
             </div>
           </li>
+
           <li class="step" data-step="6" id="step-6">
-            <span class="step__no" aria-hidden="true">06</span>
+            <span class="step__no" aria-hidden="true">4</span>
             <div class="step__body">
-              <h3>ตั้งเป้าที่ liquidity ฝั่งตรงข้าม</h3>
-              <p>เป้าคือ liquidity แบบ low-resistance เช่น stacked highs เมื่อเข้า long หรือ level ของ session ฝั่งตรงข้าม เทรดไปหา low-resistance อย่าเทรดเข้าหา high-resistance ซึ่งคือ high หรือ low ที่ราคาเพิ่งกวาดแล้วกลับตัวจากมา</p>
-              <p class="chips"><span class="badge-gap">กฎ take-profit เป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:45">42:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2700" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 45:00">45:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2790" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 46:30">46:30</a></p>
+              <h3>ขั้น 4 · entry: แท่ง 5m ปิดออก หรือ 1m flip <span class="level-tag" data-level="2">L2</span></h3>
+              <p>มีสองทางยืนยันการเข้าจาก confluence: (ก) รอแท่ง 5m ถัดไปปิดตามทิศใหม่ หรือ (ข) แบบที่เขาทำและบอกว่าคนส่วนใหญ่ทำ คือลงไปดู 1m ตอนราคา 5m ย่อเข้า confluence แท่ง 1m จะไปในทิศตรงข้ามก่อน รอให้ 1m ทำ BOS หรือ IFVG กลับมาตามเทรนด์ใหม่ เขาเรียกจุดนี้ว่า entry confluence ผลคือเข้าได้ดีกว่ารอแท่ง 5m ปิด</p>
+              <p class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1975" target="_blank" rel="noopener" data-fact="P1.44" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 32:55">#1 32:55</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1996" target="_blank" rel="noopener" data-fact="P1.45" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 33:16">#1 33:16</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2060" target="_blank" rel="noopener" data-fact="P1.46" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 34:20">#1 34:20</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2206" target="_blank" rel="noopener" data-fact="P1.47" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 36:46">#1 36:46</a></p>
+              <p class="step__l1"><span class="level-tag" data-level="1">L1</span> คลิปหลักเรียกจุดเข้าว่า average entry หลังโครงสร้างครบ เงื่อนไขเข้าเป๊ะ ๆ ของกลยุทธ์จริงไม่ได้อยู่ในคลิปนั้น <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" data-fact="F6.5" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" data-fact="F6.8" aria-label="ดูในคลิปที่ 25:30">25:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" data-fact="F6.7" aria-label="ดูในคลิปที่ 24:45">24:45</a></span></p>
               <div class="step__row">
                 <button class="ctrl" type="button" data-act="view" data-step="6">ดูบนกราฟ</button>
+                <a class="ctrl" href="strategy.html">เทรดจริงของเขา</a>
+                <a class="ctrl" href="scenarios.html#S16" aria-label="เปิดสถานการณ์ S16">S16</a>
+                <a class="ctrl" href="scenarios.html#S22" aria-label="เปิดสถานการณ์ S22">S22</a>
+              </div>
+            </div>
+          </li>
+
+          <li class="step" data-step="7" id="step-7">
+            <span class="step__no" aria-hidden="true">5</span>
+            <div class="step__body">
+              <h3>ขั้น 5 · exit ที่ draws: TP1–TP3 และ stop-loss ตัวอย่างเดียว <span class="level-tag" data-level="2">L2</span></h3>
+              <p>ที่ออกคือจุดที่ orders ที่ถูกเติมไปแล้วจะปิดได้ คือ draws ฝั่งตรงข้าม เช่น high/low ของ higher time frame, high/low ของ session ก่อนหน้า, stacked level ที่ไล่เก็บทีละระดับ และ high/low ของแท่งข่าว ในเทรดตัวอย่างของเขา TP1, TP2 และ TP3 อยู่ที่ London lows, Asia lows และ hourly lows</p>
+              <p class="chips"><span class="badge-gap">สัดส่วนที่ปิดที่แต่ละ TP คลิปไม่ได้ระบุ</span><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2474" target="_blank" rel="noopener" data-fact="P1.20" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 41:14">#1 41:14</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" data-fact="P1.51" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/AGmAVyAuBE0?t=1796" target="_blank" rel="noopener" data-fact="P12.23" aria-label="ดูในคลิป #12 Advanced Liquidity Concepts ที่ 29:56">#12 29:56</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/AGmAVyAuBE0?t=1954" target="_blank" rel="noopener" data-fact="P12.24" aria-label="ดูในคลิป #12 Advanced Liquidity Concepts ที่ 32:34">#12 32:34</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/AGmAVyAuBE0?t=2076" target="_blank" rel="noopener" data-fact="P12.25" aria-label="ดูในคลิป #12 Advanced Liquidity Concepts ที่ 34:36">#12 34:36</a></p>
+              <p><b>ตัวอย่าง stop-loss เดียวในคลิป:</b> ในเทรด short ของเขา stop อยู่เหนือ highs ของขาเข้า เขาพูดแค่นั้น ไม่ได้บอกว่าเลือก high ไหนหรือห่างกี่ tick ตัวเลขที่เห็นบนเครื่องมือวาด position คือ stop เหนือจุดเข้า 4.50 จุด <span class="readout">ตัวเลขจากเครื่องมือบนจอ ไม่ใช่ที่เขาพูด</span> นี่เป็นตัวอย่าง ไม่ใช่กฎ</p>
+              <p class="chips"><span class="badge-gap">กฎ stop-loss คลิปไม่ได้ระบุ</span><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" data-fact="P1.50" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2125" target="_blank" rel="noopener" data-fact="P1.59" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:25">#1 35:25</a></p>
+              <p class="step__l1"><span class="level-tag" data-level="1">L1</span> เป้าคือ liquidity แบบ low-resistance เช่น stacked highs เมื่อเข้า long หรือ level ของ session ฝั่งตรงข้าม เทรดเข้าหา low-resistance ไม่เทรดเข้าหา high-resistance <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" data-fact="F8.4" aria-label="ดูในคลิปที่ 42:45">42:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2790" target="_blank" rel="noopener" data-fact="F8.7" aria-label="ดูในคลิปที่ 46:30">46:30</a></span></p>
+              <div class="step__row">
+                <button class="ctrl" type="button" data-act="view" data-step="7">ดูบนกราฟ</button>
                 <a class="ctrl" href="learn.html#m8" aria-label="อ่านบทที่ 8">บทที่ 8</a>
+                <a class="ctrl" href="strategy.html">เทรดจริงของเขา</a>
                 <a class="ctrl" href="scenarios.html#S12" aria-label="เปิดสถานการณ์ S12">S12</a>
                 <a class="ctrl" href="scenarios.html#S14" aria-label="เปิดสถานการณ์ S14">S14</a>
               </div>
             </div>
           </li>
-          <li class="step" data-step="7" id="step-7">
-            <span class="step__no" aria-hidden="true">07</span>
+
+          <li class="step" data-step="8" id="step-8">
+            <span class="step__no" aria-hidden="true">R</span>
             <div class="step__body">
-              <h3>เขียน stop-loss ขนาด และความเสี่ยงเอง</h3>
-              <p>คลิปไม่ได้พูดถึง stop-loss, ขนาดสถานะ, ความเสี่ยงต่อเทรด และวิธีรับมือเมื่อ confirmation ล้ม เว็บนี้จึงไม่ใส่ตัวเลขให้ ช่องกฎของคุณเองอยู่ในเช็คลิสต์ด้านล่าง</p>
-              <p class="chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></p>
+              <h3>ความเสี่ยง · ขนาดต่อเทรด (ไปหน้าความเสี่ยง) <span class="level-tag" data-level="2">L2</span></h3>
+              <p>เขาใช้จำนวน contract คงที่ต่อเทรดแทนการคำนวณใหม่ทุกครั้ง โดยดู stop-loss ที่กว้างที่สุดที่เจอบ่อย เขาบอกว่า 1–3% ต่อเทรดคือจุดที่ &quot;มักจะพอดี&quot; ไม่ใช่ 5–20% และเขาลดขนาดลงครึ่งหนึ่งเมื่อ stop กว้างผิดปกติหรือวันที่มีข่าว นี่คือสิ่งที่เขาเล่าเกี่ยวกับตัวเอง สรุปเพื่อการเรียนจากคลิป ไม่ใช่คำแนะนำการลงทุน</p>
+              <p class="chips"><span class="badge-gap">max daily loss คลิปไม่ได้ระบุ</span><a class="ts-chip ts-chip--pl" href="https://youtu.be/hBnD6T1M4w8?t=642" target="_blank" rel="noopener" data-fact="P2.19" aria-label="ดูในคลิป #2 Risk Management &amp; Psychology ที่ 10:42">#2 10:42</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/hBnD6T1M4w8?t=740" target="_blank" rel="noopener" data-fact="P2.23" aria-label="ดูในคลิป #2 Risk Management &amp; Psychology ที่ 12:20">#2 12:20</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/hBnD6T1M4w8?t=687" target="_blank" rel="noopener" data-fact="P2.21" aria-label="ดูในคลิป #2 Risk Management &amp; Psychology ที่ 11:27">#2 11:27</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/hBnD6T1M4w8?t=849" target="_blank" rel="noopener" data-fact="P2.26" aria-label="ดูในคลิป #2 Risk Management &amp; Psychology ที่ 14:09">#2 14:09</a></p>
               <div class="step__row">
-                <button class="ctrl" type="button" data-act="view" data-step="7">ดูบนกราฟ</button>
+                <button class="ctrl" type="button" data-act="view" data-step="8">ดูบนกราฟ</button>
+                <a class="ctrl" href="risk.html">ไปหน้าความเสี่ยง</a>
                 <a class="ctrl" href="#own-rules">เขียนกฎของคุณ</a>
               </div>
             </div>
           </li>
         </ol>
 
-        <figure class="chart-frame pf" data-ui="chart" aria-label="กราฟจำลองประกอบขั้นตอนเทรด">
+        <figure class="chart-frame pf" data-ui="chart" aria-label="กราฟจำลองประกอบลำดับเทรดเต็มระบบ">
           <div class="chart-frame__bar">
             <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
             <span class="sim-tag">จำลอง</span>
-            <span class="chart-frame__meta" data-k="meta">ขั้นที่ 1 จาก 7</span>
+            <span class="chart-frame__meta" data-k="meta">ขั้นที่ 1 จาก 8</span>
           </div>
           <div class="chart-frame__canvas"></div>
           <p class="pf__now" role="status" aria-live="polite" data-k="now"><b data-k="now-n">ขั้นที่ 1</b> <span data-k="now-t">กราฟตัวอย่างต้องใช้ JavaScript</span> <span class="badge-gap" data-k="now-gap" hidden>คลิปไม่ได้ระบุ</span></p>
@@ -191,8 +294,9 @@
             </div>
             <div class="pf__row pf__row--opts">
               <div class="ctrl-group" role="group" aria-label="ตัวอย่างฝั่งไหน" data-k="sides">
-                <button class="ctrl" type="button" data-side="S01" aria-pressed="true">Long</button>
-                <button class="ctrl" type="button" data-side="S03" aria-pressed="false">Short</button>
+                <button class="ctrl" type="button" data-side="S15" aria-pressed="true">Long · BOS</button>
+                <button class="ctrl" type="button" data-side="S16" aria-pressed="false">Short · IFVG</button>
+                <button class="ctrl" type="button" data-side="S22" aria-pressed="false">Long · ตามเวลา NY</button>
               </div>
               <button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button>
               <span class="pf__seed" data-k="seed"></span>
@@ -205,7 +309,7 @@
     <section class="pb-sec" id="checklist" aria-labelledby="ck-h">
       <header class="pb-sec__head">
         <h2 id="ck-h">เช็คลิสต์ก่อนเข้าเทรด</h2>
-        <p>ติ๊กทีละข้อต่อหนึ่งเทรด แล้วกดเริ่มเทรดใหม่ ข้อ stop-loss ขนาด และความเสี่ยงเป็นกฎของคุณเอง ไม่ใช่ของคลิป เก็บไว้ในเบราว์เซอร์นี้เท่านั้น</p>
+        <p>ติ๊กทีละข้อต่อหนึ่งเทรด แล้วกดเริ่มเทรดใหม่ ข้อ stop-loss สัดส่วนที่ปิดแต่ละ TP และ max daily loss เป็นกฎของคุณเอง ไม่ใช่ของคลิป ส่วนขนาดต่อเทรดดูที่ <a href="risk.html">หน้าความเสี่ยง</a> เก็บไว้ในเบราว์เซอร์นี้เท่านั้น</p>
       </header>
       <div class="ck">
         <aside class="ck__side" aria-label="ความคืบหน้าของเช็คลิสต์">
@@ -214,7 +318,7 @@
               <svg viewBox="0 0 64 64" aria-hidden="true"><circle class="ring__bg" cx="32" cy="32" r="26"/><circle class="ring__fg" cx="32" cy="32" r="26" pathLength="100" transform="rotate(-90 32 32)"/></svg>
             </div>
             <div class="ck__nums">
-              <p class="ck__n"><b data-k="done">0</b> / <span data-k="total">11</span></p>
+              <p class="ck__n"><b data-k="done">0</b> / <span data-k="total">13</span></p>
               <p class="ck__state" role="status" aria-live="polite" data-k="state">ยังไม่ได้ติ๊กข้อไหน</p>
             </div>
           </div>
@@ -230,40 +334,46 @@
 
         <ul class="ck__list" data-k="list">
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-asia-london"><span class="check-row__text">มาร์ก high และ low ของ Asia กับ London แล้ว</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1965" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 32:45">32:45</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-trend"><span class="check-row__text">ดูเทรนด์ของ higher time frame (4h และ 1h) และตำแหน่งของราคาในเทรนด์นั้นแล้ว</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=57" target="_blank" rel="noopener" data-fact="P3.3" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 00:57">#3 00:57</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1265" target="_blank" rel="noopener" data-fact="P1.24" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 21:05">#1 21:05</a></span></label>
           </li>
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-htf"><span class="check-row__text">มาร์ก previous-day high/low และ high/low ของ 1H กับ 4H แล้ว</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1710" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 28:30">28:30</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-map"><span class="check-row__text">มาร์ก draws ของวันแล้ว: previous-day high/low, high/low ของ Asia กับ London, hourly highs และ stacked ที่ยังไม่ถูกเก็บ</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1163" target="_blank" rel="noopener" data-fact="P1.27" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 19:23">#1 19:23</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" data-fact="F8.1" aria-label="ดูในคลิปที่ 39:45">39:45</a></span></label>
           </li>
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-stack"><span class="check-row__text">จด stacked highs หรือ lows ที่ยังไม่ถูกเก็บแล้ว (low-resistance)</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2385" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 39:45">39:45</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-bias"><span class="check-row__text">ตั้ง bias แล้ว (gap หรือ equilibrium ถูก respect หรือโดนปิดทะลุ) และรู้ว่าเป้าคือ draw ไหน</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=155" target="_blank" rel="noopener" data-fact="P3.6" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 02:35">#3 02:35</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/ironJFzNBic?t=11" target="_blank" rel="noopener" data-fact="P3.8" aria-label="ดูในคลิป #3 How To Find Daily Bias ที่ 00:11">#3 00:11</a></span></label>
           </li>
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-ny"><span class="check-row__text">ตอนนี้เป็นช่วง NY open และฉันเทรด US index</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-time"><span class="check-row__text">ตอนนี้อยู่ในช่วง NY: manipulation 09:30–09:50 หรือช่วงเข้า 09:50–10:10 ET และฉันเทรด US index</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=200" target="_blank" rel="noopener" data-fact="P5.13" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:20">#5 03:20</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=221" target="_blank" rel="noopener" data-fact="P5.14" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:41">#5 03:41</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" data-fact="F7.11" aria-label="ดูในคลิปที่ 36:00">36:00</a></span></label>
           </li>
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-sweep"><span class="check-row__text">ราคา sweep ระดับที่มาร์กไว้แล้ว และฉันรู้ว่านี่เป็นแค่โอกาส ยังไม่ใช่สัญญาณ</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=945" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 15:45">15:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1350" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 22:30">22:30</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-sweep"><span class="check-row__text">ราคา sweep high/low ที่สำคัญแล้ว (ถ้าเทรด ES หรือ NQ ดู SMT ประกอบ) และฉันรู้ว่านี่เป็นแค่โอกาส ยังไม่ใช่สัญญาณ</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1395" target="_blank" rel="noopener" data-fact="F6.4" aria-label="ดูในคลิปที่ 23:15">23:15</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" data-fact="P1.19" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=281" target="_blank" rel="noopener" data-fact="P6.12" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 04:41">#6 04:41</a></span></label>
           </li>
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-structure"><span class="check-row__text">โครงสร้างใหม่ครบบน 5m หรือ 1m: L, H, HL, HH (long) หรือ H, L, LL, LH (short)</span><span class="check-row__meta chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1530" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 25:30">25:30</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2250" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 37:30">37:30</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-confirm"><span class="check-row__text">มี confirmation: แท่งปิดทะลุ swing ล่าสุด (BOS) หรือปิดทะลุ gap (IFVG) ไม่ใช่แค่ไส้</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1767" target="_blank" rel="noopener" data-fact="P1.37" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:27">#1 29:27</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=153" target="_blank" rel="noopener" data-fact="P11.8" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 02:33">#11 02:33</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=548" target="_blank" rel="noopener" data-fact="P8.19" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 09:08">#8 09:08</a></span></label>
           </li>
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-entry"><span class="check-row__text">รอเข้าที่ pullback หลังโครงสร้างครบ</span><span class="check-row__meta chips"><span class="badge-gap">จุดเข้าเป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1485" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 24:45">24:45</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-cont"><span class="check-row__text">มี continuation (FVG หรือ equilibrium) และราคา respect แล้ว ฉันไม่ได้เข้าตอนแตะครั้งแรก</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1798" target="_blank" rel="noopener" data-fact="P1.39" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 29:58">#1 29:58</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1913" target="_blank" rel="noopener" data-fact="P1.42" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 31:53">#1 31:53</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1944" target="_blank" rel="noopener" data-fact="P1.43" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 32:24">#1 32:24</a></span></label>
           </li>
           <li class="ck__item">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-target"><span class="check-row__text">เป้าอยู่ที่ liquidity แบบ low-resistance หรือ level ของ session ฝั่งตรงข้าม ไม่ใช่ที่ high-resistance</span><span class="check-row__meta chips"><span class="badge-gap">กฎ take-profit เป๊ะ ๆ คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2565" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 42:45">42:45</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2790" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 46:30">46:30</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-entry"><span class="check-row__text">เข้าด้วยแท่ง 5m ที่ปิดออกจาก confluence หรือ 1m flip</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1975" target="_blank" rel="noopener" data-fact="P1.44" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 32:55">#1 32:55</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1996" target="_blank" rel="noopener" data-fact="P1.45" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 33:16">#1 33:16</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-target"><span class="check-row__text">เป้า TP1–TP3 อยู่ที่ draws (session, higher time frame, stacked) ไม่ใช่ที่ high-resistance</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" data-fact="P1.51" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/AGmAVyAuBE0?t=1796" target="_blank" rel="noopener" data-fact="P12.23" aria-label="ดูในคลิป #12 Advanced Liquidity Concepts ที่ 29:56">#12 29:56</a><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2790" target="_blank" rel="noopener" data-fact="F8.7" aria-label="ดูในคลิปที่ 46:30">46:30</a></span></label>
+          </li>
+          <li class="ck__item">
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-risk"><span class="check-row__text">กำหนดขนาดต่อเทรดแล้ว (contract คงที่ ตาม stop ที่กว้างที่สุดที่เจอบ่อย ดูหน้าความเสี่ยง)</span><span class="check-row__meta chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/hBnD6T1M4w8?t=642" target="_blank" rel="noopener" data-fact="P2.19" aria-label="ดูในคลิป #2 Risk Management &amp; Psychology ที่ 10:42">#2 10:42</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/hBnD6T1M4w8?t=687" target="_blank" rel="noopener" data-fact="P2.21" aria-label="ดูในคลิป #2 Risk Management &amp; Psychology ที่ 11:27">#2 11:27</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/hBnD6T1M4w8?t=849" target="_blank" rel="noopener" data-fact="P2.26" aria-label="ดูในคลิป #2 Risk Management &amp; Psychology ที่ 14:09">#2 14:09</a></span></label>
           </li>
           <li class="ck__item ck__item--own" id="own-rules">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-sl"><span class="check-row__text">กำหนด stop-loss ของเทรดนี้แล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></label>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-sl"><span class="check-row__text">กำหนด stop-loss ของเทรดนี้แล้ว</span><span class="check-row__meta chips"><span class="badge-gap">กฎ stop-loss คลิปไม่ได้ระบุ</span><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" data-fact="P1.50" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a></span></label>
             <div class="own"><label class="own__lab" for="rule-sl">กฎ stop-loss ของคุณเอง</label><input class="own__in" id="rule-sl" type="text" data-rule="sl" maxlength="160" autocomplete="off" spellcheck="false"></div>
           </li>
           <li class="ck__item ck__item--own">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-size"><span class="check-row__text">กำหนดขนาดสถานะของเทรดนี้แล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></label>
-            <div class="own"><label class="own__lab" for="rule-size">กฎขนาดสถานะของคุณเอง</label><input class="own__in" id="rule-size" type="text" data-rule="size" maxlength="160" autocomplete="off" spellcheck="false"></div>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-tp"><span class="check-row__text">กำหนดสัดส่วนที่ปิดที่แต่ละ TP แล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" data-fact="P1.51" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a></span></label>
+            <div class="own"><label class="own__lab" for="rule-tp">กฎสัดส่วนที่ปิดแต่ละ TP ของคุณเอง</label><input class="own__in" id="rule-tp" type="text" data-rule="tp" maxlength="160" autocomplete="off" spellcheck="false"></div>
           </li>
           <li class="ck__item ck__item--own">
-            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-risk"><span class="check-row__text">กำหนดความเสี่ยงต่อเทรดแล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></label>
-            <div class="own"><label class="own__lab" for="rule-risk">กฎความเสี่ยงของคุณเอง</label><input class="own__in" id="rule-risk" type="text" data-rule="risk" maxlength="160" autocomplete="off" spellcheck="false"></div>
+            <label class="check-row"><input class="m-check" type="checkbox" data-id="c-maxloss"><span class="check-row__text">กำหนด max daily loss แล้ว</span><span class="check-row__meta chips"><span class="badge-gap">คลิปไม่ได้ระบุ</span></span></label>
+            <div class="own"><label class="own__lab" for="rule-maxloss">กฎ max daily loss ของคุณเอง</label><input class="own__in" id="rule-maxloss" type="text" data-rule="maxloss" maxlength="160" autocomplete="off" spellcheck="false"></div>
           </li>
         </ul>
       </div>
@@ -271,40 +381,61 @@
 
     <section class="pb-sec" id="sessions" aria-labelledby="ses-h">
       <header class="pb-sec__head">
-        <h2 id="ses-h">ตาราง session วันนี้</h2>
-        <p data-k="ses-lead">ช่วง ET ตามคลิป แปลงเป็นเวลาไทยของวันนี้โดยนาฬิกา (+1) คือวันที่ไทยเลยวันที่ ET ของเวลานั้นไปหนึ่งวัน</p>
+        <h2 id="ses-h">ตาราง session และช่วงเวลา NY วันนี้</h2>
+        <p data-k="ses-lead">ช่วง ET ตามคลิป แปลงเป็นเวลาไทยของวันนี้โดยนาฬิกา (+1) คือวันที่ไทยเลยวันที่ ET ของเวลานั้นไปหนึ่งวัน แถวที่สว่างคือช่วงที่เป็นอยู่ตอนนี้</p>
       </header>
       <div class="ses" data-k="ses">
         <table class="ses__tbl">
           <caption class="vh">session ของวันเทรดนี้ ช่วงเวลา ET และเวลาไทย</caption>
           <thead><tr><th scope="col">Session</th><th scope="col">ET</th><th scope="col">เวลาไทย</th><th scope="col">ที่คลิปบอก</th></tr></thead>
           <tbody>
-            <tr data-row="asia"><th scope="row">Asia</th><td data-k="et-asia">18:00–03:00</td><td data-k="th-asia">—</td><td>ตลาดเริ่มขยับก่อน ใช้มาร์ก high/low ไว้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
-            <tr data-row="london"><th scope="row">London</th><td data-k="et-london">03:00–08:30</td><td data-k="th-london">—</td><td>ปิดทางการ 11:00 แต่ TJR ตัดที่ 08:30 <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
-            <tr data-row="ny-pre"><th scope="row">NY pre-market</th><td data-k="et-ny-pre">08:30–09:30</td><td data-k="th-ny-pre">—</td><td>London ที่นับสิ้นสุดตรงนี้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
-            <tr data-row="ny"><th scope="row">New York</th><td data-k="et-ny">09:30–17:00</td><td data-k="th-ny">—</td><td>ช่วงที่ TJR เทรด US index <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 36:00">36:00</a></td></tr>
-            <tr data-row="spread"><th scope="row">Spread hour</th><td data-k="et-spread">17:00–18:00</td><td data-k="th-spread">—</td><td>เทรดไม่ได้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
+            <tr data-row="asia"><th scope="row">Asia</th><td data-k="et-asia">18:00–03:00</td><td data-k="th-asia">—</td><td>ตลาดเริ่มขยับก่อน ใช้มาร์ก high/low ไว้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" data-fact="F7.7" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
+            <tr data-row="london"><th scope="row">London</th><td data-k="et-london">03:00–08:30</td><td data-k="th-london">—</td><td>ปิดทางการ 11:00 แต่ TJR ตัดที่ 08:30 <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" data-fact="F7.7" aria-label="ดูในคลิปที่ 31:15">31:15</a> คลิปเก่าบอกว่าปิด 11:30 ผลปฏิบัติเหมือนกันเพราะเขาตัดที่ 08:30 <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=69" target="_blank" rel="noopener" data-fact="P5.5" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 01:09">#5 01:09</a></td></tr>
+            <tr data-row="ny-pre"><th scope="row">NY pre-market</th><td data-k="et-ny-pre">08:30–09:30</td><td data-k="th-ny-pre">—</td><td>London ที่นับสิ้นสุดตรงนี้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" data-fact="F7.7" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
+            <tr data-row="ny"><th scope="row">New York</th><td data-k="et-ny">09:30–17:00</td><td data-k="th-ny">—</td><td>ช่วงที่ TJR เทรด US index <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2160" target="_blank" rel="noopener" data-fact="F7.11" aria-label="ดูในคลิปที่ 36:00">36:00</a></td></tr>
+            <tr data-row="spread"><th scope="row">Spread hour</th><td data-k="et-spread">17:00–18:00</td><td data-k="th-spread">—</td><td>เทรดไม่ได้ <a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1875" target="_blank" rel="noopener" data-fact="F7.7" aria-label="ดูในคลิปที่ 31:15">31:15</a></td></tr>
           </tbody>
         </table>
       </div>
       <p class="ses__note" data-k="ses-note">เวลาไทยของแต่ละ session ขยับตามเวลาออมแสงของสหรัฐ นาฬิกาคำนวณให้เองทุกวัน</p>
+
+      <h3 class="ses__sub">ช่วงเวลาใน New York</h3>
+      <div class="ses" data-k="ses-win">
+        <table class="ses__tbl">
+          <caption class="vh">ช่วงเวลาของวัน New York ตามคลิป เวลา ET และเวลาไทย</caption>
+          <thead><tr><th scope="col">ช่วง</th><th scope="col">ET</th><th scope="col">เวลาไทย</th><th scope="col">ที่คลิปบอก</th></tr></thead>
+          <tbody>
+            <tr data-wrow="open"><th scope="row">NY open</th><td data-k="et-w-open">09:30</td><td data-k="th-w-open">—</td><td>ตลาดเปิด เงินใหม่เข้า จึงคาดว่าจะเห็น manipulation <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=186" target="_blank" rel="noopener" data-fact="P5.12" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:06">#5 03:06</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=276" target="_blank" rel="noopener" data-fact="P5.16" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 04:36">#5 04:36</a></td></tr>
+            <tr data-wrow="manipulation"><th scope="row">Manipulation</th><td data-k="et-w-manipulation">09:30–09:50</td><td data-k="th-w-manipulation">—</td><td>ช่วงที่มักเห็นการกวาด liquidity บางวันเสร็จราว 09:40 <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=200" target="_blank" rel="noopener" data-fact="P5.13" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:20">#5 03:20</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=286" target="_blank" rel="noopener" data-fact="P5.17" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 04:46">#5 04:46</a></td></tr>
+            <tr data-wrow="entry"><th scope="row">Entry (macro)</th><td data-k="et-w-entry">09:50–10:10</td><td data-k="th-w-entry">—</td><td>ช่วงเข้าที่เขาบอกว่าเหมาะ หลังจากนั้นก็ไปต่อ <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=221" target="_blank" rel="noopener" data-fact="P5.14" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:41">#5 03:41</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=317" target="_blank" rel="noopener" data-fact="P5.18" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 05:17">#5 05:17</a></td></tr>
+            <tr data-wrow="cutoff"><th scope="row">Cut-off ของเขา</th><td data-k="et-w-cutoff">10:30</td><td data-k="th-w-cutoff">—</td><td>ถ้ายังไม่เจอเทรดถึงตรงนี้ เขาเลิกวันนั้น พูดถึงตัวเขาเอง <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=317" target="_blank" rel="noopener" data-fact="P5.19" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 05:17">#5 05:17</a></td></tr>
+            <tr data-wrow="pm"><th scope="row">PM session</th><td data-k="et-w-pm">13:00</td><td data-k="th-w-pm">—</td><td>เริ่มราว 13:00 เขาไม่เทรดช่วงนี้ <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=233" target="_blank" rel="noopener" data-fact="P5.15" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 03:53">#5 03:53</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ses__note">ช่วงเวลาไม่เข้มงวด: บางวันเขาเข้า 09:45 หรือ 10:20 <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=566" target="_blank" rel="noopener" data-fact="P5.26" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 09:26">#5 09:26</a> ต้องมี confluence ครบก่อนเข้า เวลาอย่างเดียวไม่ใช่สัญญาณ <a class="ts-chip ts-chip--pl" href="https://youtu.be/L4xz2o23aPQ?t=330" target="_blank" rel="noopener" data-fact="P5.20" aria-label="ดูในคลิป #5 Time Theory Explained ที่ 05:30">#5 05:30</a></p>
       <p class="ses__note">เสาร์–อาทิตย์: นาฬิกาแสดงว่าไม่มี session ที่เทรดได้ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p>
     </section>
 
     <section class="pb-sec" id="gaps" aria-labelledby="gap-h">
       <header class="pb-sec__head">
         <h2 id="gap-h">สิ่งที่คลิปไม่ได้บอก</h2>
-        <p>คลิปบอกเองว่าไม่ได้ลงรายละเอียดกลยุทธ์จริง และ liquidity เป็นเพียงชิ้นเดียวของภาพรวม เว็บนี้จึงไม่เติมตัวเลขในช่องเหล่านี้ <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></p>
+        <p>แม้รวมทั้งคลิปหลักและเพลย์ลิสต์ ยังมีเรื่องเหล่านี้ที่เขาไม่ได้บอก เว็บนี้จึงไม่เติมตัวเลขในช่องเหล่านี้ คลิปหลักบอกเองว่าไม่ได้ลงรายละเอียดกลยุทธ์จริง <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=2880" target="_blank" rel="noopener" data-fact="F9.1" aria-label="ดูในคลิปที่ 48:00">48:00</a></span></p>
       </header>
       <ul class="gaps">
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ตำแหน่ง stop-loss</p></li>
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ขนาดสถานะ</p></li>
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ความเสี่ยงต่อเทรด</p></li>
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>กฎ take-profit เป๊ะ ๆ นอกจากแนวคิดว่า liquidity เป็นเป้าราคา</p></li>
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>Win rate และ backtest</p></li>
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>กฎกรอง news</p></li>
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ต้องทำอย่างไรเมื่อ confirmation ล้ม</p></li>
-        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>เงื่อนไขเข้าเป๊ะ ๆ ของกลยุทธ์จริง ซึ่งมี confluence อื่นร่วมด้วย</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>กฎ stop-loss เป็นคำพูด (มีตัวอย่างเดียวคือเหนือ highs ของขาเข้า) <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2113" target="_blank" rel="noopener" data-fact="P1.50" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:13">#1 35:13</a></span></p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>สัดส่วนของสถานะที่ปิดที่แต่ละ TP</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>เป้า win rate และ R:R</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ขาดทุนสูงสุดต่อวันและต่อสัปดาห์</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>จำนวนเทรดสูงสุดต่อวัน</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>วิธีจัดการเทรดที่ราคากลับตัวสวน มีแค่ให้ปล่อยให้ตลาดพิสูจน์ว่าเขาผิดได้ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2341" target="_blank" rel="noopener" data-fact="P1.52" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 39:01">#1 39:01</a></span></p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ขนาดขั้นต่ำของ FVG</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>วิธีเลือก swing ล่าสุดเมื่อ swing หลายอันอยู่ชิดกัน</p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>กฎ time frame ของ IFVG เขาโชว์ตัวอย่างบน 4h เท่านั้น <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=388" target="_blank" rel="noopener" data-fact="P8.21" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 06:28">#8 06:28</a></span></p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>กฎ stacked IFVG ฝั่งกลับด้าน (gap bearish ซ้อนกัน) <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=932" target="_blank" rel="noopener" data-fact="P8.37" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 15:32">#8 15:32</a></span></p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>ค่าตั้ง Gann box ที่เขาบอกว่าจะโชว์แต่ไม่ได้โชว์ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=56" target="_blank" rel="noopener" data-fact="P7.2" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 00:56">#7 00:56</a></span></p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>SMT ย่อมาจากอะไร เขาบอกว่าไม่รู้ <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=64" target="_blank" rel="noopener" data-fact="P6.5" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 01:04">#6 01:04</a></span></p></li>
+        <li><span class="badge-gap">คลิปไม่ได้ระบุ</span><p>advanced draws ทั้งเจ็ดที่เขาพูดถึง ในคลิปเดินจริงห้ากลุ่ม <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/AGmAVyAuBE0?t=74" target="_blank" rel="noopener" data-fact="P12.2" aria-label="ดูในคลิป #12 Advanced Liquidity Concepts ที่ 01:14">#12 01:14</a></span></p></li>
       </ul>
     </section>
 

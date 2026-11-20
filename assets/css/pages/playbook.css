@@ -1,9 +1,10 @@
 /*
-  TJR Liquidity: the playbook page (Task 12). An app screen with long content (spec 7.4, 10): a head with the
-  live session clock, the 7-step procedure as a numbered rail beside one chart, the checklist with its progress
-  ring, today's session table and the list of what the clip does not say. Page CSS only for what the kit and
-  site.css lack. Tokens: assets/css/tokens.css; components: site.css (.chart-frame, .ctrl, .ts-chip, .badge-gap,
-  .check-row). Motion: the clock's live dot, the ring filling, the active step; none of it under reduced motion.
+  TJR Liquidity: the playbook page (v2). An app screen with long content: a head with the live session clock and
+  the New York window, the 8-step chain as a numbered rail beside one chart (step 0 carries the bias worksheet),
+  the checklist with its progress ring, today's session table and the New York windows, and the list of what the
+  clips do not say. Page CSS only for what the kit and site.css lack. Tokens: assets/css/tokens.css; components:
+  site.css (.chart-frame, .ctrl, .ts-chip, .badge-gap, .check-row, .older-note, .web-def, .level-tag).
+  Motion: the clock's live dot, the ring filling, the active step; none of it under reduced motion.
 */
 
 .pb, .pb .chart-frame { --chart-h: clamp(280px, 27vw, 400px); }
@@ -22,6 +23,8 @@
 .pb-head__text h1 { font-size: clamp(32px, 2.4vw + 14px, 52px); }
 .pb-head__text .t-lead { margin: 0; color: var(--ink); }
 .pb-head__text .btn { justify-self: start; }
+.pb-head__src { margin: 0; font-size: var(--t-small); line-height: 1.7; color: var(--muted); }
+.pb-head__src .ts-chip { vertical-align: middle; margin-left: var(--s-1); }
 
 .clock {
   display: grid; gap: var(--s-5); min-width: 0; padding: var(--s-5);
@@ -56,6 +59,7 @@
 .clock__lab { margin: 0; font: 400 var(--t-label)/1.5 var(--font-text); color: var(--c-axis); }
 .clock__count { margin: 0; font: 500 clamp(28px, 2vw + 14px, 44px)/1.05 var(--font-mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--c-liq); overflow-wrap: anywhere; }
 .clock__at { margin: 0; font: 400 var(--t-label)/1.6 var(--font-mono); color: var(--c-axis); font-variant-numeric: tabular-nums; }
+.clock__win { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); font-size: var(--t-small); line-height: 1.6; color: var(--c-liq); }
 .clock__rule { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); font-size: var(--t-small); line-height: 1.6; color: var(--c-text); }
 
 /* ================================================================ sections */
@@ -64,6 +68,9 @@
 .pb-sec__head h2 { font-size: var(--t-h2); }
 .pb-sec__head p { margin: 0; color: var(--ink); font-size: var(--t-body); line-height: 1.75; }
 .pb-sec__head .chips { display: inline-flex; vertical-align: middle; margin-left: var(--s-1); }
+.pb-sec__head .older-note { margin-block: var(--s-2) 0; }
+.pb-sec__head .older-note .chips { display: flex; margin-left: 0; }
+.pb-sec__head .level-tag { vertical-align: baseline; }
 @media (max-width: 1023px) { .pb-sec { padding-block: var(--s-7); } }
 
 /* ================================================================ procedure: rail + chart */
@@ -85,13 +92,25 @@
 .step::after { content: ""; position: absolute; left: calc(var(--s-4) + 21px); top: calc(100% + 1px); width: 2px; height: var(--s-4); background: var(--line-strong); }
 .step:last-child::after { display: none; }
 .step__no {
-  display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  display: grid; place-items: center; width: 44px; height: 44px; overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
   font: 500 var(--t-small)/1 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; background: var(--c-bg);
 }
 .step__body { display: grid; gap: var(--s-3); min-width: 0; align-content: start; }
 .step__body h3 { font-size: var(--t-card); line-height: 1.4; }
 .step__body p { margin: 0; font-size: var(--t-body); line-height: 1.75; color: var(--ink); }
 .step__body .chips { gap: var(--s-2); }
+.step__l1 { padding: var(--s-3); border-left: 2px solid color-mix(in oklab, var(--c-liq, var(--ink)) 60%, transparent); background: color-mix(in oklab, var(--ink) 4%, transparent); font-size: var(--t-small); line-height: 1.7; }
+.step__l1 .level-tag { margin-right: var(--s-1); }
+.step__l1 .chips { display: inline-flex; vertical-align: middle; margin-left: var(--s-1); }
+.step__note { padding: var(--s-3); border: 1px dashed var(--line-strong); border-radius: var(--r-sm); font-size: var(--t-small) !important; }
+.step__note b { color: var(--c-liq); font-weight: 500; }
+.step__note .chips { display: inline-flex; vertical-align: middle; margin-left: var(--s-1); }
+.step__body h3 .level-tag { margin-left: var(--s-2); }
+.step__body .web-def { margin-block: 0; }
+.readout {
+  display: inline-block; padding: 2px var(--s-2); border: 1px dashed var(--line-strong); border-radius: var(--r-sm);
+  font: 500 var(--t-label)/1.5 var(--font-mono); color: var(--muted); white-space: normal;
+}
 .step__row { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .step__row .ctrl { text-decoration: none; padding-inline: var(--s-3); }
 .step.is-active { border-color: var(--c-liq); }
@@ -124,6 +143,7 @@ html:not([data-motion="off"]) .step::after { transition: background-color 240ms 
 .pf__row--opts { gap: var(--s-2) var(--s-4); }
 .pf__seed { margin-left: auto; font: 400 var(--t-label)/1 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .pf .ctrl-group > .ctrl { padding-inline: var(--s-3); }
+.pf .ctrl-group, .bw .ctrl-group { flex-wrap: wrap; }
 .ctrl[data-act="auto"] { min-width: 150px; }
 .ctrl[data-act="auto"][data-state="on"] svg { display: none; }
 @media (max-width: 639px) {
@@ -131,6 +151,35 @@ html:not([data-motion="off"]) .step::after { transition: background-color 240ms 
   .pf__seed { margin-left: 0; flex-basis: 100%; }
   .pf .chart-frame__meta { margin-left: 0; }
 }
+
+/* ================================================================ bias worksheet (inside step 0) */
+.bw {
+  display: grid; gap: var(--s-4); min-width: 0; padding: var(--s-4); cursor: default;
+  background: var(--c-bg); color: var(--c-text); border: 1px solid var(--line-strong); border-radius: var(--r-lg);
+}
+.bw h4 { margin: 0; font: 500 var(--t-card)/1.4 var(--font-text); color: var(--c-text); }
+.bw p { margin: 0; font-size: var(--t-small); line-height: 1.7; color: var(--c-text); }
+.bw__lead { color: var(--c-axis) !important; }
+.bw__bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3); }
+.bw .chart-frame { --chart-h: clamp(220px, 46vw, 280px); }
+.bw__q { margin: 0; padding: var(--s-3) 0 0; border: 0; border-top: 1px solid var(--line); display: grid; gap: var(--s-2); min-width: 0; }
+.bw__q legend { float: left; width: 100%; padding: 0; margin: 0 0 var(--s-2); font-size: var(--t-small); line-height: 1.7; color: var(--c-text); }
+.bw__q legend + * { clear: both; }
+.bw__q legend .chips { display: inline-flex; vertical-align: middle; margin-left: var(--s-1); }
+.bw__n {
+  display: inline-grid; place-items: center; width: 24px; height: 24px; margin-right: var(--s-2); border-radius: var(--r-sm);
+  font: 500 var(--t-label)/1 var(--font-mono); background: color-mix(in oklab, var(--c-liq) 18%, transparent); color: var(--c-liq); vertical-align: middle;
+}
+.bw__out { display: grid; gap: var(--s-2); padding: var(--s-3) var(--s-4); border: 1px solid var(--line-strong); border-radius: var(--r-sm); min-height: 7.5em; align-content: start; }
+.bw__bias { font: 500 var(--t-body)/1.5 var(--font-text) !important; color: var(--c-liq) !important; }
+.bw[data-state="set"] .bw__bias { color: var(--c-bull) !important; }
+.bw[data-state="flip"] .bw__bias { color: var(--c-bear) !important; }
+.bw__check { color: var(--c-axis) !important; }
+.bw__gap { min-height: 0; }
+.bw__gap [hidden] { display: none !important; }
+.bw__src { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.bw__srclab { font: 400 var(--t-label)/1.5 var(--font-text); color: var(--c-axis); }
+.bw__note { color: var(--c-axis) !important; font-size: var(--t-label) !important; }
 
 /* ================================================================ checklist */
 .ck { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-6); align-items: start; }
@@ -191,6 +240,7 @@ html:not([data-motion="off"]) .own__in { transition: border-color var(--m-out, 1
   background: var(--c-liq); color: var(--c-bg); vertical-align: middle;
 }
 html:not([data-motion="off"]) .ses__tbl tr { transition: background-color 240ms var(--ease, ease); }
+.ses__sub { font-size: var(--t-card); margin: var(--s-4) 0 0; }
 .ses__note { margin: 0; font-size: var(--t-body); line-height: 1.75; color: var(--ink); max-width: 78ch; }
 @media (max-width: 639px) {
   .ses { overflow: visible; border: 0; background: none; }

@@ -21,62 +21,73 @@
     eq(P.MAX_RULE, 160);
   });
 
+  test('playbook checklist ids follow the chain; the rule fields are stop-loss, TP split and max daily loss', () => {
+    eq(P.CHECK_IDS, ['c-trend', 'c-map', 'c-bias', 'c-time', 'c-sweep', 'c-confirm', 'c-cont', 'c-entry', 'c-target', 'c-risk', 'c-sl', 'c-tp', 'c-maxloss']);
+    eq(P.RULE_KEYS, ['sl', 'tp', 'maxloss']);
+    eq(P.RULE_OF, { 'c-sl': 'sl', 'c-tp': 'tp', 'c-maxloss': 'maxloss' });
+    eq(P.emptyState(), { checks: {}, rules: { sl: '', tp: '', maxloss: '' } });
+  });
+
   test('playbook.parseState: unknown ids and damaged values are dropped', () => {
-    var s = P.parseState(['c-ny', 'c-sl', 'nope', 7, null, '__proto__', 'c-ny'], { sl: ' 1R ', size: 5, risk: 'x'.repeat(500), extra: 'y' });
-    eq(Object.keys(s.checks).sort(), ['c-ny', 'c-sl']);
+    var s = P.parseState(['c-time', 'c-sl', 'nope', 7, null, '__proto__', 'c-time', 'c-ny'], { sl: ' 1R ', tp: 5, maxloss: 'x'.repeat(500), size: 'old', extra: 'y' });
+    eq(Object.keys(s.checks).sort(), ['c-sl', 'c-time']);
     eq(s.rules.sl, '1R');
-    eq(s.rules.size, '');
-    eq(s.rules.risk.length, 160);
-    eq(Object.keys(s.rules).sort(), ['risk', 'size', 'sl']);
+    eq(s.rules.tp, '');
+    eq(s.rules.maxloss.length, 160);
+    eq(Object.keys(s.rules).sort(), ['maxloss', 'sl', 'tp']);
     eq(P.parseState('x', 'y'), P.emptyState());
     eq(P.parseState(undefined, [1, 2]), P.emptyState());
-    eq(P.parseState({ 0: 'c-ny' }, null), P.emptyState());
+    eq(P.parseState({ 0: 'c-time' }, null), P.emptyState());
   });
 
   test('playbook.setCheck / resetChecks / clearRules / setRule: immutable, reset keeps the rules', () => {
-    var s0 = P.emptyState(), s1 = P.setCheck(s0, 'c-ny', true), s2 = P.setRule(s1, 'sl', '  ใต้ low ของ sweep \n');
+    var s0 = P.emptyState(), s1 = P.setCheck(s0, 'c-time', true), s2 = P.setRule(s1, 'sl', '  เหนือ high ของขาเข้า \n');
     eq(P.progress(s0).done, 0, 'the first state is untouched');
-    eq(s1.checks['c-ny'], true);
-    eq(s2.rules.sl, 'ใต้ low ของ sweep');
+    eq(s1.checks['c-time'], true);
+    eq(s2.rules.sl, 'เหนือ high ของขาเข้า');
     eq(P.setCheck(s2, 'bogus', true), s2, 'unknown id ignored');
     eq(P.setRule(s2, 'bogus', 'x'), s2, 'unknown rule key ignored');
-    var s3 = P.resetChecks(P.setCheck(s2, 'c-asia-london', true));
+    eq(P.setRule(s2, 'size', 'x'), s2, 'the v1 key "size" is not a rule any more');
+    var s3 = P.resetChecks(P.setCheck(s2, 'c-trend', true));
     eq(P.progress(s3).done, 0);
-    eq(s3.rules.sl, 'ใต้ low ของ sweep', 'a new trade keeps the user\'s rules');
-    eq(P.clearRules(s2).rules, { sl: '', size: '', risk: '' });
-    eq(P.setCheck(s2, 'c-ny', false).checks, {});
+    eq(s3.rules.sl, 'เหนือ high ของขาเข้า', 'a new trade keeps the user\'s rules');
+    eq(P.clearRules(s2).rules, { sl: '', tp: '', maxloss: '' });
+    eq(P.setCheck(s2, 'c-time', false).checks, {});
   });
 
   test('playbook.progress / serialize: ticked ids come out in list order', () => {
     var s = P.emptyState();
-    ['c-risk', 'c-asia-london', 'c-sweep'].forEach((id) => { s = P.setCheck(s, id, true); });
-    eq(P.serialize(s).checks, ['c-asia-london', 'c-sweep', 'c-risk']);
-    eq(P.progress(s), { done: 3, total: 11, pct: 27 });
+    ['c-maxloss', 'c-trend', 'c-sweep'].forEach((id) => { s = P.setCheck(s, id, true); });
+    eq(P.serialize(s).checks, ['c-trend', 'c-sweep', 'c-maxloss']);
+    eq(P.progress(s), { done: 3, total: 13, pct: 23 });
     P.CHECK_IDS.forEach((id) => { s = P.setCheck(s, id, true); });
-    eq(P.progress(s), { done: 11, total: 11, pct: 100 });
+    eq(P.progress(s), { done: 13, total: 13, pct: 100 });
     eq(P.progress(P.emptyState()).pct, 0);
   });
 
-  test('playbook.asText: ticked rows, the user\'s own rules, the source line', () => {
-    var s = P.setRule(P.setCheck(P.emptyState(), 'c-ny', true), 'sl', 'ใต้ low');
-    var labels = { 'c-ny': 'ช่วง NY open', 'c-sl': 'กำหนด stop-loss แล้ว' };
+  test('playbook.asText: ticked rows, the user\'s own rules, both sources', () => {
+    var s = P.setRule(P.setCheck(P.emptyState(), 'c-time', true), 'sl', 'เหนือ high');
+    var labels = { 'c-time': 'ช่วง NY', 'c-sl': 'กำหนด stop-loss แล้ว' };
     var t = P.asText(s, labels).split('\n');
-    eq(t[1], 'ติ๊กแล้ว 1 / 11');
-    ok(t.indexOf('[x] ช่วง NY open') >= 0);
+    eq(t[1], 'ติ๊กแล้ว 1 / 13');
+    ok(t.indexOf('[x] ช่วง NY') >= 0);
     ok(t.indexOf('[ ] กำหนด stop-loss แล้ว') >= 0);
-    ok(t.indexOf('    กฎของฉัน (stop-loss): ใต้ low') >= 0);
-    ok(t.indexOf('    กฎของฉัน (ขนาดสถานะ): (ยังไม่ได้เขียน)') >= 0);
-    eq(t[t.length - 1], 'ที่มา: https://youtu.be/Vulini8xbB0');
-    eq(t.length, 2 + 11 + 3 + 1);
+    ok(t.indexOf('    กฎของฉัน (stop-loss): เหนือ high') >= 0);
+    ok(t.indexOf('    กฎของฉัน (สัดส่วนที่ปิดที่แต่ละ TP): (ยังไม่ได้เขียน)') >= 0);
+    ok(t.indexOf('    กฎของฉัน (max daily loss): (ยังไม่ได้เขียน)') >= 0);
+    var src = t[t.length - 1];
+    ok(src.indexOf('https://youtu.be/Vulini8xbB0') >= 0 && src.indexOf(TJR.sources.PLAYLIST) >= 0, 'main clip and playlist');
+    eq(t.length, 2 + 13 + 3 + 1);
   });
 
-  test('playbook storage: keys tjr.playbook.*, round trip, and a blocked localStorage falls back to memory', () => {
-    var s = P.setRule(P.setCheck(P.setCheck(P.emptyState(), 'c-htf', true), 'c-target', true), 'risk', 'ตามแผนของฉัน');
+  test('playbook storage: keys tjr.playbook.v2.*, round trip, and a blocked localStorage falls back to memory', () => {
+    var s = P.setRule(P.setCheck(P.setCheck(P.emptyState(), 'c-map', true), 'c-target', true), 'maxloss', 'ตามแผนของฉัน');
     P.saveChecks(s); P.saveRules(s);
-    eq(TJR.store.get('playbook.checks'), ['c-htf', 'c-target']);
-    eq(TJR.store.get('playbook.rules'), { sl: '', size: '', risk: 'ตามแผนของฉัน' });
-    eq(P.KEY_CHECKS, 'playbook.checks');
+    eq(TJR.store.get('playbook.v2.checks'), ['c-map', 'c-target']);
+    eq(TJR.store.get('playbook.v2.rules'), { sl: '', tp: '', maxloss: 'ตามแผนของฉัน' });
+    eq(P.KEY_CHECKS, 'playbook.v2.checks'); eq(P.KEY_RULES, 'playbook.v2.rules');
     eq(P.loadState(), s);
+    eq(P.load(), s, 'load is loadState');
     var mem = {};
     var fake = { get: (k, d) => (k in mem ? mem[k] : d), set: (k, v) => { mem[k] = v; } };
     P.saveChecks(s, fake); P.saveRules(s, fake);
@@ -84,13 +95,30 @@
     // storage that throws on every access (private window, sandboxed frame)
     Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('blocked'); } });
     try {
-      var s2 = P.setCheck(P.emptyState(), 'c-ny', true);
+      var s2 = P.setCheck(P.emptyState(), 'c-time', true);
       P.saveChecks(s2); P.saveRules(P.setRule(s2, 'sl', 'x'));
-      eq(P.loadState().checks['c-ny'], true, 'memory copy answers');
+      eq(P.loadState().checks['c-time'], true, 'memory copy answers');
       eq(P.loadState().rules.sl, 'x');
     } finally { delete globalThis.localStorage; }
-    TJR.store.remove('playbook.checks'); TJR.store.remove('playbook.rules');
+    TJR.store.remove('playbook.v2.checks'); TJR.store.remove('playbook.v2.rules');
     eq(P.loadState(), P.emptyState());
+  });
+
+  test('playbook: a v1-shaped tjr.playbook.checks / rules in localStorage is ignored, never parsed, never overwritten', () => {
+    var disk = {
+      'tjr.playbook.checks': JSON.stringify(['c-sl', 'c-ny', 'c-htf', 'c-risk']),         // the v1 shape (some ids are also v2 ids)
+      'tjr.playbook.rules': JSON.stringify({ sl: 'กฎเก่า', size: 'เก่า', risk: 'เก่า' })
+    };
+    globalThis.localStorage = { getItem: (k) => (k in disk ? disk[k] : null), setItem: (k, v) => { disk[k] = String(v); }, removeItem: (k) => { delete disk[k]; } };
+    try {
+      var s = P.load();
+      eq(P.progress(s).done, 0, 'all-unticked v2 state');
+      eq(s, P.emptyState());
+      P.saveChecks(P.setCheck(s, 'c-trend', true));
+      eq(JSON.parse(disk['tjr.playbook.checks']), ['c-sl', 'c-ny', 'c-htf', 'c-risk'], 'the v1 key is left as it was');
+      eq(JSON.parse(disk['tjr.playbook.v2.checks']), ['c-trend']);
+      eq(P.load().checks, { 'c-trend': true });
+    } finally { delete globalThis.localStorage; TJR.store.remove('playbook.v2.checks'); TJR.store.remove('playbook.v2.rules'); }
   });
 
   test('playbook.js never writes the user\'s text as HTML', () => {
@@ -245,53 +273,203 @@
     th.start(); th.setHidden(true); th.setHidden(false);
   });
 
-  // ---------------------------------------------------------------- the chart's step frames
-  [['S01', 'long'], ['S03', 'short']].forEach((pair) => {
-    test('playbook.stepFrames ' + pair[0] + ': 7 frames, knowable-only overlays, 12 seeds', () => {
+  // ---------------------------------------------------------------- the New York windows (P5.12-P5.19)
+  test('playbook.currentWindow: manipulation at 09:40 ET, null at 11:00 ET, on a winter and a summer day', () => {
+    eq(P.currentWindow(utc(2026, 11, 18, 14, 40)), 'manipulation', 'Wed 09:40 EST');
+    eq(P.currentWindow(utc(2026, 11, 18, 16, 0)), null, 'Wed 11:00 EST');
+    eq(P.currentWindow(utc(2026, 7, 15, 13, 40)), 'manipulation', 'Wed 09:40 EDT');
+    eq(P.currentWindow(utc(2026, 7, 15, 15, 0)), null, 'Wed 11:00 EDT');
+  });
+
+  test('playbook.currentWindow: the edges, the entry window, PM, and nothing outside New York or on a weekend', () => {
+    eq(P.currentWindow(utc(2026, 11, 18, 14, 29, 59)), null, '09:29:59 is pre-market');
+    eq(P.currentWindow(utc(2026, 11, 18, 14, 30)), 'manipulation', '09:30:00');
+    eq(P.currentWindow(utc(2026, 11, 18, 14, 49, 59)), 'manipulation');
+    eq(P.currentWindow(utc(2026, 11, 18, 14, 50)), 'entry', '09:50:00');
+    eq(P.currentWindow(utc(2026, 11, 18, 15, 9, 59)), 'entry');
+    eq(P.currentWindow(utc(2026, 11, 18, 15, 10)), null, '10:10 ends the entry window');
+    eq(P.currentWindow(utc(2026, 11, 18, 15, 30)), null, '10:30 is a cut-off, not a window');
+    eq(P.currentWindow(utc(2026, 11, 18, 17, 59)), null, '12:59');
+    eq(P.currentWindow(utc(2026, 11, 18, 18, 0)), 'pm', '13:00 EST');
+    eq(P.currentWindow(utc(2026, 11, 18, 21, 59)), 'pm', '16:59');
+    eq(P.currentWindow(utc(2026, 11, 18, 22, 0)), null, '17:00 spread hour');
+    eq(P.currentWindow(utc(2026, 11, 18, 5, 0)), null, 'Asia / London');
+    eq(P.currentWindow(utc(2026, 11, 21, 14, 40)), null, 'Saturday 09:40 ET');
+    eq(P.currentWindow(utc(2026, 11, 22, 14, 40)), null, 'Sunday 09:40 ET');
+  });
+
+  test('playbook.clockParts carries the window and its label', () => {
+    var c = P.clockParts(utc(2026, 11, 18, 14, 40));
+    eq(c.window, 'manipulation');
+    ok(c.windowLabel.indexOf('09:30–09:50') >= 0);
+    eq(P.clockParts(utc(2026, 11, 18, 16, 0)).window, null);
+    eq(P.clockParts(utc(2026, 11, 18, 16, 0)).windowLabel, null);
+    P.WIN_ORDER.filter((w) => w !== 'open' && w !== 'cutoff').forEach((w) => ok(P.WIN_LABEL[w], w + ' has a label'));
+  });
+
+  test('playbook.windowRows: the five New York windows on a winter day (EST), ET and Thailand time', () => {
+    var r = P.windowRows(utc(2026, 11, 18, 14, 30));
+    eq(r.map((x) => x.id), ['open', 'manipulation', 'entry', 'cutoff', 'pm']);
+    eq(r.map((x) => x.et), ['09:30', '09:30–09:50', '09:50–10:10', '10:30', '13:00']);
+    eq(r.map((x) => x.th), ['21:30', '21:30–21:50', '21:50–22:10', '22:30', '01:00 (+1)']);
+    eq(r[1].from, utc(2026, 11, 18, 14, 30)); eq(r[1].to, utc(2026, 11, 18, 14, 50));
+    eq(r[0].to, null); eq(r[3].to, null);
+  });
+
+  test('playbook.windowRows: summer time (EDT) is one hour earlier in Thailand; a weekend shows Monday', () => {
+    var r = P.windowRows(utc(2026, 7, 15, 14, 0));
+    eq(r.map((x) => x.et), ['09:30', '09:30–09:50', '09:50–10:10', '10:30', '13:00']);
+    eq(r.map((x) => x.th), ['20:30', '20:30–20:50', '20:50–21:10', '21:30', '00:00 (+1)']);
+    var sat = P.windowRows(utc(2026, 11, 21, 12, 0));                 // Saturday: Monday 2026-11-23
+    eq(sat[1].from, utc(2026, 11, 23, 14, 30));
+    var evening = P.windowRows(utc(2026, 11, 18, 23, 30));            // Wed 18:30 EST: Thursday's windows
+    eq(evening[1].from, utc(2026, 11, 19, 14, 30));
+  });
+
+  // ---------------------------------------------------------------- the chain's step frames (S15 long BOS, S16 short IFVG, S22 long with the NY windows)
+  [['S15', 'long', 'bos'], ['S16', 'short', 'ifvg'], ['S22', 'long', 'ifvg']].forEach((trio) => {
+    test('playbook.stepFrames ' + trio[0] + ': 8 frames, knowable-only overlays, read from truth, 12 seeds', () => {
       for (var seed = 1; seed <= 12; seed++) {
-        var b = TJR.scenarios.safeBuild(TJR.scenarios.get(pair[0]), seed, {}), T = b.truth, last = b.candles.length - 1;
-        eq(T.side, pair[1]);
+        var b = TJR.scenarios.safeBuild(TJR.scenarios.get(trio[0]), seed, {}), T = b.truth, K = T.confluence, last = b.candles.length - 1;
+        var tag = trio[0] + ' seed ' + seed;
+        eq(T.side, trio[1]); eq(K.confirm.kind, trio[2]);
         var f = P.stepFrames(b);
-        eq(f.length, 7);
+        eq(f.length, 8);
         f.forEach((fr, i) => {
           eq(fr.step, i + 1);
           ok(fr.bar >= 0 && fr.bar <= last, 'bar in range');
-          if (i) ok(fr.bar >= f[i - 1].bar, 'frames never go back in time');
-          P.overlaysFor(b, fr).forEach((o) => ok(o.appearAt <= fr.bar, pair[0] + ' seed ' + seed + ' step ' + (i + 1) + ': ' + o.id + ' knowable'));
+          if (i) ok(fr.bar >= f[i - 1].bar, tag + ': frames never go back in time');
+          P.overlaysFor(b, fr).forEach((o) => ok(o.appearAt <= fr.bar, tag + ' step ' + (i + 1) + ': ' + o.id + ' knowable at ' + fr.bar + ' (appears ' + o.appearAt + ')'));
         });
-        ok(f[0].bar < T.sweep.bar, 'levels are marked before the sweep');
-        eq(f[1].bar, f[0].bar, 'step 2 is about time: same frame as step 1');
+        ok(f[0].bar < T.sweep.bar, tag + ': levels are marked before the sweep');
         eq(f[2].bar, T.sweep.bar);
-        ok(f[3].bar >= T.confirmBar, 'structure step reaches the confirming swing');
-        ok(f[4].bar >= T.entryWindow.from && f[4].bar <= T.entryWindow.to + 1, 'entry step sits in the window');
+        eq(f[3].bar, K.confirm.at);
+        ok(f[4].bar >= K.cont.at && f[4].bar <= K.entry.at, tag + ': continuation step sits between the gap and the entry');
+        eq(f[5].bar, K.entry.at);
+        ok(f[6].bar >= K.entry.at, tag + ': exits come after the entry');
+        eq(f[7].bar, f[6].bar, 'risk is not on the chart: same frame as the exits');
         var ids = (k) => P.overlaysFor(b, f[k - 1]).map((o) => o.id);
-        ok(ids(1).indexOf('sweep') < 0 && ids(2).indexOf('sweep') < 0, 'no sweep marker before step 3');
+        var types = (k) => P.overlaysFor(b, f[k - 1]).map((o) => o.type);
+        ok(ids(1).indexOf('sweep') < 0 && ids(2).indexOf('sweep') < 0, tag + ': no sweep marker before step 3');
         ok(ids(3).indexOf('sweep') >= 0);
-        ok(ids(3).indexOf('entry') < 0 && ids(4).indexOf('entry') < 0, 'no entry zone before step 5');
-        ok(ids(5).indexOf('entry') >= 0);
-        ok(ids(5).indexOf('target') < 0, 'target overlay waits for step 6');
-        ok(ids(6).indexOf('target') >= 0 && ids(7).indexOf('target') >= 0);
-        ok(ids(4).some((x) => x.indexOf('lbl:') === 0), 'structure labels by step 4');
-        var conf = 'lbl:' + T.confirmBar;
-        ok(ids(4).indexOf(conf) >= 0, 'the HH / LL label is up at step 4');
+        var conf = K.confirm.kind === 'bos' ? 'bos:' + K.confirm.at : 'fvg:' + K.confirm.i, cont = 'fvg:' + K.cont.i;
+        ok(ids(3).indexOf(conf) < 0 && ids(3).indexOf(cont) < 0, 'no confirmation or gap before step 4');
+        ok(ids(4).indexOf(conf) >= 0, tag + ': the confirming ' + conf + ' is up at step 4');
+        ok(ids(4).indexOf(cont) < 0, 'the continuation gap waits for step 5');
+        ok(ids(5).indexOf(cont) >= 0 && ids(5).indexOf(conf) >= 0, 'step 5 keeps the confirmation and adds the gap');
+        ok(ids(5).indexOf('entry-mk') < 0 && ids(6).indexOf('entry-mk') >= 0, 'the entry mark comes at step 6');
+        ok(ids(8).indexOf('entry-mk') >= 0, 'and stays');
+        [1, 2, 3, 4, 5, 6, 7, 8].forEach((k) => ok(ids(k).indexOf('entry') < 0, 'the gap is the entry zone: no separate zone shape'));
+        ok(ids(6).indexOf('target') < 0 && ids(7).indexOf('target') >= 0 && ids(8).indexOf('target') >= 0, 'target overlay waits for step 7');
+        ok(ids(4).some((x) => x.indexOf('lbl:') === 0), tag + ': Level 1 structure labels by step 4');
+        [1, 2, 3].forEach((k) => ok(types(k).indexOf('label') < 0, 'no structure labels before the confirmation step'));
+        ok(ids(4).filter((x) => x.indexOf('fvg:') === 0 || x.indexOf('bos:') === 0).length === 1 || trio[2] === 'ifvg', 'one confirmation shape only');
         f[0].focus.forEach((id) => ok(T.levels.some((l) => l.id === id), 'step 1 focus names a level'));
+        if (trio[0] === 'S22') {
+          ok(types(2).indexOf('band') >= 0, tag + ': the manipulation band is up at the timing step');
+          eq(types(1).indexOf('band'), -1, 'no band before the timing step');
+        } else {
+          eq(types(2).indexOf('band'), -1, 'a scenario without a clock has no bands');
+        }
       }
     });
   });
 
-  test('playbook.nowText: seven different lines, the side changes what step 1 and 4 say, gap steps are 5 and 7', () => {
-    var long = [1, 2, 3, 4, 5, 6, 7].map((k) => P.nowText(k, { side: 'long', stacks: 3 }));
-    var short = [1, 2, 3, 4, 5, 6, 7].map((k) => P.nowText(k, { side: 'short', stacks: 2 }));
-    eq(new Set(long).size, 7);
-    ok(long[0].indexOf('stacked lows 3 จุด') >= 0); ok(short[0].indexOf('stacked highs 2 จุด') >= 0);
-    ok(long[3].indexOf('HH') >= 0); ok(short[3].indexOf('LL') >= 0);
-    eq(long[1], short[1]);
-    eq(Object.keys(P.STEP_GAP).map(Number), [5, 7]);
+  test('playbook.stepFrames: BOS confirmation is drawn from the truth even when the full scan has no event there', () => {
+    var b = TJR.scenarios.safeBuild(TJR.scenarios.get('S15'), 1, {}), K = b.truth.confluence;
+    var fr = P.stepFrames(b)[3], o = P.overlaysFor(b, fr).filter((x) => x.type === 'bos');
+    eq(o.length, 1);
+    eq(o[0].at, K.confirm.at); eq(o[0].price, K.confirm.level.price); eq(o[0].from, K.confirm.level.i);
+  });
+
+  test('playbook.nowText: eight different lines; confirm kind and the clock change what steps 2 and 4 say; gap steps are 7 and 8', () => {
+    var a = [1, 2, 3, 4, 5, 6, 7, 8].map((k) => P.nowText(k, { side: 'long', stacks: 3, confirm: 'bos', windows: false }));
+    eq(new Set(a).size, 8);
+    var s = [1, 2, 3, 4, 5, 6, 7, 8].map((k) => P.nowText(k, { side: 'short', stacks: 2, confirm: 'ifvg', windows: true }));
+    ok(a[0].indexOf('stacked lows 3 จุด') >= 0); ok(s[0].indexOf('stacked highs 2 จุด') >= 0);
+    ok(a[3].indexOf('BOS') >= 0 && a[3].indexOf('HH') >= 0); ok(s[3].indexOf('IFVG') >= 0 && s[3].indexOf('LH') >= 0);
+    ok(a[1] !== s[1] && s[1].indexOf('09:30–09:50') >= 0, 'with a clock the timing step names the band');
+    ok(a[1].indexOf('Long · ตามเวลา NY') >= 0, 'without one it points at the sample that has it');
+    eq(Object.keys(P.STEP_GAP).map(Number), [7, 8]);
     ok(P.nowText(99, null).length > 0 && P.nowText(-3, null).length > 0, 'out-of-range steps clamp');
+  });
+
+  // ---------------------------------------------------------------- the bias worksheet (60m, S19 stacked gaps / S18 closed through)
+  test('playbook.biasSample S19: all four answers yes, bias up, the target is the draw above, over 30 seeds', () => {
+    for (var seed = 1; seed <= 30; seed++) {
+      var b = TJR.scenarios.safeBuild(TJR.scenarios.get('S19'), seed, {}), K = b.truth.confluence, s = P.biasSample(b);
+      eq(b.meta.tf, 60, 'the worksheet sample is a 60m chart');
+      ok(s, 'sample S19 seed ' + seed);
+      eq(s.expected, [true, true, true, true], 'S19 seed ' + seed);
+      eq(s.trend, 'up'); eq(s.bias, 'up'); eq(s.flipped, false);
+      eq(s.frame, K.entry.at);
+      eq(s.draw, { id: K.targets[0].levelId, price: K.targets[0].price });
+      eq(s.gapState, 'respected');
+      var ov = P.biasOverlays(b, s);
+      ov.forEach((o) => ok(o.appearAt <= s.frame, 'S19 seed ' + seed + ': ' + o.id + ' knowable at the frame'));
+      ok(ov.some((o) => o.id === s.gapId), 'the continuation gap is drawn');
+      ok(ov.some((o) => o.id === s.stackId && o.type === 'fvg'), 'the top gap of the stack is drawn');
+      ok(ov.some((o) => o.type === 'level'), 'levels are drawn');
+      ok(ov.every((o) => o.type === 'level' || o.type === 'trend' || o.type === 'fvg'), 'nothing else is drawn');
+      eq(ov.filter((o) => o.id === s.gapId)[0].state, 'respected');
+      var top = ov.filter((o) => o.id === s.stackId)[0];
+      eq(top.state, 'open', 'a close under the top gap of a stack is not an inverse: no IFVG pill (P8.34)');
+      ok(top.stateAt === undefined, 'and no state change is drawn');
+    }
+  });
+
+  test('playbook.biasSample S18: gap closed through, bias flips, no draw, over 30 seeds', () => {
+    for (var seed = 1; seed <= 30; seed++) {
+      var b = TJR.scenarios.safeBuild(TJR.scenarios.get('S18'), seed, {}), K = b.truth.confluence, s = P.biasSample(b);
+      eq(b.meta.tf, 60);
+      ok(s, 'sample S18 seed ' + seed);
+      eq(s.expected, [true, true, true, false], 'S18 seed ' + seed);
+      eq(s.trend, 'down'); eq(s.flipped, true); eq(s.bias, 'up'); eq(s.draw, null);
+      eq(s.frame, K.noTrade.at);
+      eq(s.gapState, 'disrespected');
+      P.biasOverlays(b, s).forEach((o) => ok(o.appearAt <= s.frame, 'S18 seed ' + seed + ': ' + o.id + ' knowable'));
+    }
+  });
+
+  test('playbook.biasSample: nothing for a scenario without a Level 2 truth', () => {
+    eq(P.biasSample(TJR.scenarios.safeBuild(TJR.scenarios.get('S01'), 1, {})), null);
+  });
+
+  test('playbook.biasVerdict: the four-question decision tree', () => {
+    var up = { trend: 'up', draw: { id: 'T', price: 7576.5 }, instrument: 'ES' }, down = { trend: 'down', draw: null, instrument: 'ES' };
+    eq(P.biasVerdict([true, true, true, null], up).state, 'incomplete');
+    eq(P.biasVerdict([], up).state, 'incomplete');
+    eq(P.biasVerdict(null, up).state, 'incomplete');
+    eq(P.biasVerdict([false, true, true, true], up), { state: 'notrend', bias: null, target: null, gap: true });
+    eq(P.biasVerdict([true, false, true, true], up), { state: 'nodraw', bias: null, target: null, gap: true });
+    eq(P.biasVerdict([true, true, false, true], up), { state: 'wait', bias: null, target: null, gap: false });
+    eq(P.biasVerdict([true, true, true, true], up), { state: 'set', bias: 'up', target: { id: 'T', price: 7576.5 }, gap: false });
+    eq(P.biasVerdict([true, true, true, false], up), { state: 'flip', bias: 'down', target: null, gap: false }, 'an up trend whose gap is closed through flips down');
+    eq(P.biasVerdict([true, true, true, false], down), { state: 'flip', bias: 'up', target: null, gap: false }, 'a down trend whose gap is closed through flips up');
+    eq(P.biasVerdict([true, true, true, true], down).bias, 'down');
+  });
+
+  test('playbook.biasWords / biasDiff: words for every state, the gap states say so, differences listed by question number', () => {
+    var up = { trend: 'up', draw: { id: 'T', price: 7576.5 }, instrument: 'ES', expected: [true, true, true, true] };
+    var states = { incomplete: [null, null, null, null], notrend: [false, true, true, true], nodraw: [true, false, true, true], wait: [true, true, false, true], set: [true, true, true, true], flip: [true, true, true, false] };
+    var seen = {};
+    Object.keys(states).forEach((k) => {
+      var v = P.biasVerdict(states[k], up), w = P.biasWords(v, up);
+      eq(v.state, k); ok(w.bias.length > 0, k + ' has a bias line'); seen[w.bias] = true;
+    });
+    eq(Object.keys(seen).length, 6, 'six different lines');
+    var set = P.biasWords(P.biasVerdict(states.set, up), up);
+    ok(set.bias.indexOf('ขึ้น') >= 0 && set.draw.indexOf('7,576.50') >= 0 && set.draw.indexOf('ES') >= 0, 'bias up, the draw price and the instrument');
+    ok(P.biasWords(P.biasVerdict(states.flip, up), up).bias.indexOf('ลง') >= 0, 'flipped to down');
+    eq(P.biasDiff([true, true, true, true], up), []);
+    eq(P.biasDiff([true, false, true, false], up), [2, 4]);
+    eq(P.biasDiff([null, null, true, null], up), [], 'unanswered questions are not differences');
+    eq(Object.keys(P.BIAS_Q1).sort(), ['down', 'up']);
   });
 
   // ---------------------------------------------------------------- playbook.html: the content rule and the hooks
   var html = readText('playbook.html');
+  var stepBlock = (k) => { var a = html.indexOf('data-step="' + k + '" id="step-' + k + '"'), b = html.indexOf('</li>', a); return html.slice(a, b); };
 
   test('playbook.html: every checklist id has one checkbox, the three own-rule fields and the gap badge', () => {
     P.CHECK_IDS.forEach((id) => eq(html.split('data-id="' + id + '"').length - 1, 1, id));
@@ -301,48 +479,171 @@
       ok(html.indexOf('id="rule-' + k + '"') >= 0 && html.indexOf('for="rule-' + k + '"') >= 0, 'field ' + k + ' has a visible label');
     });
     eq((html.match(/maxlength="160"/g) || []).length, 3);
-    // the SL / size / risk rows each carry the badge before the field
-    ['c-sl', 'c-size', 'c-risk'].forEach((id) => {
+    // the SL / TP split / max daily loss rows each carry the badge before the field
+    ['c-sl', 'c-tp', 'c-maxloss'].forEach((id) => {
       var row = html.slice(html.indexOf('data-id="' + id + '"'));
       row = row.slice(0, row.indexOf('</li>'));
       ok(row.indexOf('badge-gap') >= 0 && row.indexOf('คลิปไม่ได้ระบุ') >= 0, id + ' shows the gap badge');
       ok(row.indexOf('กฎ') >= 0 && row.indexOf('ของคุณเอง') >= 0, id + ' has the user\'s own rule field');
     });
+    ['c-risk', 'c-target', 'c-entry'].forEach((id) => {
+      var row = html.slice(html.indexOf('data-id="' + id + '"')); row = row.slice(0, row.indexOf('</li>'));
+      ok(row.indexOf('data-rule=') < 0, id + ' has no own-rule field: clip #2 and #1 say it');
+    });
   });
 
-  test('playbook.html: 7 steps in order, each with a view button and a module or scenario link', () => {
-    for (var k = 1; k <= 7; k++) {
+  test('playbook.html: 8 chain steps in order, each with a view button; links point at real modules, scenarios and pages', () => {
+    for (var k = 1; k <= 8; k++) {
       ok(html.indexOf('data-step="' + k + '" id="step-' + k + '"') >= 0, 'step ' + k);
       eq(html.split('data-act="view" data-step="' + k + '"').length - 1, 1);
     }
-    ok(/learn\.html#m7/.test(html) && /learn\.html#m8/.test(html) && /learn\.html#m6/.test(html) && /scenarios\.html#S01/.test(html) && /scenarios\.html#S03/.test(html));
+    eq(html.split('class="step').length - 1, 8 + (html.split('class="step__').length - 1) + 1, 'exactly eight .step cards (+ the <ol class="steps">)');
     var ids = (html.match(/(?:learn\.html#m|scenarios\.html#S)\d+/g) || []);
-    ids.forEach((h) => { var n = Number(h.replace(/\D/g, '')); ok(h.indexOf('learn') === 0 ? n >= 1 && n <= 8 : n >= 1 && n <= 14, h); });
+    ok(ids.length >= 10, 'module and scenario links present');
+    ids.forEach((h) => { var n = Number(h.replace(/\D/g, '')); ok(h.indexOf('learn') === 0 ? n >= 1 && n <= 8 : n >= 1 && n <= 22, h); });
     var learn = readText('learn.html');
     for (var m = 1; m <= 8; m++) ok(learn.indexOf('id="m' + m + '"') >= 0);
+    ['risk.html', 'strategy.html', 'confluences.html'].forEach((f) => ok(html.indexOf('href="' + f + '"') >= 0, 'links ' + f));
+    ok(stepBlock(8).indexOf('href="risk.html"') >= 0, 'the last step links the risk page');
   });
 
-  test('playbook.html: every clip chip is the start second of a fact in clip-facts.md, and chips link the clip', () => {
+  test('playbook.html: each chain step carries a chip to clip #1 (TEp3a-7GUds) or to the clip that teaches it', () => {
+    var want = {
+      1: ['ironJFzNBic', 'TEp3a-7GUds', 'xX5LTSJ5wwM', '4sRDnVmLcMk'],   // bias + map: #3, #1 P1.23-P1.30; the worksheet's stacked-gap note P10.29 (#10), P8.34 (#8)
+      2: ['L4xz2o23aPQ'],                             // timing: #5
+      3: ['7dTQA0t8SH0', 'TEp3a-7GUds'],              // sweep + SMT: #6, #1 P1.19 (main F6.4 / F7.2)
+      4: ['Zzk864cVJek', '4sRDnVmLcMk', 'TEp3a-7GUds'],   // confirmation: #11 BOS, #8 IFVG, #1 P1.37
+      5: ['xX5LTSJ5wwM', 'joe_XTCn5Bs', 'TEp3a-7GUds'],   // continuation: #10 FVG, #7 EQ, #1 P1.39
+      6: ['TEp3a-7GUds'],                             // entry: #1 P1.44-P1.47
+      7: ['AGmAVyAuBE0', 'TEp3a-7GUds'],              // exits: #12 draws, #1 P1.51
+      8: ['hBnD6T1M4w8']                              // risk: #2
+    };
+    Object.keys(want).forEach((k) => {
+      var vids = (stepBlock(k).match(/youtu\.be\/([\w-]+)\?t=/g) || []).map((x) => /youtu\.be\/([\w-]+)/.exec(x)[1]);
+      ok(vids.length >= 1, 'step ' + k + ' has chips');
+      want[k].forEach((v) => ok(vids.indexOf(v) >= 0, 'step ' + k + ' has a chip to ' + v));
+      vids.forEach((v) => ok(v === 'Vulini8xbB0' || want[k].indexOf(v) >= 0 || (k === '1' && v === 'Vulini8xbB0'), 'step ' + k + ' chip to ' + v + ' is expected'));
+    });
+    ok(stepBlock(6).indexOf('data-fact="P1.44"') >= 0 && stepBlock(7).indexOf('data-fact="P1.51"') >= 0 && stepBlock(4).indexOf('data-fact="P1.37"') >= 0 && stepBlock(5).indexOf('data-fact="P1.39"') >= 0, 'the facts the brief names');
+    ['P1.37', 'P11.25', 'P8.14'].forEach((id) => ok(stepBlock(4).indexOf('data-fact="' + id + '"') >= 0, 'step 4 ' + id));
+    ['P1.39', 'P1.42', 'P1.43'].forEach((id) => ok(stepBlock(5).indexOf('data-fact="' + id + '"') >= 0, 'step 5 ' + id));
+    ['P1.44', 'P1.45', 'P1.46', 'P1.47'].forEach((id) => ok(stepBlock(6).indexOf('data-fact="' + id + '"') >= 0, 'step 6 ' + id));
+    ['P1.51', 'P12.23', 'P12.24', 'P12.25', 'P1.50'].forEach((id) => ok(stepBlock(7).indexOf('data-fact="' + id + '"') >= 0, 'step 7 ' + id));
+    ['P2.21', 'P2.26'].forEach((id) => ok(stepBlock(8).indexOf('data-fact="' + id + '"') >= 0, 'step 8 ' + id));
+    ['P5.12', 'P5.13', 'P5.14', 'P5.18', 'P5.19'].forEach((id) => ok(stepBlock(2).indexOf('data-fact="' + id + '"') >= 0, 'step 2 ' + id));
+    ['F6.4', 'F7.2', 'P6.12'].forEach((id) => ok(stepBlock(3).indexOf('data-fact="' + id + '"') >= 0, 'step 3 ' + id));
+    ['P3.3', 'P3.4', 'P3.5', 'P3.6', 'P1.23', 'P1.30'].forEach((id) => ok(stepBlock(1).indexOf('data-fact="' + id + '"') >= 0, 'step 1 ' + id));
+  });
+
+  test('playbook.html: every chip names its fact and links the start second of that fact in that fact\'s own video', () => {
+    var anchors = (html.match(/<a\b[^>]*\bts-chip\b[^>]*>[^<]*<\/a>/g) || []);
+    ok(anchors.length >= 100, 'chips present: ' + anchors.length);
+    var starts = (id) => {
+      var src = TJR.sources.forFact(id), file = id.charAt(0) === 'F' ? 'docs/source/clip-facts.md' : 'docs/source/playlist/' + src.id + '.md';
+      var line = readText(file).split('\n').filter((l) => l.indexOf('- ' + id + ' ') === 0)[0];
+      ok(line, id + ' is a fact');
+      var all = line.match(/\(\d{1,2}:\d\d[^)]*\)/g), m = /\((\d{1,2}):(\d\d)/.exec(all[all.length - 1]);
+      return Number(m[1]) * 60 + Number(m[2]);
+    };
+    var named = 0;
+    anchors.forEach((a) => {
+      var href = /href="https:\/\/youtu\.be\/([\w-]+)\?t=(\d+)"/.exec(a), id = (/data-fact="([FP]\d+\.\d+)"/.exec(a) || [])[1];
+      ok(href, 'chip has a youtu.be link: ' + a);
+      if (!id) return;
+      named++;
+      var src = TJR.sources.forFact(id);
+      eq(href[1], src.id, id + ' links its own video');
+      eq(Number(href[2]), starts(id), id + ' links the start of its range');
+      ok(/\bts-chip--pl\b/.test(a) === !src.main, id + ' playlist chips are the outline kind, main chips are not');
+    });
+    eq(named, anchors.length, 'every chip names its fact');
+    ok(html.indexOf('คลิปไม่ได้ระบุ') >= 0);
+  });
+
+  test('playbook.html: every main-clip chip is the start second of a fact in clip-facts.md', () => {
     var starts = {};
     readText('docs/source/clip-facts.md').split('\n').forEach((l) => {
       var m = /^- F\d+\.\d+ .*\((\d\d):(\d\d)[^)]*\)\s*$/.exec(l);
       if (m) starts[Number(m[1]) * 60 + Number(m[2])] = true;
     });
     var chips = html.match(/href="https:\/\/youtu\.be\/Vulini8xbB0\?t=\d+"/g) || [];
-    ok(chips.length >= 30, 'chips present: ' + chips.length);
+    ok(chips.length >= 20, 'main-clip chips present: ' + chips.length);
     chips.forEach((c) => { var s = Number(/t=(\d+)/.exec(c)[1]); ok(starts[s], 'second ' + s + ' starts a fact'); });
-    ok(html.indexOf('คลิปไม่ได้ระบุ') >= 0);
   });
 
-  test('playbook.html: head, script order, GSAP tags and one live chart slot', () => {
+  test('playbook.html: no clip #4 chip, nothing from the excluded list, no TJR screenshots', () => {
+    ok(html.indexOf('52nxvJKM57U') < 0 && html.indexOf('P4.') < 0, 'funded accounts (#4) is context only');
+    ok(html.indexOf('3GZgBBMzC_E') < 0, 'clip #16 is not used');
+    ['promo', 'โค้ดส่วนลด', 'Alpha Futures', 'Tradeify', 'payout', 'funded', 'prop firm'].forEach((w) => ok(html.toLowerCase().indexOf(w.toLowerCase()) < 0, 'excluded: ' + w));
+    ok(!/<img\b/i.test(html), 'no images: no TJR footage or screenshots');
+  });
+
+  test('playbook.html: the older-video note (C5) under the heading, the bias-before-sweep note (C6) at step 0, the BOS web box (C8)', () => {
+    var head = html.slice(html.indexOf('id="procedure"'), html.indexOf('class="proc"'));
+    ok(head.indexOf('class="older-note"') >= 0 && head.indexOf('คลิปเก่า (ม.ค. 2026) พูดว่า…') >= 0, 'older-note with its label');
+    ok(head.indexOf('data-fact="P1.3"') >= 0 && head.indexOf('data-fact="P1.7"') >= 0, 'chips to P1.3 and P1.7');
+    ok(head.indexOf('ts-chip--pl') >= 0 && head.indexOf('?t=62"') >= 0 && head.indexOf('?t=791"') >= 0, 'clip #1 links at 01:02 and 13:11');
+    var s1 = stepBlock(1);
+    ok(s1.indexOf('class="step__note"') >= 0 && s1.indexOf('bias ยังไม่ใช่ entry') >= 0, 'C6 note');
+    ok(s1.indexOf('data-fact="F6.4"') >= 0, 'the C6 note chips the sweep rule F6.4');
+    var s4 = stepBlock(4);
+    ok(s4.indexOf('class="web-def"') >= 0 && s4.indexOf('นิยามทั่วไป ไม่ใช่จากคลิป') >= 0 && s4.indexOf('https://www.luxalgo.com/library/concept/break-of-structure/') >= 0, 'web definition with its URL');
+    eq(html.split('class="web-def"').length - 1, 1, 'one web definition');
+  });
+
+  test('playbook.html: each step shows its Level 1 equivalent where one exists; stop-loss is an example, the rule stays a gap', () => {
+    [1, 2, 3, 4, 5, 6, 7].forEach((k) => ok(stepBlock(k).indexOf('class="step__l1"') >= 0, 'step ' + k + ' has a Level 1 line'));
+    ok(stepBlock(4).indexOf('H, L, HL, HH') >= 0 && stepBlock(4).indexOf('data-fact="F6.5"') >= 0, 'step 4: Level 1 H, L, HL, HH (F6.5)');
+    var s7 = stepBlock(7);
+    ok(s7.indexOf('data-fact="P1.50"') >= 0 && s7.indexOf('ตัวอย่าง stop-loss เดียวในคลิป') >= 0, 'the one stop-loss example (P1.50)');
+    ok(s7.indexOf('กฎ stop-loss คลิปไม่ได้ระบุ') >= 0, 'the rule keeps its badge');
+    ok(s7.indexOf('ตัวเลขจากเครื่องมือบนจอ ไม่ใช่ที่เขาพูด') >= 0, 'the 4.50 readout is labelled a readout');
+    ok(stepBlock(8).indexOf('คลิปไม่ได้ระบุ') >= 0, 'max daily loss badge');
+  });
+
+  test('playbook.html: the bias worksheet: four yes/no questions over a 60m scenario, the answer, the sources', () => {
+    var bw = html.slice(html.indexOf('class="bw"'), html.indexOf('</section>', html.indexOf('class="bw"')));
+    eq((bw.match(/<fieldset class="bw__q"/g) || []).length, 4, 'four questions');
+    for (var q = 1; q <= 4; q++) {
+      ok(bw.indexOf('data-bq="' + q + '" data-bv="1"') >= 0 && bw.indexOf('data-bq="' + q + '" data-bv="0"') >= 0, 'question ' + q + ' has yes and no');
+    }
+    ['P3.3', 'P3.4', 'P3.5', 'P3.6', 'P3.21', 'P3.41', 'P10.29', 'P8.34'].forEach((id) => ok(bw.indexOf('data-fact="' + id + '"') >= 0, 'worksheet chip ' + id));
+    ok(bw.indexOf('data-bw-sample="S19"') >= 0 && bw.indexOf('data-bw-sample="S18"') >= 0, 'S19 and a second sample S18');
+    ok(bw.indexOf('S17') < 0, 'not S17 (15m)');
+    ok(bw.indexOf('60m') >= 0 && bw.indexOf('data-k="bw-bias"') >= 0 && bw.indexOf('data-k="bw-draw"') >= 0 && bw.indexOf('aria-live="polite"') >= 0);
+    ok(bw.indexOf('data-k="bw-gap"') >= 0 && bw.indexOf('คลิปไม่ได้ระบุ') >= 0, 'the verdicts the clip does not cover carry the badge');
+    ok(P.BIAS_Q1.up.indexOf('60m') >= 0 && P.BIAS_Q1.down.indexOf('60m') >= 0);
+    eq(TJR.scenarios.get('S19').tf, 60); eq(TJR.scenarios.get('S18').tf, 60);
+  });
+
+  test('playbook.html: the session tables, the New York windows (ET and Thailand), the live hooks', () => {
+    P.ORDER.forEach((id) => ok(html.indexOf('data-row="' + id + '"') >= 0 && html.indexOf('data-k="et-' + id + '"') >= 0 && html.indexOf('data-k="th-' + id + '"') >= 0, 'session row ' + id));
+    P.WIN_ORDER.forEach((id) => ok(html.indexOf('data-wrow="' + id + '"') >= 0 && html.indexOf('data-k="et-w-' + id + '"') >= 0 && html.indexOf('data-k="th-w-' + id + '"') >= 0, 'window row ' + id));
+    ok(html.indexOf('data-k="ses-win"') >= 0 && html.indexOf('data-k="win"') >= 0, 'window table and the clock line');
+    ['09:30–09:50', '09:50–10:10', '10:30', '13:00'].forEach((t) => ok(html.indexOf('>' + t + '<') >= 0, 'static fallback ' + t));
+    ['P5.12', 'P5.13', 'P5.14', 'P5.15', 'P5.19'].forEach((id) => ok(html.indexOf('data-fact="' + id + '"') >= 0, id));
+    ok(html.indexOf('data-fact="P5.5"') >= 0, 'C2: the older video says London ends 11:30');
+  });
+
+  test('playbook.html: "สิ่งที่คลิปไม่ได้บอก" is the spec section 7 list', () => {
+    var g = html.slice(html.indexOf('class="gaps"'), html.indexOf('</ul>', html.indexOf('class="gaps"')));
+    eq((g.match(/<li><span class="badge-gap">คลิปไม่ได้ระบุ<\/span>/g) || []).length, 13);
+    ['กฎ stop-loss', 'สัดส่วนของสถานะที่ปิดที่แต่ละ TP', 'win rate และ R:R', 'ขาดทุนสูงสุดต่อวัน', 'จำนวนเทรดสูงสุดต่อวัน', 'จัดการเทรดที่ราคากลับตัวสวน',
+      'ขนาดขั้นต่ำของ FVG', 'เลือก swing ล่าสุด', 'time frame ของ IFVG', 'stacked IFVG ฝั่งกลับด้าน', 'Gann box', 'SMT ย่อมาจากอะไร', 'advanced draws'
+    ].forEach((t) => ok(g.indexOf(t) >= 0, 'gap: ' + t));
+  });
+
+  test('playbook.html: head, script order, GSAP tags, one stepping chart plus the worksheet chart', () => {
     ok(html.indexOf('<html lang="th"') >= 0 && html.indexOf('data-tone="dark"') >= 0);
     eq((html.match(/<h1[ >]/g) || []).length, 1);
-    var order = ['ns', 'store', 'rng', 'swings', 'gen', 'sessions', 'library', 'annotate', 'grade', 'scale', 'render', 'overlays', 'chart', 'layout', 'motion', 'pages/playbook'];
+    var order = ['ns', 'sources', 'store', 'rng', 'swings', 'gen', 'sessions', 'confluence', 'library', 'system', 'annotate', 'grade', 'scale', 'render', 'overlays', 'chart', 'layout', 'motion', 'pages/playbook'];
     var at = order.map((n) => html.indexOf('/' + n + '.js"'));
     at.forEach((i, j) => ok(i > 0, order[j] + ' loaded'));
     for (var i = 1; i < at.length; i++) ok(at[i] > at[i - 1], order[i] + ' after ' + order[i - 1]);
     ok(html.indexOf('gsap/3.12.5/gsap.min.js') > 0 && html.indexOf('gsap/3.12.5/ScrollTrigger.min.js') > 0);
-    eq(html.split('class="chart-frame pf"').length - 1, 1, 'one chart on the page');
-    ok(/id="clock"/.test(html) && /id="checklist"/.test(html) && /id="sessions"/.test(html) && /id="procedure"/.test(html));
+    eq(html.split('class="chart-frame pf"').length - 1, 1, 'one chain chart on the page');
+    eq(html.split('class="chart-frame bw__chart"').length - 1, 1, 'and the worksheet chart');
+    ok(/id="clock"/.test(html) && /id="checklist"/.test(html) && /id="sessions"/.test(html) && /id="procedure"/.test(html) && /id="bias"/.test(html));
+    ['S15', 'S16', 'S22'].forEach((id) => ok(html.indexOf('data-side="' + id + '"') >= 0, 'sample button ' + id));
   });
 })();
