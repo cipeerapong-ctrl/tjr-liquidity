@@ -1,9 +1,11 @@
-# TJR Liquidity — เว็บสอนระบบของ TJR จากคลิป (v2)
+# TJR Liquidity — เว็บสอนระบบของ TJR จากคลิป (v3)
 
-Static Thai website that teaches only TJR's own system, in two levels:
+Static Thai website that teaches only TJR's own system as one learning path from zero (Step 0 to Step 5, plus practice):
 
-- **Level 1 (liquidity):** his clip "The ONLY Liquidity Guide You'll Ever Need" (https://youtu.be/Vulini8xbB0, 49:07, 2026-07-21), the MAIN source. Where liquidity sits, sweeps as an opportunity, a simple structure confirmation (H, L, HL, HH), session and higher-time-frame targets, low- vs high-resistance liquidity.
-- **Level 2 (the full system):** his 16-video playlist "Path to Profitability" (2026-01, older). It fills in what the main clip says it does not teach: daily bias, time windows, break of structure, fair value gaps, inverse FVGs, equilibrium, SMT divergence, the exits, and risk. The worked trade of clip #1 is told step by step.
+- **Source A, the main clip (liquidity):** his clip "The ONLY Liquidity Guide You'll Ever Need" (https://youtu.be/Vulini8xbB0, 49:07, 2026-07-21), the MAIN source. Where liquidity sits, sweeps as an opportunity, a simple structure confirmation (H, L, HL, HH), session and higher-time-frame targets, low- vs high-resistance liquidity.
+- **Source B, the playlist (the full system, and the basics):** his 16-video playlist "Path to Profitability" (2026-01, older). It fills in what the main clip says it does not teach: daily bias, time windows, break of structure, fair value gaps, inverse FVGs, equilibrium, SMT divergence, the exits, and risk. The worked trade of clip #1 is told step by step. Clip #14 (candlestick basics) is the base of Step 0.
+
+The learning path: Step 0 `start.html` (candle, timeframe, high / low, trend, a glossary) → Step 1 Liquidity → Step 2 Confluences → Step 3 the full setup (strategy) → Step 4 Playbook → Step 5 Risk. Every path page shows its step and a previous / next bar; the scenarios and the lab are practice pages tagged with the steps they go with. `TJR.layout.PATH` in `assets/js/core/layout.js` is the one list of the order.
 
 Charts are synthetic (a seeded generator plus a custom Canvas 2D engine), not footage or real prices.
 
@@ -24,20 +26,20 @@ Needs JavaScript, and internet for GSAP 3.12.5 + ScrollTrigger 3.12.5 (cdnjs) an
 ```
 node tests/run.mjs
 ```
-Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js`: 476 tests, about 40 seconds. They cover the generators (every scenario S01-S22 x seeds 1..200 against `TJR.scenarios.check`), the swing rule, sessions and DST days, the detectors (FVG, BOS, equilibrium, SMT), grading, chart scale math and overlays, the store with blocked localStorage, rapid Play clicks, the page controllers with a stub DOM, and content rules on every page (chips point at the right video and second, nothing from the excluded list).
+Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js`: 515 tests, about 40 seconds. They cover the generators (every scenario S01-S22 x seeds 1..200 against `TJR.scenarios.check`), the swing rule, sessions and DST days, the detectors (FVG, BOS, equilibrium, SMT), grading, chart scale math and overlays, the store with blocked localStorage, rapid Play clicks, the page controllers with a stub DOM, and content rules on every page (chips point at the right video and second, nothing from the excluded list).
 
 ## Pages
-| Page | Level | What it does |
+| Page | Step | What it does |
 |---|---|---|
-| `start.html` | 0 | Step 0, the beginner page: candle, timeframe, high / low, trend, then a short glossary that links into the lessons |
-| `index.html` | 1 + 2 | Home: hero chart, the 3-step trade of the clip, the full-system chain, lesson timeline, the tools, the two sources |
-| `learn.html` | 1 | 8 lessons in main-clip order, each with a playable chart, a short quiz and timestamp chips; session table in ET and Thai time; extra detail from playlist clips #12 and #14 |
-| `confluences.html` | 2 | Five lessons with an interactive each: break of structure, fair value gap, inverse FVG (BOS vs IFVG race), equilibrium (draggable range), SMT (twin ES / NQ charts) |
-| `strategy.html` | 2 | His worked trade of 16 Jan 2026 as a 9-step tracker over a simulated twin chart (bearish SMT, ES leads), plus the facts the clip does not state |
-| `risk.html` | 2 | Risk and discipline: the three skills, his sizing logic, a contract-size calculator (inputs only, no advice), win rate x R:R, the funded-account paragraph |
-| `playbook.html` | 1 + 2 | His order of thinking in 8 steps (bias, time, sweep, confirmation, continuation, entry, exit, risk) with "show on chart" demos, a bias worksheet, a 13-item checklist (progress saved locally), live NY clock (ET and Thailand), session table, own-rules fields |
-| `scenarios.html` | 1 + 2 | 22 scenarios: S01-S14 from the main clip, S15-S22 full-system setups (BOS + FVG, IFVG, equilibrium, stacked gaps, wick-is-not-a-break, SMT twin, time windows). Step or play bar by bar, notes appear when price reaches them, random new chart, timeframe and outcome switches |
-| `lab.html` | 1 + 2 | 7 graded drills on random charts: Replay, Spot, Sessions, Quiz (Level 1) and Gap finder, Break or not, Which index leads (Level 2). Scores measure following the steps, not profit |
+| `start.html` | Step 0 | Step 0, the beginner page: candle, timeframe, high / low, trend, then a short glossary that links into the lessons |
+| `index.html` | home | Home: hero chart, the six-step path with the chain of one trade, the 3-step trade of the clip, lesson timeline, the tools, the two sources |
+| `learn.html` | Step 1 | 8 lessons in main-clip order, each with a playable chart, a short quiz and timestamp chips; session table in ET and Thai time; extra detail from playlist clips #12 and #14 |
+| `confluences.html` | Step 2 | Five lessons with an interactive each: break of structure, fair value gap, inverse FVG (BOS vs IFVG race), equilibrium (draggable range), SMT (twin ES / NQ charts) |
+| `strategy.html` | Step 3 | His worked trade of 16 Jan 2026 as a 9-step tracker over a simulated twin chart (bearish SMT, ES leads), plus the facts the clip does not state |
+| `risk.html` | Step 5 | Risk and discipline: the three skills, his sizing logic, a contract-size calculator (inputs only, no advice), win rate x R:R, the funded-account paragraph |
+| `playbook.html` | Step 4 | His order of thinking in 8 steps (bias, time, sweep, confirmation, continuation, entry, exit, risk) with "show on chart" demos, a bias worksheet, a 13-item checklist (progress saved locally), live NY clock (ET and Thailand), session table, own-rules fields |
+| `scenarios.html` | practice (Steps 1-3) | 22 scenarios: S01-S14 from the main clip, S15-S22 full-system setups (BOS + FVG, IFVG, equilibrium, stacked gaps, wick-is-not-a-break, SMT twin, time windows). Step or play bar by bar, notes appear when price reaches them, random new chart, timeframe and outcome switches |
+| `lab.html` | practice (Steps 0-3) | 7 graded drills on random charts: Replay, Spot, Sessions, Quiz (Steps 0-1) and Gap finder, Break or not, Which index leads (Steps 2-3). Scores measure following the steps, not profit |
 
 ## Folder map
 ```

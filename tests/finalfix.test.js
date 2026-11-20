@@ -102,10 +102,10 @@
   });
 
   // minor 8: README is v2
-  test('README: v2 pages, Level 1 / Level 2, sources and precedence, run / test / deploy; nothing from v1', () => {
+  test('README: the learning path and its pages, sources and precedence, run / test / deploy; nothing from v1', () => {
     var md = readText('README.md');
     ROOT.forEach(function (f) { ok(md.indexOf('`' + f + '`') >= 0, 'README lists ' + f); });
-    ['Level 1', 'Level 2', 'precedence', 'node tests/run.mjs', 'Deploy', 'Folder map', 'clip-facts.md', 'playlist'].forEach(function (w) { ok(md.indexOf(w) >= 0, 'README mentions ' + w); });
+    ['learning path', 'Step 0', 'start.html', 'precedence', 'node tests/run.mjs', 'Deploy', 'Folder map', 'clip-facts.md', 'playlist'].forEach(function (w) { ok(md.indexOf(w) >= 0, 'README mentions ' + w); });
     ok(!/14 messy|202 tests|four graded|7-step|11-item/.test(md), 'no v1 numbers');
     ok(!/__TESTS__/.test(md), 'the test count is filled in');
     ok(/system, annotate/.test(md) && /confluence/.test(md), 'script order and folder map include the v2 scripts');

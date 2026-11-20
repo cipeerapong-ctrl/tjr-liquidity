@@ -8,8 +8,8 @@ Static, multi-page Thai website that teaches only TJR's own system: his liquidit
 - GSAP 3.12.5 + ScrollTrigger 3.12.5 from cdnjs only. Google Fonts (Thai-capable).
 - Design kit copied from the design-taste-frontend skill into `assets/` (do not edit kit files).
 
-## Pages (v2)
-Level 1 (liquidity clip): `learn.html`, `scenarios.html` S01–S14, `lab.html` v1 modes. Level 2 (playlist): `confluences.html`, `strategy.html`, `playbook.html`, `risk.html`, scenarios S15–S22, lab drills gap/bos/smt. `index.html` maps both. Script order and file map: `docs/superpowers/plans/2026-11-19-tjr-v2-full-system.md`.
+## Pages (v3: one learning path)
+Path (order in `TJR.layout.PATH`, assets/js/core/layout.js): Step 0 `start.html` (candle, timeframe, high/low, trend, glossary; clip #14 and the main clip) → 1 `learn.html` (liquidity clip) → 2 `confluences.html` → 3 `strategy.html` (nav label "เซ็ตอัพเต็ม") → 4 `playbook.html` → 5 `risk.html`. Practice pages (not on the path, tagged with the steps they go with): `scenarios.html` (S01–S14 step 1, S15–S22 steps 2–3), `lab.html`. `index.html` shows the path. No visible "Level 1/2" wording: source tags say คลิปหลัก / เพลย์ลิสต์, pointers say ขั้น N (tests/path.test.js). Script order and file map: `docs/superpowers/plans/2026-11-19-tjr-v2-full-system.md`; v3 design and plan: `docs/superpowers/specs/2026-11-20-tjr-learning-path-design.md`, `docs/superpowers/plans/2026-11-20-tjr-learning-path.md`.
 
 ## Run / test
 - Run: open `index.html` in a browser.
