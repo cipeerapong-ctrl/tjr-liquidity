@@ -274,7 +274,7 @@
     ok(/<html lang="th"[^>]*data-type="software"/.test(h));
     eq((h.match(/<h1[ >]/g) || []).length, 1);
     ok(h.indexOf('id="viewer"') > 0 && h.indexOf('data-f="all"') > 0 && h.indexOf('data-f="htf"') > 0);
-    ok(/data-f="l1"[^>]*>Level 1</.test(h) && /data-f="l2"[^>]*>Level 2</.test(h), 'Level 1 / Level 2 filters');
+    ok(/data-f="l1"[^>]*>/.test(h) && /data-f="l2"[^>]*>/.test(h), 'the two group filters (the step wording is pinned in path.test.js)');
     ok(/data-act="conf"[^>]*>อ่าน confluence</.test(h), 'the confluence toggle');
     ok(h.indexOf('data-k="hostA"') > 0 && h.indexOf('data-k="hostB"') > 0, 'two chart hosts for the twin view');
     ok(h.indexOf('assets/css/pages/scenarios.css') > 0);

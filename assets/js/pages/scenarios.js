@@ -268,8 +268,10 @@
 
   // ---------------------------------------------------------------- the cards
   var SIDE_TAG = { long: ['tag--long', 'Long'], short: ['tag--short', 'Short'], either: ['tag--none', 'Long / Short'] };
+  // the group a scenario practises: S01-S14 the liquidity step, S15-S22 the full system (steps 2-3)
+  function stepLabel(lv) { return lv === 2 ? 'ขั้น 2–3' : 'ขั้น 1'; }
   function cardHtml(d) {
-    var lv = levelOf(d.id), k = kindOf(d), tags = '<span class="level-tag" data-level="' + lv + '">L' + lv + '</span>';
+    var lv = levelOf(d.id), k = kindOf(d), tags = '<span class="level-tag" data-level="' + lv + '">' + stepLabel(lv) + '</span>';
     tags += k.trade
       ? '<span class="tag ' + SIDE_TAG[k.side][0] + '">' + SIDE_TAG[k.side][1] + '</span>' + (k.fail ? '<span class="tag">มีแบบ ' + (lv === 2 ? 'setup' : 'confirmation') + ' ล้ม</span>' : '')
       : '<span class="tag tag--none">' + noTradeTag(d.id) + '</span>';
@@ -604,7 +606,7 @@
     V.noteCount = -1; V.vkey = null; V.at = 0;
     V.ch.setData(b);
     setOverlays();
-    el.vid.innerHTML = id + ' · ' + d.instrument + ' · ' + TF_NAME[d.tf] + ' <span class="level-tag" data-level="' + lv + '">Level ' + lv + '</span>';
+    el.vid.innerHTML = id + ' · ' + d.instrument + ' · ' + TF_NAME[d.tf] + ' <span class="level-tag" data-level="' + lv + '">' + stepLabel(lv) + '</span>';
     el.title.textContent = d.title;
     el.sum.textContent = d.summary;
     el.chips.innerHTML = chipsHtml(clipsOf(d));

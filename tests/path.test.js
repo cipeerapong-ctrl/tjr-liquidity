@@ -39,6 +39,42 @@
     });
   });
 
+  // ---------------------------------------------------------------- the practice pages (not on the path: tagged by the steps they practise)
+  var PRACTICE = { scenarios: 'ฝึก · ใช้คู่กับขั้น 1–3', lab: 'ฝึก · ใช้คู่กับขั้น 0–3' };
+  var LEVEL_TH = /ระดับ\s?[12]/;
+
+  Object.keys(PRACTICE).forEach(function (id) {
+    var html = readText(id + '.html');
+
+    test(id + '.html: tagged as practice with the steps it goes with, first in <main>', () => {
+      var tag = '<p class="step-tag step-tag--practice">' + PRACTICE[id] + '</p>';
+      eq(html.split(tag).length - 1, 1, 'the practice tag appears once');
+      var main = html.slice(html.indexOf('<main'));
+      ok(main.indexOf(tag) > 0 && main.indexOf(tag) < main.indexOf('<h1'), 'the tag comes before the h1');
+    });
+
+    test(id + '.html and its script: no Level 1 / Level 2 / L1 / L2 / ระดับ 1-2 a reader sees', () => {
+      var seen = visible(html), m = LEVEL.exec(seen) || LEVEL_TH.exec(seen);
+      ok(!m, 'page text: ' + (m ? seen.slice(Math.max(0, m.index - 40), m.index + 40) : ''));
+      // string literals of the script that reach the DOM (comments stripped first)
+      var js = readText('assets/js/pages/' + id + '.js').replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+      var lit = (js.match(/'(?:[^'\\\n]|\\.)*'/g) || []).filter(function (x) { return LEVEL.test(x) || LEVEL_TH.test(x); });
+      eq(lit, [], 'string literals that say Level / ระดับ');
+    });
+  });
+
+  test('scenarios.html: the filter chips name the step, and the card and viewer tags say ขั้น', () => {
+    var h = readText('scenarios.html'), js = readText('assets/js/pages/scenarios.js');
+    ok(/data-f="l1"[^>]*>ฝึกขั้น 1 · Liquidity</.test(h) && /data-f="l2"[^>]*>ฝึกขั้น 2–3 · ระบบเต็ม</.test(h), 'filter chips');
+    ok(/<meta name="description" content="[^"]*"/.test(h) && !/Level/.test(/<meta name="description" content="([^"]*)"/.exec(h)[1]), 'meta description');
+    ok(js.indexOf("'ขั้น 2–3'") > 0 && js.indexOf("'ขั้น 1'") > 0, 'tag text for both groups');
+  });
+
+  test('lab.html: says which steps each group of modes goes with', () => {
+    var h = readText('lab.html');
+    ok(h.indexOf('ใช้คู่กับขั้น 0–1') > 0 && h.indexOf('ใช้คู่กับขั้น 2–3') > 0, 'both groups named');
+  });
+
   test('playbook.html: the source tags name the source in words', () => {
     var pb = readText('playbook.html');
     ok(/<span class="level-tag" data-level="1">คลิปหลัก<\/span>/.test(pb) && /<span class="level-tag" data-level="2">เพลย์ลิสต์<\/span>/.test(pb), 'playbook tags');

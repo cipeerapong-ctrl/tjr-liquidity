@@ -12,6 +12,8 @@
 
 /* ================================================================ head, tabs, score */
 .lab-head { display: grid; gap: var(--s-4); max-width: 64ch; margin-bottom: var(--s-6); }
+.lab-head .step-tag { justify-self: start; }
+.lab-head .lab-steps { margin: 0; color: var(--muted); font-size: var(--t-small); }
 .lab-head h1 { font-size: clamp(32px, 2.4vw + 14px, 52px); }
 .lab-head .t-lead { margin: 0; color: var(--ink); }
 
