@@ -292,10 +292,10 @@
     var long = ctx.side !== 'short', n = ctx.stacks ? ctx.stacks : 0;
     var stack = (long ? 'stacked lows' : 'stacked highs') + (n ? ' ' + n + ' จุด' : '');
     return [
-      'เส้นคือ level ที่รู้แล้วก่อน sweep: ' + stack + ' (low-resistance) กับ liquidity ' + (long ? 'ด้านบน' : 'ด้านล่าง') + ' ที่จะเป็นเป้า bias ตั้งก่อนเทรด ลองทำ worksheet ในขั้นนี้',
+      'เส้นคือ level ที่รู้แล้วก่อน sweep: ' + stack + ' (low-resistance) กับ liquidity ' + (long ? 'ด้านบน' : 'ด้านล่าง') + ' ที่จะเป็นเป้า bias ตั้งก่อนเทรด ลองทำ worksheet ในข้อนี้',
       ctx.windows
         ? 'แถบสีคือช่วง manipulation 09:30–09:50 ET ราคากวาด liquidity ในช่วงนี้ แล้วช่วงเข้าคือ 09:50–10:10'
-        : 'ขั้นนี้เป็นเรื่องเวลา กราฟตัวอย่างนี้ไม่ได้ตั้งเวลาไว้ที่ NY open เลือก Long · ตามเวลา NY เพื่อดูแถบช่วงเวลา หรือดูตารางด้านล่าง',
+        : 'ข้อนี้เป็นเรื่องเวลา กราฟตัวอย่างนี้ไม่ได้ตั้งเวลาไว้ที่ NY open เลือก Long · ตามเวลา NY เพื่อดูแถบช่วงเวลา หรือดูตารางด้านล่าง',
       'ลูกศรคือแท่งที่ sweep level ยังไม่ใช่จุดเข้า ต้องรอ confirmation',
       (ctx.confirm === 'ifvg'
         ? 'gap ที่โดนแท่งปิดทะลุ (IFVG) ทำหน้าที่เป็น BOS'
@@ -593,8 +593,8 @@
       li.classList.toggle('is-active', on);
       if (on) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     });
-    setText(metaEl, 'ขั้นที่ ' + k + ' จาก ' + STEPS);
-    setText(nowN, 'ขั้นที่ ' + k);
+    setText(metaEl, 'ข้อที่ ' + k + ' จาก ' + STEPS);
+    setText(nowN, 'ข้อที่ ' + k);
     setText(nowT, nowText(k, ctx));
     if (nowGap) nowGap.hidden = !STEP_GAP[k];
     btnPrev.disabled = k <= 1; btnNext.disabled = k >= STEPS;

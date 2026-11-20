@@ -284,7 +284,7 @@
     // step together: a short window (a phone on its side, a 320px phone) gets the three still rows instead
     var ST = M.ScrollTrigger, live = !!(M.enabled && ST && M.gsap && (!tall || tall.matches));
     if (!live) {
-      var names = ['ขั้น 1 · sweep', 'ขั้น 2 · confirmation', 'ขั้น 3 · entry'];
+      var names = ['ข้อ 1 · sweep', 'ข้อ 2 · confirmation', 'ข้อ 3 · entry'];
       $$('[data-core-still]', sec).forEach(function (host, k) {
         var ch = frame(host, b, { label: 'กราฟ S01 ' + names[k], title: 'S01 · ' + def.title, meta: names[k] });
         ch.reveal(k === 2 ? n - 1 : S[k]);
@@ -306,7 +306,7 @@
       if (at.k !== cur.k) {
         cur.k = at.k;
         steps.forEach(function (s, i) { s.classList.toggle('is-on', i === at.k); });
-        if (meta) meta.textContent = 'ขั้น ' + (at.k + 1) + ' / 3';
+        if (meta) meta.textContent = 'ข้อ ' + (at.k + 1) + ' / 3';
       }
       rail.forEach(function (r, i) { r.style.setProperty('--f', String(clamp(p * 3 - i, 0, 1))); });
     }

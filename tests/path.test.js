@@ -75,6 +75,18 @@
     ok(h.indexOf('ใช้คู่กับขั้น 0–1') > 0 && h.indexOf('ใช้คู่กับขั้น 2–3') > 0, 'both groups named');
   });
 
+  test('the numbers of a page own sequence say ข้อ, never ขั้น (ขั้น is the path step only)', () => {
+    ['playbook', 'strategy', 'confluences', 'index'].forEach(function (id) {
+      var seen = visible(readText(id + '.html'));
+      ok(seen.indexOf('ขั้นที่') < 0, id + ' has no "ขั้นที่ N"');
+    });
+    var pb = readText('playbook.html');
+    ok(!/<h3>ขั้น [0-9]/.test(pb), 'playbook headings are ข้อ N');
+    ['playbook', 'strategy', 'confluences'].forEach(function (id) {
+      ok(readText('assets/js/pages/' + id + '.js').indexOf("'ขั้นที่") < 0, id + '.js counters say ข้อที่');
+    });
+  });
+
   test('playbook.html: the source tags name the source in words', () => {
     var pb = readText('playbook.html');
     ok(/<span class="level-tag" data-level="1">คลิปหลัก<\/span>/.test(pb) && /<span class="level-tag" data-level="2">เพลย์ลิสต์<\/span>/.test(pb), 'playbook tags');

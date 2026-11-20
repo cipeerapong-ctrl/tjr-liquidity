@@ -15,7 +15,7 @@
     return m ? m[0] : '';
   }
   // the clips this page may cite: the main clip (0), #14 (the basics) and the clips that define the glossary's terms
-  var CLIPS = [0, 6, 7, 8, 10, 11, 14];
+  var CLIPS = [0, 1, 6, 7, 8, 10, 11, 14];
   var TERMS = ['liquidity', 'sweep', 'draw', 'session', 'bos', 'fvg', 'ifvg', 'eq', 'smt'];
   // what each glossary term looks like in running text (a term may use only the ones before it)
   var TERM_RE = {
@@ -174,6 +174,17 @@
         ok(pathStep && String(pathStep.step) === link[3], k + ' names the right step for ' + link[1]);
       }
     });
+  });
+
+  test('start.html #terms: "draw on liquidity" is the clip #1 definition (P1.29) and links to the strategy step that shows the word; "sweep" does not promise a reversal', () => {
+    var t = section('terms');
+    var d = new RegExp('<div class="term" id="t-draw">[\\s\\S]*?</div>').exec(t)[0];
+    ok(d.indexOf('data-fact="P1.29"') >= 0, 'cites P1.29');
+    ok(d.indexOf('href="strategy.html#s1"') >= 0 && d.indexOf('เรียนเต็มในขั้น 3 →') >= 0, 'links to strategy.html#s1, step 3');
+    var strat = readText('strategy.html');
+    ok(/id="s1"[\s\S]{0,4000}draw on liquidity/.test(strat), 'that section really says "draw on liquidity"');
+    var sw = new RegExp('<div class="term" id="t-sweep">[\\s\\S]*?</div>').exec(t)[0];
+    ok(sw.indexOf('จะกลับตัวทุกครั้ง') >= 0 && sw.indexOf('กลับตัวทันที') < 0, 'F4.6: not every time, only an opportunity');
   });
 
   test('start.html: a term is defined before it is used (the basics blocks use none; each term uses only earlier ones)', () => {

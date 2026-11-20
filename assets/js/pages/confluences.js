@@ -423,7 +423,7 @@
       S.step = i = clamp(i, 0, st.steps.length - 1);
       var s = st.steps[i], t = STACK_TEXT[s.key];
       if (!keep) ch.reveal(s.bar);
-      if (stepEl) stepEl.textContent = 'ขั้นที่ ' + (i + 1) + ' จาก ' + st.steps.length + ' · ' + stamp(cs[s.bar].t);
+      if (stepEl) stepEl.textContent = 'ข้อที่ ' + (i + 1) + ' จาก ' + st.steps.length + ' · ' + stamp(cs[s.bar].t);
       read.innerHTML = '<b>' + t[0] + '</b> ' + t[1] + ' ' + t[2].map(function (c) { return chip(c[0], c[1]); }).join(' ') + ' ' + sim();
       prev.disabled = i === 0; nextB.disabled = i === st.steps.length - 1;
     }

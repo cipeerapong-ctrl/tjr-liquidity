@@ -26,7 +26,7 @@ Needs JavaScript, and internet for GSAP 3.12.5 + ScrollTrigger 3.12.5 (cdnjs) an
 ```
 node tests/run.mjs
 ```
-Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js`: 515 tests, about 40 seconds. They cover the generators (every scenario S01-S22 x seeds 1..200 against `TJR.scenarios.check`), the swing rule, sessions and DST days, the detectors (FVG, BOS, equilibrium, SMT), grading, chart scale math and overlays, the store with blocked localStorage, rapid Play clicks, the page controllers with a stub DOM, and content rules on every page (chips point at the right video and second, nothing from the excluded list).
+Node 24. Loads the site's scripts into a `vm` context, then runs `tests/*.test.js`: 517 tests, about 40 seconds. They cover the generators (every scenario S01-S22 x seeds 1..200 against `TJR.scenarios.check`), the swing rule, sessions and DST days, the detectors (FVG, BOS, equilibrium, SMT), grading, chart scale math and overlays, the store with blocked localStorage, rapid Play clicks, the page controllers with a stub DOM, and content rules on every page (chips point at the right video and second, nothing from the excluded list).
 
 ## Pages
 | Page | Step | What it does |

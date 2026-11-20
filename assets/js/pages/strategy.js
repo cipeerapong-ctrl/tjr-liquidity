@@ -221,7 +221,7 @@
     var bar = $('.track__bar'); if (bar) bar.style.setProperty('--p', String(i / (META.length - 1)));
     var cap = $('[data-k="cap"]', fig), no = $('[data-k="stepno"]', fig);
     if (cap) cap.textContent = META[i].cap;
-    if (no) no.textContent = 'ขั้นที่ ' + (i + 1) + ' จาก ' + META.length;
+    if (no) no.textContent = 'ข้อที่ ' + (i + 1) + ' จาก ' + META.length;
     var prev = $('[data-act="prev"]', fig), next = $('[data-act="next"]', fig);
     if (prev) prev.disabled = i === 0;
     if (next) next.disabled = i === META.length - 1;
