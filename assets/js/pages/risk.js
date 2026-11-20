@@ -168,10 +168,10 @@
   TJR.layout.mount({
     page: 'risk',
     close: {
-      title: 'เอาไปใส่เช็คลิสต์ของคุณ',
-      line: 'ขนาดต่อเทรดดูได้จากหน้านี้ ส่วน stop-loss สัดส่วน TP และ max daily loss ที่คลิปไม่ได้บอก เขียนเป็นกฎของคุณเองที่ Playbook',
-      label: 'เปิด Playbook',
-      href: 'playbook.html'
+      title: 'เรียนครบแล้ว ไปฝึกต่อ',
+      line: 'ลองอ่านกราฟจริงในหน้าสถานการณ์ หรือซ้อมในหน้าแบบฝึก ส่วน stop-loss และสัดส่วน TP ที่คลิปไม่ได้บอก เขียนเป็นกฎของคุณเอง',
+      label: 'ไปฝึกต่อ',
+      href: 'scenarios.html'
     }
   });
 

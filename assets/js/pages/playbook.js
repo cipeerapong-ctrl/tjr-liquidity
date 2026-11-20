@@ -397,7 +397,7 @@
   var M = TJR.motion.init();
   TJR.layout.mount({
     page: 'playbook',
-    close: { title: 'ซ้อมขั้นตอนบนกราฟสุ่ม', line: 'ตัดสินใจทีละแท่ง แล้วตรวจคำตอบตามคลิป', label: 'เปิดแบบฝึก', href: 'lab.html' }
+    close: { title: 'ไปขั้น 5: ความเสี่ยง', line: 'ขนาดต่อเทรดและวินัย คือส่วนสุดท้ายของระบบ', label: 'ไปขั้น 5', href: 'risk.html' }
   });
 
   function $(sel, root) { return (root || doc).querySelector(sel); }

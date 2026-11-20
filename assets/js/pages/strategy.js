@@ -179,7 +179,7 @@
   var M = TJR.motion.init();
   TJR.layout.mount({
     page: 'strategy',
-    close: { title: 'ต่อด้วยความเสี่ยงและจิตวิทยา', line: 'เขาบอกว่าทักษะที่ทำกำไรมีสามอย่าง คือกลยุทธ์ การจัดการความเสี่ยง และจิตวิทยา', label: 'ดูหน้าความเสี่ยง', href: 'risk.html' }
+    close: { title: 'ไปขั้น 4: Playbook', line: 'เอาทั้งสายมาเรียงเป็นขั้นตอนที่ใช้ตอนเทรดจริง', label: 'ไปขั้น 4', href: 'playbook.html' }
   });
 
   function $(sel, root) { return (root || doc).querySelector(sel); }

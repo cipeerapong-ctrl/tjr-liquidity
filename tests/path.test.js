@@ -28,6 +28,17 @@
     });
   });
 
+  test('each lesson page footer button goes where the path next link goes', () => {
+    PAGES.forEach(function (id) {
+      var js = readText('assets/js/pages/' + id + '.js');
+      var close = /close:\s*\{[\s\S]*?href:\s*'([^']+)'/.exec(js);
+      ok(close, id + ' has a close row');
+      var next = /path-nav__next" href="([^"]+)"/.exec(TJR.layout.pathNavHTML(id, ''));
+      ok(next, id + ' has a next link');
+      eq(close[1], next[1], id + ': the footer button and the path next link agree');
+    });
+  });
+
   test('playbook.html: the source tags name the source in words', () => {
     var pb = readText('playbook.html');
     ok(/<span class="level-tag" data-level="1">คลิปหลัก<\/span>/.test(pb) && /<span class="level-tag" data-level="2">เพลย์ลิสต์<\/span>/.test(pb), 'playbook tags');

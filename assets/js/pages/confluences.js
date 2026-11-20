@@ -219,7 +219,7 @@
   var M = TJR.motion.init();
   TJR.layout.mount({
     page: 'confluences',
-    close: { title: 'ต่อด้วยกลยุทธ์ทั้งสาย', line: 'bias, sweep, confirmation, continuation, entry และ exit เรียงตามลำดับที่เขาคิด', label: 'ดูหน้ากลยุทธ์', href: 'strategy.html' }
+    close: { title: 'ไปขั้น 3: เซ็ตอัพเต็ม', line: 'bias, sweep, confirmation, continuation, entry และ exit เรียงตามลำดับที่เขาคิด', label: 'ไปขั้น 3', href: 'strategy.html' }
   });
 
   var MAX_LIVE = 4;

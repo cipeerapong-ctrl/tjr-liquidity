@@ -172,7 +172,7 @@
   var N_SC = TJR.scenarios.list.length;                    // every scenario (Level 1 and Level 2), never a typed count
   TJR.layout.mount({
     page: 'learn',
-    close: { title: 'ลองอ่านกราฟจริง', line: N_SC + ' สถานการณ์จากคลิป เล่นทีละแท่ง และสุ่มกราฟใหม่ได้ทุกครั้ง', label: 'ดู ' + N_SC + ' สถานการณ์', href: 'scenarios.html' }
+    close: { title: 'ไปขั้น 2: Confluences', line: 'liquidity ให้แค่โอกาส ตัวยืนยันอยู่ในขั้นถัดไป ฝึกอ่านกราฟจริงได้ที่หน้าสถานการณ์', label: 'ไปขั้น 2', href: 'confluences.html' }
   });
 
   var TF_NAME = { 1: '1m', 5: '5m', 15: '15m', 60: '1H', 240: '4H', 1440: 'D' };
