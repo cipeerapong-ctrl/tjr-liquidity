@@ -12,6 +12,23 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#1c1c1c">
+<!-- <link rel="canonical" href="https://[the site's domain]/"> : no domain yet -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/pages/start.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+</head>
 <body>
 <!--
   software · TJR Liquidity step 0 (v3 learning path): the beginner page. Candle, timeframe, high / low, trend, then a short
@@ -19,13 +36,87 @@
   deal: the site's (tokens.css), nothing re-dealt. moment: none dealt; its motion is the candle labels drawing in once
   and the timeframe split toggle (both static under reduced motion).
 -->
-<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="start.html">เริ่มที่นี่</a></div><div class="nav__item"><a class="nav__link" href="learn.html">Liquidity</a></div><div class="nav__item"><a class="nav__link" href="confluences.html" aria-current="page">Confluences</a></div><div class="nav__item"><a class="nav__link" href="strategy.html">เซ็ตอัพเต็ม</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="risk.html">ความเสี่ยง</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="start.html">เริ่มที่นี่</a></div><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="tjr-nav-links" aria-label="เมนู"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></header></noscript>
+<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="start.html" aria-current="page">เริ่มที่นี่</a></div><div class="nav__item"><a class="nav__link" href="learn.html">Liquidity</a></div><div class="nav__item"><a class="nav__link" href="confluences.html">Confluences</a></div><div class="nav__item"><a class="nav__link" href="strategy.html">เซ็ตอัพเต็ม</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="risk.html">ความเสี่ยง</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="start.html">เริ่มที่นี่</a></div><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="tjr-nav-links" aria-label="เมนู"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></header></noscript>
 <main class="app st" id="top">
   <div class="wrap">
-    <header class="st-head">
+    <section id="path" class="st-hero" aria-labelledby="path-h">
       <p class="step-tag" data-step="0">ขั้น 0 · เริ่มที่นี่</p>
-      <h1>เริ่มที่นี่</h1>
-    </header>
+      <h1 id="path-h">เริ่มจากศูนย์ อ่านกราฟให้เป็นก่อน</h1>
+      <p class="t-lead">ไม่ต้องรู้เรื่องเทรดมาก่อน หน้านี้อธิบายแท่งเทียน high low และเทรนด์ แล้วค่อยไปเรียนระบบของ TJR ทีละขั้น</p>
+      <ol class="path-stops" aria-label="เส้นทางเรียน 6 ขั้น">
+        <li class="path-stop is-here" aria-current="step"><span class="path-stop__n">0</span><span class="path-stop__t">เริ่มที่นี่</span><span class="path-stop__here">คุณอยู่ตรงนี้</span></li>
+        <li class="path-stop"><a href="learn.html"><span class="path-stop__n">1</span><span class="path-stop__t">Liquidity</span></a></li>
+        <li class="path-stop"><a href="confluences.html"><span class="path-stop__n">2</span><span class="path-stop__t">Confluences</span></a></li>
+        <li class="path-stop"><a href="strategy.html"><span class="path-stop__n">3</span><span class="path-stop__t">เซ็ตอัพเต็ม</span></a></li>
+        <li class="path-stop"><a href="playbook.html"><span class="path-stop__n">4</span><span class="path-stop__t">Playbook</span></a></li>
+        <li class="path-stop"><a href="risk.html"><span class="path-stop__n">5</span><span class="path-stop__t">ความเสี่ยง</span></a></li>
+      </ol>
+      <a class="btn btn--primary" href="#candle">เริ่มอ่าน</a>
+    </section>
+
+    <section id="candle" class="st-sec" aria-labelledby="candle-h">
+      <div class="st-sec__text">
+        <h2 id="candle-h">แท่งเทียนคืออะไร</h2>
+      <ul class="facts">
+        <li><p>แท่งเทียน 1 แท่ง = ราคาในช่วงเวลาหนึ่ง บอกว่าราคาเปิดที่ไหน วิ่งไปถึงไหน และปิดที่ไหน</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=814" target="_blank" rel="noopener" data-fact="P14.17" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 13:34">#14 13:34</a></span></li>
+        <li><p>ทุกแท่งมี 4 ราคา: open (เปิด) high (สูงสุด) low (ต่ำสุด) close (ปิด)</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=879" target="_blank" rel="noopener" data-fact="P14.18" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 14:39">#14 14:39</a></span></li>
+        <li><p>กล่องตรงกลางคือตัวแท่ง (body) เส้นบางบนกับล่างคือไส้ (wick) ไส้บอกว่าราคาเคยวิ่งไปถึงตรงนั้นแล้วกลับมา</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=890" target="_blank" rel="noopener" data-fact="P14.19" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 14:50">#14 14:50</a></span></li>
+        <li><p>แท่งขึ้น: open อยู่ล่างสุดของตัว close อยู่บนสุด ปลายไส้บนคือ high ปลายไส้ล่างคือ low</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=991" target="_blank" rel="noopener" data-fact="P14.20" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 16:31">#14 16:31</a></span></li>
+        <li><p>แท่งลงกลับกัน: open อยู่บนสุดของตัว close อยู่ล่างสุด high กับ low ยังเป็นปลายไส้เหมือนเดิม</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1141" target="_blank" rel="noopener" data-fact="P14.22" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 19:01">#14 19:01</a></span></li>
+        <li><p>เขาเรียกแท่งขึ้นว่า bullish และเรียกแท่งลงว่า down candle</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1183" target="_blank" rel="noopener" data-fact="P14.23" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 19:43">#14 19:43</a></span></li>
+      </ul>
+      </div>
+      <figure class="st-sec__fig" data-k="candlefig">
+        <svg class="st-svg" viewBox="0 0 560 320" role="img" aria-label="แท่งขึ้นและแท่งลง บอกจุด open high low close ตัวแท่ง และไส้"><g class="cd cd--up"><line x1="150" x2="150" y1="40" y2="260"/><rect x="128" y="100" width="44" height="100" rx="2"/></g><g class="cd cd--down"><line x1="410" x2="410" y1="40" y2="260"/><rect x="388" y="100" width="44" height="100" rx="2"/></g><line class="lead reveal" x1="174" x2="204" y1="40" y2="40"/><g class="reveal"><text x="212" y="44" text-anchor="start">high</text></g><line class="lead reveal" x1="174" x2="204" y1="100" y2="100"/><g class="reveal"><text x="212" y="104" text-anchor="start">close</text></g><line class="lead reveal" x1="174" x2="204" y1="200" y2="200"/><g class="reveal"><text x="212" y="204" text-anchor="start">open</text></g><line class="lead reveal" x1="174" x2="204" y1="260" y2="260"/><g class="reveal"><text x="212" y="264" text-anchor="start">low</text></g><line class="lead reveal" x1="434" x2="464" y1="40" y2="40"/><g class="reveal"><text x="472" y="44" text-anchor="start">high</text></g><line class="lead reveal" x1="434" x2="464" y1="100" y2="100"/><g class="reveal"><text x="472" y="104" text-anchor="start">open</text></g><line class="lead reveal" x1="434" x2="464" y1="200" y2="200"/><g class="reveal"><text x="472" y="204" text-anchor="start">close</text></g><line class="lead reveal" x1="434" x2="464" y1="260" y2="260"/><g class="reveal"><text x="472" y="264" text-anchor="start">low</text></g><line class="lead reveal" x1="96" x2="128" y1="150" y2="150"/><g class="reveal"><text x="90" y="154" text-anchor="end">ตัว (body)</text></g><line class="lead reveal" x1="96" x2="148" y1="62" y2="62"/><g class="reveal"><text x="90" y="66" text-anchor="end">ไส้ (wick)</text></g><text class="cap" x="150" y="298" text-anchor="middle">แท่งขึ้น</text><text class="cap" x="410" y="298" text-anchor="middle">แท่งลง</text></svg>
+      </figure>
+    </section>
+
+    <section id="timeframe" class="st-sec" aria-labelledby="timeframe-h">
+      <div class="st-sec__text">
+        <h2 id="timeframe-h">Timeframe คือแท่งหนึ่งแท่งยาวแค่ไหน</h2>
+      <ul class="facts">
+        <li><p>timeframe คือเวลาที่แท่งหนึ่งแท่งครอบคลุม แท่ง 1 วัน = ราคาทั้งวัน 24 ชั่วโมง แท่ง 4 ชั่วโมง = ราคา 4 ชั่วโมง</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=836" target="_blank" rel="noopener" data-fact="P14.25" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 13:56">#14 13:56</a> <a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=856" target="_blank" rel="noopener" data-fact="P14.26" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 14:16">#14 14:16</a></span></li>
+        <li><p>ซูมเข้าไปแล้ว แท่ง 4 ชั่วโมง 1 แท่ง ก็คือแท่ง 1 ชั่วโมง 4 แท่ง ราคาที่วิ่งจริงเหมือนเดิมทุกอย่าง</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1455" target="_blank" rel="noopener" data-fact="P14.27" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 24:15">#14 24:15</a></span></li>
+        <li><p>เปลี่ยน timeframe ไม่ได้เปลี่ยนราคา แค่เปลี่ยนว่าหั่นเป็นกี่แท่ง ยิ่งเล็กยิ่งมีแท่งเยอะ</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1551" target="_blank" rel="noopener" data-fact="P14.28" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 25:51">#14 25:51</a></span></li>
+      </ul>
+      </div>
+      <figure class="st-sec__fig">
+        <svg class="st-svg" viewBox="0 0 560 280" role="img" aria-label="แท่ง 4 ชั่วโมงหนึ่งแท่ง กดปุ่มเพื่อแยกเป็นแท่ง 1 ชั่วโมงสี่แท่ง" data-k="tfsvg"><line class="guide" x1="40" x2="520" y1="30" y2="30"/><line class="guide" x1="40" x2="520" y1="230" y2="230"/><text class="cap" x="520" y="22" text-anchor="end">high ของช่วงนี้</text><text class="cap" x="520" y="250" text-anchor="end">low ของช่วงนี้</text><g data-k="tfcands"><g class="cd cd--up"><line x1="280" x2="280" y1="30" y2="230"/><rect x="245" y="80" width="70" height="117" rx="2"/></g></g></svg>
+        <figcaption class="st-cap"><span data-k="tfcap" aria-live="polite">แท่ง 4 ชั่วโมง 1 แท่ง</span>
+          <button class="ctrl" type="button" data-k="tftoggle" aria-pressed="false" hidden>แยกเป็นแท่ง 1 ชั่วโมง</button></figcaption>
+      </figure>
+    </section>
+
+    <section id="highlow" class="st-sec" aria-labelledby="highlow-h">
+      <div class="st-sec__text">
+        <h2 id="highlow-h">High และ low</h2>
+      <ul class="facts">
+        <li><p>ในระบบนี้ high ไม่ใช่แค่ราคาสูงสุดของแท่งเดียว แต่คือ &quot;จุดสูง&quot; ที่ราคาขึ้นแล้วกลับลง: แท่งขึ้นตามด้วยแท่งลง จุด high อยู่ที่ปลายไส้ที่สูงที่สุดของสองแท่งนั้น</p> <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=315" target="_blank" rel="noopener" data-fact="F2.1" aria-label="ดูในคลิปที่ 05:15">05:15</a></span></li>
+        <li><p>low กลับกัน: แท่งลงตามด้วยแท่งขึ้น จุด low อยู่ที่ปลายไส้ที่ต่ำที่สุดของสองแท่งนั้น</p> <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=315" target="_blank" rel="noopener" data-fact="F2.2" aria-label="ดูในคลิปที่ 05:15">05:15</a></span></li>
+        <li><p>คลิปสอนพื้นฐานของเขาพูดตรงกัน และพูดอีกแบบว่า high คือราคาขึ้นแล้วลง low คือราคาลงแล้วขึ้น</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1818" target="_blank" rel="noopener" data-fact="P14.33" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 30:18">#14 30:18</a> <a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1928" target="_blank" rel="noopener" data-fact="P14.35" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 32:08">#14 32:08</a> <a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1961" target="_blank" rel="noopener" data-fact="P14.36" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 32:41">#14 32:41</a></span></li>
+      </ul>
+      </div>
+      <figure class="st-sec__fig">
+        <svg class="st-svg" viewBox="0 0 620 340" role="img" aria-label="ชุดแท่งเทียนตัวอย่าง ที่ทำเครื่องหมาย high และ low"><g data-candle="0"><g class="cd cd--up"><line x1="44" x2="44" y1="157" y2="193"/><rect x="31" y="164" width="26" height="22" rx="2"/></g></g><g data-candle="1"><g class="cd cd--up"><line x1="90" x2="90" y1="125" y2="172"/><rect x="77" y="132" width="26" height="32" rx="2"/></g></g><g data-candle="2"><g class="cd cd--down"><line x1="136" x2="136" y1="114" y2="157"/><rect x="123" y="132" width="26" height="18" rx="2"/></g></g><g data-candle="3"><g class="cd cd--down"><line x1="182" x2="182" y1="146" y2="186"/><rect x="169" y="150" width="26" height="29" rx="2"/></g></g><g data-candle="4"><g class="cd cd--down"><line x1="228" x2="228" y1="175" y2="208"/><rect x="215" y="179" width="26" height="14" rx="2"/></g></g><g data-candle="5"><g class="cd cd--up"><line x1="274" x2="274" y1="154" y2="200"/><rect x="261" y="161" width="26" height="32" rx="2"/></g></g><g data-candle="6"><g class="cd cd--up"><line x1="320" x2="320" y1="121" y2="164"/><rect x="307" y="128" width="26" height="33" rx="2"/></g></g><g data-candle="7"><g class="cd cd--up"><line x1="366" x2="366" y1="92" y2="132"/><rect x="353" y="100" width="26" height="28" rx="2"/></g></g><g data-candle="8"><g class="cd cd--down"><line x1="412" x2="412" y1="78" y2="128"/><rect x="399" y="100" width="26" height="21" rx="2"/></g></g><g data-candle="9"><g class="cd cd--down"><line x1="458" x2="458" y1="114" y2="150"/><rect x="445" y="121" width="26" height="22" rx="2"/></g></g><g data-candle="10"><g class="cd cd--up"><line x1="504" x2="504" y1="107" y2="154"/><rect x="491" y="114" width="26" height="29" rx="2"/></g></g><g data-candle="11"><g class="cd cd--down"><line x1="550" x2="550" y1="100" y2="132"/><rect x="537" y="114" width="26" height="11" rx="2"/></g></g><g class="reveal mk mk--high" data-mark="high" data-i="2" data-price="60"><path d="M136 106 l-6 -9 h12 z"/><text x="136" y="96" text-anchor="middle">high</text></g><g class="reveal mk mk--low" data-mark="low" data-i="4" data-price="34"><path d="M228 216 l-6 9 h12 z"/><text x="228" y="242" text-anchor="middle">low</text></g><g class="reveal mk mk--high" data-mark="high" data-i="8" data-price="70"><path d="M412 70 l-6 -9 h12 z"/><text x="412" y="60" text-anchor="middle">high</text></g><g class="reveal mk mk--low" data-mark="low" data-i="10" data-price="49"><path d="M504 162 l-6 9 h12 z"/><text x="504" y="188" text-anchor="middle">low</text></g><g class="reveal mk mk--high" data-mark="high" data-i="11" data-price="64"><path d="M550 92 l-6 -9 h12 z"/><text x="550" y="82" text-anchor="middle">high</text></g></svg>
+      </figure>
+    </section>
+
+    <section id="trend" class="st-sec" aria-labelledby="trend-h">
+      <div class="st-sec__text">
+        <h2 id="trend-h">เทรนด์</h2>
+      <ul class="facts">
+        <li><p>ขาขึ้น = high สูงขึ้นเรื่อย ๆ (HH, higher high) และ low สูงขึ้นเรื่อย ๆ (HL, higher low) ขาลง = high ต่ำลงเรื่อย ๆ (LH, lower high) และ low ต่ำลงเรื่อย ๆ (LL, lower low)</p> <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=375" target="_blank" rel="noopener" data-fact="F3.1" aria-label="ดูในคลิปที่ 06:15">06:15</a></span></li>
+        <li><p>ตลาดไปได้สามทาง คือขึ้น ลง หรือแกว่งข้าง ๆ ดู high กับ low ก็รู้ว่าตอนนี้เป็นทางไหน</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=1874" target="_blank" rel="noopener" data-fact="P14.38" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 31:14">#14 31:14</a></span></li>
+        <li><p>ขาขึ้นเรียงแบบนี้: high, low, high ที่สูงกว่า (HH), low ที่สูงกว่า (HL) แล้ววนซ้ำ</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=2050" target="_blank" rel="noopener" data-fact="P14.39" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 34:10">#14 34:10</a></span></li>
+        <li><p>ขาลงกลับกัน: low, high, low ที่ต่ำกว่า (LL), high ที่ต่ำกว่า (LH) แล้ววนซ้ำ</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=2166" target="_blank" rel="noopener" data-fact="P14.41" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 36:06">#14 36:06</a></span></li>
+        <li><p>เทรนด์เปลี่ยนได้ ขาขึ้นไม่ได้แปลว่าต้องกดซื้อ ขาลงไม่ได้แปลว่าต้องกดขาย</p> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/8qwEmE1DwYw?t=2290" target="_blank" rel="noopener" data-fact="P14.43" aria-label="ดูในคลิป #14 How to Read a Candlestick Chart ที่ 38:10">#14 38:10</a></span></li>
+      </ul>
+      </div>
+      <figure class="st-sec__fig st-zigs">
+        <svg class="st-svg st-svg--zig" viewBox="0 0 560 280" role="img" aria-label="ลำดับ high และ low ของขาขึ้น" data-zig="up"><path class="zig zig--up" d="M50 156 L140 195 L230 117 L320 156 L410 78 L500 125"/><g class="reveal"><circle cx="50" cy="156" r="5" class="pt pt--hi"/><text x="50" y="142" text-anchor="middle" data-zig-label="high">high</text></g><g class="reveal"><circle cx="140" cy="195" r="5" class="pt pt--lo"/><text x="140" y="219" text-anchor="middle" data-zig-label="low">low</text></g><g class="reveal"><circle cx="230" cy="117" r="5" class="pt pt--hi"/><text x="230" y="103" text-anchor="middle" data-zig-label="HH">HH</text></g><g class="reveal"><circle cx="320" cy="156" r="5" class="pt pt--lo"/><text x="320" y="180" text-anchor="middle" data-zig-label="HL">HL</text></g><g class="reveal"><circle cx="410" cy="78" r="5" class="pt pt--hi"/><text x="410" y="64" text-anchor="middle" data-zig-label="HH">HH</text></g><g class="reveal"><circle cx="500" cy="125" r="5" class="pt pt--lo"/><text x="500" y="149" text-anchor="middle" data-zig-label="HL">HL</text></g></svg>
+        <svg class="st-svg st-svg--zig" viewBox="0 0 560 280" role="img" aria-label="ลำดับ high และ low ของขาลง" data-zig="down"><path class="zig zig--down" d="M50 104 L140 65 L230 143 L320 99 L410 182 L500 135"/><g class="reveal"><circle cx="50" cy="104" r="5" class="pt pt--lo"/><text x="50" y="128" text-anchor="middle" data-zig-label="low">low</text></g><g class="reveal"><circle cx="140" cy="65" r="5" class="pt pt--hi"/><text x="140" y="51" text-anchor="middle" data-zig-label="high">high</text></g><g class="reveal"><circle cx="230" cy="143" r="5" class="pt pt--lo"/><text x="230" y="167" text-anchor="middle" data-zig-label="LL">LL</text></g><g class="reveal"><circle cx="320" cy="99" r="5" class="pt pt--hi"/><text x="320" y="85" text-anchor="middle" data-zig-label="LH">LH</text></g><g class="reveal"><circle cx="410" cy="182" r="5" class="pt pt--lo"/><text x="410" y="206" text-anchor="middle" data-zig-label="LL">LL</text></g><g class="reveal"><circle cx="500" cy="135" r="5" class="pt pt--hi"/><text x="500" y="121" text-anchor="middle" data-zig-label="LH">LH</text></g></svg>
+      </figure>
+    </section>
   </div>
 </main>
 
