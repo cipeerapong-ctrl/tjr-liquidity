@@ -1,7 +1,8 @@
 /*
-  TJR Liquidity: the scenario gallery (Task 11). An app screen (spec 10): a filter row and 14 cards, and a viewer
-  that replaces them when the URL names a scenario (#S06). Page CSS only for what the kit and site.css lack:
-  the cards and their previews, the viewer's layout, the side panel, the notes and the tags.
+  TJR Liquidity: the scenario gallery (Task 11). An app screen (spec 10): a filter row and 22 cards (Level 1 and
+  Level 2), and a viewer that replaces them when the URL names a scenario (#S06 ... #S22). Page CSS only for what the
+  kit and site.css lack: the cards and their previews, the viewer's layout (S21: two panes, stacked on a phone), the
+  side panel, the notes and the tags.
   Tokens: assets/css/tokens.css; components: site.css (.chart-frame, .ctrl, .ts-chip, .badge-gap).
   Motion: the previews draw in once, a new note slides in, the viewer fades up; none of it under reduced motion.
 */
@@ -76,6 +77,18 @@ html:not([data-motion="off"]) .sc__fig { transition: border-color var(--m-out, 1
   .side { position: sticky; top: calc(var(--nav) + var(--s-5)); }
 }
 
+/* the chart stage: one host, or two panes for the ES / NQ pair (S21), side by side from 768 px and stacked below it */
+.vf__stage { display: block; }
+.vf__pane { min-width: 0; }
+.vf__lbl { margin: 0; padding: var(--s-2) var(--s-3) 0; font: 500 var(--t-label)/1.4 var(--font-mono); color: var(--c-axis); }
+.vf__stage.is-twin { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+.vf__stage.is-twin .chart-frame__canvas { height: clamp(260px, 28vw, 420px); }
+@media (max-width: 767px) {
+  .vf__stage.is-twin { grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+  .vf__stage.is-twin .chart-frame__canvas { height: clamp(240px, 60vw, 340px); }
+}
+.viewer__id .level-tag { margin-left: var(--s-2); }
+
 /* the chart frame's extras (as the course page) */
 .vf .chart-frame__bar { row-gap: var(--s-2); }
 .vf .chart-frame__meta { flex: none; }
@@ -108,6 +121,10 @@ html:not([data-motion="off"]) .sc__fig { transition: border-color var(--m-out, 1
 .phase [data-phase="sweep"] { --pc: var(--c-liq); }
 .phase [data-phase="confirm"] { --pc: var(--c-bull); }
 .phase [data-phase="entry"] { --pc: var(--c-entry); }
+.phase [data-phase="smt"] { --pc: var(--c-htf); }
+.phase [data-phase="cont"] { --pc: var(--c-session); }
+.phase [data-phase="nt"] { --pc: var(--c-bear); }
+.phase { flex-wrap: wrap; }
 .phase li.is-on { color: var(--c-text); border-color: var(--pc); background: color-mix(in oklab, var(--pc) 18%, transparent); }
 html:not([data-motion="off"]) .phase li { transition: color 240ms var(--ease, ease), border-color 240ms var(--ease, ease), background-color 240ms var(--ease, ease); }
 

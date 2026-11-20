@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>14 สถานการณ์ liquidity จากคลิป TJR | Liquidity</title>
-<meta name="description" content="14 สถานการณ์จากคลิป TJR 49 นาที เล่นทีละแท่งบนกราฟสุ่ม เปิดอ่านกราฟเพื่อดู sweep โครงสร้าง และช่วงเข้า ทุกข้อมีเวลาในคลิปกำกับ">
+<title>22 สถานการณ์ liquidity จากคลิป TJR | Liquidity</title>
+<meta name="description" content="22 สถานการณ์จากคลิป TJR: Level 1 จากคลิป liquidity 49 นาที และ Level 2 จากเพลย์ลิสต์ เล่นทีละแท่งบนกราฟสุ่ม เปิดอ่านกราฟและ confluence ทุกข้อมีเวลาในคลิปกำกับ">
 <meta property="og:type" content="website">
-<meta property="og:title" content="14 สถานการณ์ liquidity จากคลิป TJR">
+<meta property="og:title" content="22 สถานการณ์ liquidity จากคลิป TJR">
 <meta property="og:description" content="เลือกสถานการณ์ เล่นทีละแท่ง แล้วสุ่มกราฟใหม่ได้ไม่รู้จบ">
 <meta property="og:image" content="share.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -34,10 +34,10 @@
   software · TJR Liquidity scenario gallery (Task 11), an app screen (spec 7.3, 10)
   deal: the home page's (Task 8/9): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
         close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
-  page: gallery (filter chips + 14 cards from TJR.scenarios.list, each with a small drawn preview) and a viewer
-        that replaces it when the URL hash is #S01..#S14 (the back button closes it). The viewer holds one live
-        engine chart (Play / Step / Reset, อ่านกราฟ, สุ่มกราฟใหม่, timeframe and outcome switches) and the
-        scenario's notes from the clip, which appear as playback passes their bar.
+  page: gallery (filter chips Level 1 / Level 2 + 22 cards from TJR.scenarios.list, each with a small drawn preview) and a
+        viewer that replaces it when the URL hash is #S01..#S22 (the back button closes it). The viewer holds one live
+        engine chart (Play / Step / Reset, อ่านกราฟ, อ่าน confluence, สุ่มกราฟใหม่, timeframe and outcome switches; S21 opens
+        as an ES / NQ pair, TJR.chart.twin) and the scenario's notes from the clips, which appear as playback passes their bar.
   moment: none dealt on this page: its motion is the chart itself, the previews drawing in and the notes arriving.
 -->
 <noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="confluences.html">Confluences</a></div><div class="nav__item"><a class="nav__link" href="strategy.html">กลยุทธ์</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html" aria-current="page">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="risk.html">ความเสี่ยง</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div></div></header></noscript>
@@ -46,13 +46,15 @@
 
     <div id="gallery" class="gallery">
       <header class="scen-head">
-        <h1>14 สถานการณ์ liquidity จากคลิป TJR</h1>
-        <p class="t-lead">เลือกสถานการณ์แล้วเล่นทีละแท่ง กราฟทุกอันจำลองขึ้นใหม่และยุ่งเหมือนตลาดจริง ส่วนสิ่งที่สอนยังเหมือนในคลิป</p>
+        <h1>22 สถานการณ์ liquidity จากคลิป TJR</h1>
+        <p class="t-lead">เลือกสถานการณ์แล้วเล่นทีละแท่ง กราฟทุกอันจำลองขึ้นใหม่และยุ่งเหมือนตลาดจริง ส่วนสิ่งที่สอนยังเหมือนในคลิป Level 1 มาจากคลิป liquidity 49 นาที Level 2 มาจากเพลย์ลิสต์ของ TJR</p>
         <a class="btn btn--primary" href="#S01">เปิดสถานการณ์ S01</a>
       </header>
       <div class="scen-tools">
         <div class="ctrl-group" role="group" aria-label="กรองสถานการณ์" data-k="filters">
           <button class="ctrl" type="button" data-f="all" aria-pressed="true">ทั้งหมด</button>
+          <button class="ctrl" type="button" data-f="l1" aria-pressed="false">Level 1</button>
+          <button class="ctrl" type="button" data-f="l2" aria-pressed="false">Level 2</button>
           <button class="ctrl" type="button" data-f="trade" aria-pressed="false">มีเทรด</button>
           <button class="ctrl" type="button" data-f="notrade" aria-pressed="false">ไม่มีจุดเข้า</button>
           <button class="ctrl" type="button" data-f="session" aria-pressed="false">Session</button>
@@ -86,7 +88,10 @@
             <ul class="phase" data-k="phases" aria-label="ขั้นของเทรด"></ul>
             <span class="chart-frame__meta" data-k="meta"></span>
           </div>
-          <div class="chart-frame__canvas"></div>
+          <div class="vf__stage" data-k="stage">
+            <div class="vf__pane"><p class="vf__lbl" data-k="lblA" hidden></p><div class="chart-frame__canvas" data-k="hostA"></div></div>
+            <div class="vf__pane" data-k="paneB" hidden><p class="vf__lbl" data-k="lblB"></p><div class="chart-frame__canvas" data-k="hostB"></div></div>
+          </div>
           <div class="chart-frame__ctrls">
             <div class="vf__row">
               <button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button>
@@ -94,6 +99,7 @@
               <button class="ctrl" type="button" data-act="step" aria-label="ก้าวหนึ่งแท่ง">ก้าว ▶</button>
               <button class="ctrl" type="button" data-act="reset">รีเซ็ต</button>
               <button class="ctrl" type="button" data-act="ann" aria-pressed="true">อ่านกราฟ</button>
+              <button class="ctrl" type="button" data-act="conf" aria-pressed="false">อ่าน confluence</button>
               <button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button>
             </div>
             <div class="vf__row vf__row--opts">
@@ -105,7 +111,7 @@
               <div class="ctrl-group" role="group" aria-label="เลือก timeframe" data-k="tfg" hidden></div>
               <div class="ctrl-group ctrl-group--wide" role="group" aria-label="ผลของเทรด" data-k="og" hidden>
                 <button class="ctrl" type="button" data-outcome="win" aria-pressed="true">ถึงเป้า</button>
-                <button class="ctrl" type="button" data-outcome="fail" aria-pressed="false">confirmation ล้ม</button>
+                <button class="ctrl" type="button" data-outcome="fail" aria-pressed="false" data-k="failbtn">confirmation ล้ม</button>
               </div>
               <span class="vf__seed" data-k="seed"></span>
             </div>
