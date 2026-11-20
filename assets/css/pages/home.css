@@ -1,6 +1,6 @@
 /*
   TJR Liquidity: the home page (Task 9). Page CSS only for what sits inside a visual or the kit lacks
-  (layout-v4.md): the hero's chart window, the pinned walkthrough's stage, the clip timeline and module
+  (layout-v4.md): the hero chart window, the pinned walkthrough stage, the system map, the clip timeline and module
   tiles, the door fragments and the order ticket. Tokens: assets/css/tokens.css; components: site.css.
   Nothing here moves with the scroll except #core (the page's one moment, data-scroll-moment), and only
   while home.js marks it .is-live (GSAP ScrollTrigger loaded, motion allowed, a window 620px tall or more).
@@ -160,7 +160,87 @@ html:not([data-motion="off"]) .core.is-live .core-step { transition: border-colo
   .core.is-live .core__live .chart-frame__title { display: none; }
 }
 
-/* ================================================================ 3 · #course: the clip timeline, eight modules */
+/* ================================================================ 3 · #system: both levels as the chain he summarises
+   Level 1 is one strip (its eight chapters as numbered links), Level 2 the six-step chain (steps 0 to 5) with
+   time and risk beside it. Market colours mark the roles, as the charts do: htf silver, sweep amber, confirm
+   green, continuation cyan, entry blue, exit lime. Nothing moves: it is a map to read and click. */
+.sysmap { display: flex; flex-direction: column; gap: var(--s-4); }
+.sys-l1, .sys-l2 { display: grid; gap: var(--s-3); }
+.sys-l1 p, .sys-l2 p, .sys-step p, .sys-side p { margin: 0; }
+.sys-l1__title, .sys-l1__ch { align-self: center; }
+.sys-l1 { grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: var(--s-6); padding: var(--s-3) var(--s-5); border: 1px solid var(--line-strong); border-radius: var(--r-md); background: color-mix(in oklab, var(--ink) 4%, transparent); }
+.sys-l1__head, .sys-l2__head { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-3); }
+.sys-l1__title { color: var(--ink); font-weight: 500; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.sys-l1__note { grid-column: 1; color: var(--muted); font-size: var(--t-small); line-height: 1.5; }
+.sys-l1__ch { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+.sys-l1__ch a {
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-sm);
+  font: 500 var(--t-small)/1 var(--font-mono); color: var(--ink); text-decoration: none;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+.sys-l1__ch a:hover, .sys-l1__ch a:focus-visible { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
+.sys-l2__title { color: var(--muted); font-size: var(--t-small); }
+.sys-l2 { grid-template-rows: auto auto auto; gap: var(--s-4); }
+.chain { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--s-4); }
+.sys-step {
+  --sc: var(--c-htf); position: relative; display: flex; flex-direction: column; gap: var(--s-3); min-height: 0;
+  padding: var(--s-4); border: 1px solid var(--line); border-top: 2px solid var(--sc); border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--ink) 4%, transparent);
+}
+.sys-step[data-step="1"] { --sc: var(--c-liq); }
+.sys-step[data-step="2"] { --sc: var(--c-bull); }
+.sys-step[data-step="3"] { --sc: var(--c-session); }
+.sys-step[data-step="4"] { --sc: var(--c-entry); }
+.sys-step[data-step="5"] { --sc: var(--c-target); }
+.sys-step__n { display: flex; align-items: center; gap: var(--s-2); font-weight: 500; line-height: 1.3; }
+.sys-step__n span { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: var(--r-sm); background: var(--sc); color: var(--c-bg); font: 600 var(--t-label)/1 var(--font-mono); }
+.sys-step__body { color: var(--ink); font-size: var(--t-small); line-height: 1.6; flex: 1 1 auto; }
+.sys-step__go { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); }
+.sys-step__go a, .sys-side__go { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); font-size: var(--t-small); font-weight: 500; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+/* a step is joined to the next by a small chevron on the gutter (the six-across row only) */
+@media (min-width: 1280px) {
+  .sys-step:not(:last-child)::after {
+    content: ""; position: absolute; top: 22px; right: calc(var(--s-4) / -2 - 4px); width: 7px; height: 7px;
+    border-top: 1.5px solid var(--muted); border-right: 1.5px solid var(--muted); transform: rotate(45deg);
+  }
+}
+/* time and risk are two more items of the same list: on the six-across row they take its second row, half each */
+.sys-side { grid-column: span 3; list-style: none; display: grid; gap: var(--s-2); padding: var(--s-3) var(--s-4); border: 1px dashed var(--line-strong); border-radius: var(--r-md); }
+.sys-side__n { font-weight: 500; }
+.sys-side__body { color: var(--ink); font-size: var(--t-small); line-height: 1.6; }
+.sys-side__src { gap: var(--s-4); }
+@media (max-width: 1279px) {
+  .chain { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sys-side { grid-column: 1 / -1; }
+}
+@media (max-width: 1023px) {
+  .sysmap { gap: var(--s-4); }
+  .sys-l1 { grid-template-columns: minmax(0, 1fr); }
+  .sys-l1__ch { grid-column: 1; grid-row: auto; }
+}
+@media (max-width: 767px) {
+  .chain { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* a phone: the chain is a row of cards you swipe (scroll-snap), the next one peeking, so the whole map stays on
+   one screen; the scroller bleeds to the screen edges and every link in a card is a 44px target */
+@media (max-width: 639px) {
+  .sys-l1 { padding: var(--s-3) var(--s-4); }
+  .sys-l1__note { display: none; }
+  .sys-l1__title { display: inline-flex; align-items: center; min-height: 44px; }
+  .sys-l1__ch { flex-wrap: wrap; }
+  .chain {
+    display: flex; gap: var(--s-3); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+    margin-inline: calc(var(--gut, 24px) * -1); padding-inline: var(--gut, 24px); scroll-padding-inline: var(--gut, 24px);
+    padding-bottom: var(--s-2); scrollbar-width: thin;
+  }
+  .chain > li { flex: 0 0 min(78%, 300px); scroll-snap-align: start; grid-column: auto; }
+  .sys-step { padding: var(--s-3) var(--s-4); gap: var(--s-2); }
+  .sys-step__go a, .sys-side__go { min-height: 44px; }
+  .sys-step__src.chips > .ts-chip, .sys-side__src.chips > .ts-chip { height: 44px; }
+  .section-head p .ts-chip, .sources__text .t-lead .ts-chip { height: 44px; padding-inline: var(--s-3); }
+}
+
+/* ================================================================ 4 · #course: the clip timeline, eight modules */
 .tl { flex: none; margin-bottom: var(--s-6); }
 .tl__bar { display: flex; gap: 2px; height: 48px; }
 .tl__seg {
@@ -248,7 +328,7 @@ html:not([data-motion="off"]) .mod__fig .g-l { transition: stroke-width var(--m-
   .card.mod > h3 { font-size: 16px; line-height: 1.5; }
 }
 
-/* ================================================================ 4 · #practice: three doors */
+/* ================================================================ 5 · #practice: three doors */
 .doors { flex: 1 1 auto; grid-auto-rows: minmax(0, 1fr); }
 @media (min-width: 1024px) { .grid.doors > .door { grid-column: auto / span 4; } }
 .door .card__link::after { content: ""; position: absolute; inset: 0; z-index: 3; }
@@ -298,13 +378,21 @@ html:not([data-motion="off"]) .mod__fig .g-l { transition: stroke-width var(--m-
   .door-chart__canvas { height: 170px; }
 }
 
-/* ================================================================ 5 · #limits: the order ticket the clip leaves blank */
-.limits { align-content: stretch; grid-template-rows: minmax(0, 1fr); }
-.limits__text { display: grid; align-content: start; gap: var(--s-5); }
-.limits__text p { margin: 0; max-width: 46ch; }
-.limits__text p:not(.t-lead) { color: var(--muted); }
-.limits__visual { min-height: 0; display: flex; }
-@media (min-width: 1024px) { .limits__visual { grid-column: 6 / -1; } }
+/* ================================================================ 6 · #sources: two sources, the precedence, the order ticket no clip fills */
+.sources { align-content: stretch; grid-template-rows: minmax(0, 1fr); }
+.sources__text { display: grid; align-content: start; gap: var(--s-5); }
+.sources__text p { margin: 0; max-width: 46ch; }
+.sources__text p:not(.t-lead, .sources__rule) { color: var(--muted); }
+.sources__rule { color: var(--ink); font-weight: 500; line-height: 1.7; }
+/* the two sources: a main row and a filling row, each a link out (44px targets) */
+.srcs { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); max-width: 46ch; }
+.srcs li { display: grid; gap: var(--s-1); padding: var(--s-3) var(--s-4); border: 1px solid var(--line-strong); border-radius: var(--r-md); }
+.srcs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); font-weight: 500; line-height: 1.45; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.srcs span { font: 500 var(--t-label)/1.4 var(--font-mono); color: var(--muted); }
+.srcs li:first-child span { color: var(--c-liq); }
+.srcs li:last-child span { color: var(--c-session); }
+.sources__visual { min-height: 0; display: flex; }
+@media (min-width: 1024px) { .sources__visual { grid-column: 6 / -1; } }
 .panel--ticket { flex: 1 1 auto; display: grid; place-items: center; padding: var(--s-6); border-radius: var(--r-md); min-height: 0; }
 .ticket {
   position: relative; z-index: 1; width: min(100%, 560px);
@@ -324,16 +412,15 @@ html:not([data-motion="off"]) .mod__fig .g-l { transition: stroke-width var(--m-
 .ticket__rows dt .ts-chip { margin-left: var(--s-1); }
 .ticket__rows dd { margin: 0; flex: none; }
 @media (max-width: 1023px) {
-  .limits { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
-  .limits__visual { margin-top: var(--s-6); }
+  .sources { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
+  .sources__visual { margin-top: var(--s-6); }
 }
 /* a phone: one screen, the ticket compact under the words (its rows say the badge the second line names,
    so that line goes); over two screens the ticket would float in a tall, mostly empty panel */
 @media (max-width: 639px) {
   #practice { --hm: 2; }
-  .limits__text { gap: var(--s-4); }
-  .limits__text p:not(.t-lead) { display: none; }
-  .limits__visual { margin-top: var(--s-5); }
+  .sources__text { gap: var(--s-4); }
+  .sources__visual { margin-top: var(--s-5); }
   .panel--ticket { padding: var(--s-3); }
   .ticket__head { min-height: 44px; }
   .ticket__rows dt .ts-chip { height: 44px; padding-inline: var(--s-3); }
