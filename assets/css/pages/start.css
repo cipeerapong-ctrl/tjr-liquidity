@@ -66,3 +66,16 @@
 .st-cap .ctrl { min-height: 44px; }
 
 @media (prefers-reduced-motion: reduce) { .path-stop > a { transition: none; } .path-stop > a:hover { transform: none; } }
+
+/* ================================================================ settings box and glossary (single column) */
+.st-sec--solo { grid-template-columns: minmax(0, 1fr); }
+.st-sec--solo > .st-sec__text { max-width: 70ch; }
+.st-note { margin: 0; color: var(--muted); }
+.terms { margin: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.term { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); padding-block: var(--s-5); border-bottom: 1px solid var(--line); scroll-margin-top: calc(var(--nav) + var(--s-4)); }
+@media (min-width: 900px) { .term { grid-template-columns: minmax(180px, 1fr) minmax(0, 3fr); column-gap: var(--s-7); } }
+.term dt { font-weight: 600; font-size: var(--t-body); }
+.term dd { margin: 0; display: grid; gap: var(--s-2); max-width: 70ch; }
+.term dd p { margin: 0; }
+.term__more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+.term__go { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }

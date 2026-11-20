@@ -14,8 +14,14 @@
     ok(m, 'section #' + id + ' exists');
     return m ? m[0] : '';
   }
-  // the clips this page may cite: the main clip (0) and the playlist clips listed (Task 3 adds the glossary's)
-  var CLIPS = [0, 14];
+  // the clips this page may cite: the main clip (0), #14 (the basics) and the clips that define the glossary's terms
+  var CLIPS = [0, 6, 7, 8, 10, 11, 14];
+  var TERMS = ['liquidity', 'sweep', 'draw', 'session', 'bos', 'fvg', 'ifvg', 'eq', 'smt'];
+  // what each glossary term looks like in running text (a term may use only the ones before it)
+  var TERM_RE = {
+    liquidity: /liquidity/i, sweep: /sweep/i, draw: /\bdraw\b/i, session: /session/i, bos: /\bBOS\b|break of structure/i,
+    fvg: /\bFVG\b|fair value gap/i, ifvg: /IFVG|inverse/i, eq: /equilibrium|premium|discount/i, smt: /\bSMT\b/i
+  };
 
   // ---------------------------------------------------------------- pure helpers
 
@@ -84,9 +90,9 @@
     });
   });
 
-  test('start.html: the five blocks come in teaching order', () => {
+  test('start.html: the blocks come in teaching order', () => {
     var at = -1;
-    ['path', 'candle', 'timeframe', 'highlow', 'trend'].forEach(function (id) {
+    ['path', 'candle', 'timeframe', 'highlow', 'trend', 'settings', 'terms'].forEach(function (id) {
       var i = html.search(new RegExp('<section\\b[^>]*\\bid="' + id + '"'));
       ok(i > at, '#' + id + ' after the one before it');
       at = i;
@@ -98,7 +104,8 @@
       candle: ['P14.17', 'P14.18', 'P14.19', 'P14.20', 'P14.22', 'P14.23'],
       timeframe: ['P14.25', 'P14.26', 'P14.27', 'P14.28'],
       highlow: ['F2.1', 'F2.2', 'P14.33', 'P14.35', 'P14.36'],
-      trend: ['F3.1', 'P14.38', 'P14.39', 'P14.41', 'P14.43']
+      trend: ['F3.1', 'P14.38', 'P14.39', 'P14.41', 'P14.43'],
+      settings: ['P14.8', 'P14.9', 'P14.13']
     };
     Object.keys(need).forEach(function (id) {
       var s = section(id);
@@ -147,6 +154,38 @@
       eq(Number(href[2]), starts(id), id + ' links the start of its range');
       ok(/\bts-chip--pl\b/.test(a) === !src.main, id + ' playlist chips are the outline kind');
       if (!src.main) ok(new RegExp('>#' + src.clip + ' \\d\\d:\\d\\d<').test(a), id + ' label is "#n MM:SS"');
+    });
+  });
+
+  test('start.html #terms: nine terms in order, each with a chip and a link to a section that exists', () => {
+    var t = section('terms');
+    var ids = (t.match(/class="term" id="t-[a-z]+"/g) || []).map(function (x) { return /id="t-([a-z]+)"/.exec(x)[1]; });
+    eq(ids, TERMS, 'the terms in teaching order');
+    ids.forEach(function (k) {
+      var m = new RegExp('<div class="term" id="t-' + k + '">[\\s\\S]*?</div>').exec(t);
+      ok(m, k + ' block');
+      var b = m[0];
+      ok(/\bts-chip\b/.test(b) && /data-fact="/.test(b), k + ' has a chip');
+      var link = /<a class="term__go" href="([a-z]+\.html)#([\w-]+)">เรียนเต็มในขั้น ([1-5]) →<\/a>/.exec(b);
+      ok(link, k + ' links to the full lesson');
+      if (link) {
+        ok(new RegExp('\\bid="' + link[2] + '"').test(readText(link[1])), k + ' -> ' + link[1] + '#' + link[2] + ' exists');
+        var pathStep = TJR.layout.PATH.filter(function (p) { return p.href === link[1]; })[0];
+        ok(pathStep && String(pathStep.step) === link[3], k + ' names the right step for ' + link[1]);
+      }
+    });
+  });
+
+  test('start.html: a term is defined before it is used (the basics blocks use none; each term uses only earlier ones)', () => {
+    var head = html.slice(html.indexOf('id="path"'), html.indexOf('id="settings"'))
+      .replace(/<ol class="path-stops"[\s\S]*?<\/ol>/, ' ');           // the six stop names are the path's labels, not teaching
+    var basics = tagless(head);
+    TERMS.forEach(function (k) { ok(!TERM_RE[k].test(basics), 'the basics blocks do not use "' + k + '" before it is defined'); });
+    var t = section('terms');
+    TERMS.forEach(function (k, i) {
+      var m = new RegExp('<div class="term" id="t-' + k + '">([\\s\\S]*?)</div>').exec(t);
+      var text = tagless(m ? m[1] : '').replace(/เรียนเต็มในขั้น[^→]*→/, ' ');
+      TERMS.slice(i + 1).forEach(function (later) { ok(!TERM_RE[later].test(text), '"' + k + '" does not use the later term "' + later + '"'); });
     });
   });
 
