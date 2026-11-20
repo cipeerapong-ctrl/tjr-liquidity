@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="th" data-type="software" data-radius="sharp" data-buttons="tonal" data-ground="sand" data-tone="dark" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Confluences ของ TJR: BOS, FVG, IFVG, equilibrium, SMT | Liquidity</title>
+<meta name="description" content="เรียน confluence ที่ TJR สอนในเพลย์ลิสต์ Path to Profitability ทีละบท มีกราฟจำลองให้ลองทำ ทุกข้อมีเวลาในคลิปของมันเองกำกับ และคำถามตรวจความเข้าใจบทละ 2 ข้อ">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Confluences ของ TJR: BOS, FVG, IFVG, equilibrium, SMT">
+<meta property="og:description" content="ห้า confluence ที่ใช้ยืนยันและต่อเทรนด์ พร้อมกราฟจำลองที่ลองทำเองได้และเวลาในคลิปกำกับ">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1c1c1c">
+<!-- <link rel="canonical" href="https://[the site's domain]/"> : no domain yet -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/pages/confluences.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+</head>
+<body>
+<!--
+  software · TJR Liquidity Level 2 confluences page (v2 Task 6), an app screen with long content, the same shape as the course page
+  deal: the site's (tokens.css): palette charcoal-room-sage, Geist + IBM Plex Sans Thai, nav-centre, footer-dark,
+        close-word, buttons tonal, mark ring, lit ground sand, radius sharp. Nothing re-dealt.
+  page: the chain table (his three-part order) + sticky lesson rail + 5 lessons (#m1..#m5) + the "next" strip. A lesson = facts with
+        playlist chips (every one links its OWN clip), one or two live charts (created near the screen, at most 4 at once),
+        gap badges for what the clip does not say, and a 2-question self-check (TJR.store keys conf.m1..m5). Opening gaps / BPR
+        have no lesson: one sentence and a #9 chip on the next strip.
+  moment: none dealt on this page: its motion is the charts themselves and a one-time heading wipe per lesson.
+-->
+<noscript><header class="nav nav--centre" data-tjr-layout="nav"><div class="wrap nav__bar"><a class="skip-link" href="#top">ข้ามไปที่เนื้อหา</a><a class="nav__logo" href="index.html"><span class="mark" data-mark="ring" aria-hidden="true"></span>Liquidity</a><nav class="nav__links" id="tjr-nav-links" aria-label="เมนูหลัก"><div class="nav__item"><a class="nav__link" href="index.html">หน้าแรก</a></div><div class="nav__item"><a class="nav__link" href="learn.html">บทเรียน</a></div><div class="nav__item"><a class="nav__link" href="confluences.html" aria-current="page">Confluences</a></div><div class="nav__item"><a class="nav__link" href="strategy.html">กลยุทธ์</a></div><div class="nav__item"><a class="nav__link" href="scenarios.html">สถานการณ์</a></div><div class="nav__item"><a class="nav__link" href="playbook.html">Playbook</a></div><div class="nav__item"><a class="nav__link" href="risk.html">ความเสี่ยง</a></div><div class="nav__item"><a class="nav__link" href="lab.html">แบบฝึก</a></div></nav><div class="nav__actions"><a class="btn btn--primary" href="learn.html">เริ่มบทเรียน</a></div><button class="nav__toggle" type="button" aria-expanded="false" aria-controls="tjr-nav-links" aria-label="เมนู"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></header></noscript>
+<main class="app conf" id="top">
+  <div class="wrap">
+    <header class="conf-head">
+      <p class="level-tag" data-level="2">Level 2 · Confluences</p>
+      <h1>Confluences ของ TJR: ห้าตัวที่ใช้ยืนยันและต่อเทรนด์</h1>
+      <p class="t-lead">คลิป liquidity บอกว่าการกวาด high หรือ low ให้แค่โอกาส ส่วนที่เหลือคือ confluence ที่เขาสอนไว้ในเพลย์ลิสต์ Path to Profitability แต่ละบทมีกราฟจำลองให้ลอง ทุกข้อมีเวลาในคลิปของมันเองกำกับ ส่วนที่คลิปไม่ได้พูด เราติดป้ายไว้ ไม่เติมเอง</p>
+      <a class="btn btn--primary" href="#m1">เริ่มบทที่ 1</a>
+    </header>
+  <section class="chain-wrap" id="chain" aria-labelledby="chain-h">
+    <div class="chain-wrap__text">
+      <h2 id="chain-h">ลำดับที่ confluence เข้ามาในเทรดของเขา</h2>
+      <p class="t-lead">เขาสรุปไว้ในหลายคลิปว่าเทรดหนึ่งครั้งมีสามส่วน: โอกาสที่ orders จะถูกเติม ยืนยันว่า orders ถูกเติมแล้ว และเทรนด์ใหม่ไปต่อ <span class="chips" data-fact="P11.26"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=706" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 11:46">#11 11:46</a></span></p>
+    </div>
+    <div class="chain-scroll">
+      <table class="chain">
+        <caption class="vh">ลำดับความคิดของ TJR และบทในหน้านี้ที่เกี่ยวข้อง</caption>
+        <thead><tr><th scope="col">ขั้น</th><th scope="col">ชื่อที่เขาเรียก</th><th scope="col">เครื่องมือ</th><th scope="col">บทในหน้านี้</th></tr></thead>
+        <tbody>
+          <tr data-fact="P1.19 P8.3"><th scope="row" data-th="ขั้น">1</th><td data-th="ชื่อที่เขาเรียก">โอกาสที่ orders จะถูกเติม (reversal confluence)</td><td data-th="เครื่องมือ">sweep ของ high หรือ low สำคัญ มี SMT เป็นเบาะแสที่มาก่อน</td><td data-th="บทในหน้านี้"><a href="#m5">บท 5</a> และ Level 1 <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=35" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 00:35">#8 00:35</a></span></td></tr>
+          <tr data-fact="P11.25"><th scope="row" data-th="ขั้น">2</th><td data-th="ชื่อที่เขาเรียก">ยืนยันว่า orders ถูกเติมแล้ว (confirmation confluence)</td><td data-th="เครื่องมือ">break of structure หรือ inverse fair value gap</td><td data-th="บทในหน้านี้"><a href="#m1">บท 1</a> · <a href="#m3">บท 3</a> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=695" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 11:35">#11 11:35</a></span></td></tr>
+          <tr data-fact="P8.39"><th scope="row" data-th="ขั้น">3</th><td data-th="ชื่อที่เขาเรียก">เทรนด์ใหม่ไปต่อ (continuation confluence)</td><td data-th="เครื่องมือ">fair value gap หรือ equilibrium</td><td data-th="บทในหน้านี้"><a href="#m2">บท 2</a> · <a href="#m4">บท 4</a> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=1321" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 22:01">#8 22:01</a></span></td></tr>
+          <tr data-fact="P1.19"><th scope="row" data-th="ขั้น">4</th><td data-th="ชื่อที่เขาเรียก">ออกจากเทรด (exit)</td><td data-th="เครื่องมือ">จุดที่น่าจะถูกล้าง liquidity</td><td data-th="บทในหน้านี้"><a href="strategy.html">หน้ากลยุทธ์</a> <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="facts chain-facts">
+      <li data-fact="P8.39"><p>ตอนจบคลิป #8 เขานับ confirmation confluence ไว้สองตัว คือ BOS กับ IFVG และ continuation confluence หนึ่งตัวคือ FVG ส่วน equilibrium เป็นตัวต่อไปที่สอนในวันถัดมา</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=1321" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 22:01">#8 22:01</a></span></li>
+      <li data-fact="P1.19"><p>คลิปสุดท้ายของเพลย์ลิสต์เรียงเป็นสี่ส่วน: โอกาส → ยืนยัน → เทรนด์ใหม่ไปต่อ → ออก</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=2144" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 35:44">#1 35:44</a></span></li>
+    </ul>
+    <p class="hint">เพลย์ลิสต์ออกก่อนคลิป liquidity (ม.ค. 2026 เทียบกับ ก.ค. 2026) ถ้ามีจุดไหนสองคลิปไม่ตรงกัน เว็บนี้ใช้คลิป liquidity เป็นหลัก</p>
+  </section>
+    <div class="conf-shell">
+      <nav class="rail" aria-label="สารบัญบทเรียน">
+        <p class="rail__now" data-k="now-mod" aria-hidden="true"></p>
+        <p class="rail__count"><b data-k="done">0</b><span>/ 5 บทที่ตอบถูกครบ</span></p>
+        <ol class="rail__list">
+          <li><a href="#m1" data-m="1"><span class="rail__n">01</span><span class="rail__t">Market structure และ BOS</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m2" data-m="2"><span class="rail__n">02</span><span class="rail__t">Fair value gap (FVG)</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m3" data-m="3"><span class="rail__n">03</span><span class="rail__t">Inverse FVG (IFVG)</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m4" data-m="4"><span class="rail__n">04</span><span class="rail__t">Equilibrium</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+          <li><a href="#m5" data-m="5"><span class="rail__n">05</span><span class="rail__t">SMT divergence</span><i class="rail__tick" aria-hidden="true"></i></a></li>
+        </ol>
+        <div class="rail__bar" aria-hidden="true"></div>
+      </nav>
+      <div class="conf-body">
+    <section class="module" id="m1" data-m="1" aria-labelledby="m1-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 1</p>
+        <h2 id="m1-h">Market structure และ BOS</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=44" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 00:44">#11 00:44</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=153" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 02:33">#11 02:33</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <ul class="facts">
+            <li data-fact="P11.3"><p>ขาขึ้นคือ higher highs กับ higher lows ขาลงคือ lower highs กับ lower lows เขาเรียกรูปแบบนี้ว่า market structure</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=44" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 00:44">#11 00:44</a></span></li>
+            <li data-fact="P11.5 P11.6 P11.7"><p>Break of structure (BOS) คือจังหวะที่โครงสร้างที่ราคาอยู่ตอนนี้ถูกหัก ขาขึ้นหักเมื่อราคาหลุด higher low แล้วทำ lower low และ lower high ส่วนขาลงกลับกัน เขาเรียกเหตุการณ์นี้ว่า market structure shift ด้วย ชื่อสองชื่อนี้คือเรื่องเดียวกัน</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=88" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 01:28">#11 01:28</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=99" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 01:39">#11 01:39</a></span></li>
+            <li data-fact="P11.8"><p>วิธีดูบนกราฟ: ขณะที่กราฟยังเป็น HH และ HL ให้เฝ้า low <b>ล่าสุด</b>ตัวเดียว break เกิดเมื่อมีแท่งเทียน<b>ปิด</b>ใต้ low นั้น</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=153" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 02:33">#11 02:33</a></span></li>
+            <li data-fact="P11.9"><p>ขาลงกลับกัน: เฝ้า high ล่าสุด แล้วรอแท่งที่ปิดเหนือมัน เขาเน้นคำว่า ล่าสุด low หรือ high เก่าที่อยู่ไกลออกไปไม่ใช่ตัวที่ต้องเฝ้า</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=186" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 03:06">#11 03:06</a></span></li>
+            <li data-fact="P11.10"><p>แท่งที่ body แค่ไปจบเท่าระดับ low ยังไม่นับ ต้องปิดใต้จุดต่ำสุดของ low เขาบอกเองว่าตัวอย่างนี้อ่านยาก</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=263" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 04:23">#11 04:23</a></span></li>
+            <li data-fact="P11.12"><p>ไส้เทียนที่แค่โผล่เหนือ high ก็ไม่นับ เขาจะไม่กด buy จนกว่าจะมีแท่งที่ปิดเหนือ high ล่าสุดทั้งแท่ง</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=377" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 06:17">#11 06:17</a></span></li>
+            <li data-fact="P11.13 P11.14"><p>ในตัวอย่างขาขึ้นยาว มีแท่งหนึ่งที่ไส้ลงลึกใต้ low ที่เฝ้าอยู่มาก เขาย้ำเสียงดังว่านี่ไม่ใช่ BOS เพราะไม่มีแท่งปิดใต้ low หลังจากนั้นยังนับเป็นขาขึ้น และ low ที่ต้องเฝ้ากลายเป็น low ล่าสุดตัวใหม่</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=502" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 08:22">#11 08:22</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=535" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 08:55">#11 08:55</a></span></li>
+            <li data-fact="P11.15 P11.16"><p>lower high อย่างเดียวในขาขึ้นไม่ใช่ break (higher low อย่างเดียวในขาลงก็ไม่ใช่) ขาขึ้นเฝ้าเฉพาะ low ไม่ต้องเฝ้า high</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=346" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 05:46">#11 05:46</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=420" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 07:00">#11 07:00</a></span></li>
+            <li data-fact="P11.24"><p>สรุปของเขา: เทรนด์เปลี่ยนที่แท่งที่ปิด ไม่ใช่ที่ไส้ และให้ดู high กับ low ล่าสุด</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=664" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 11:04">#11 11:04</a></span></li>
+            <li data-fact="P11.25 P11.23"><p>เขาเรียก BOS ว่า confirmation confluence คือใช้ยืนยันว่า orders ถูกเติมแล้ว แต่ไม่ใช่ว่าทะลุ high แล้วโครงสร้างหักก็ต้องลงแน่ ยังต้องมี confluence อื่นร่วมด้วย</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=695" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 11:35">#11 11:35</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/Zzk864cVJek?t=644" target="_blank" rel="noopener" aria-label="ดูในคลิป #11 Break of Structure Explained ที่ 10:44">#11 10:44</a></span></li>
+          </ul>
+          <aside class="web-def"><p class="web-def__label">นิยามทั่วไป ไม่ใช่จากคลิป</p><div class="web-def__body"><p>บนเว็บทั่วไป คำว่า break of structure มักหมายถึงสัญญาณที่เทรนด์ ต่อเนื่อง (ราคาปิดเลย swing high ในขาขึ้น) และแต่ละที่นิยามไม่เหมือนกัน ส่วน TJR ใช้คำนี้กับการ <b>เปลี่ยน</b> เทรนด์ คือหักสวนทิศทางที่ราคาอยู่ ในหน้านี้ BOS มีความหมายแบบของเขาเท่านั้น</p></div><p class="web-def__src"><a href="https://www.luxalgo.com/library/concept/break-of-structure/" target="_blank" rel="noopener">ที่มา: https://www.luxalgo.com/library/concept/break-of-structure/</a></p></aside>
+          <aside class="note"><p class="note__t">Level 1 ยังอยู่</p><p>การยืนยันแบบ high, low, higher low, higher high ในคลิป liquidity ยังเหมือนเดิมตามที่หน้าบทเรียนสอน <span class="chips"><a class="ts-chip" href="https://youtu.be/Vulini8xbB0?t=1410" target="_blank" rel="noopener" aria-label="ดูในคลิปที่ 23:30">23:30</a></span> ที่นี่คือเวอร์ชันของเขาในเพลย์ลิสต์ ซึ่งชี้ว่าจุดตัดสินคือแท่งที่ปิดใต้ low ล่าสุด ดูเทียบได้ที่ <a href="learn.html">หน้าบทเรียน</a></p></aside>
+          <ul class="facts facts--gaps" aria-label="สิ่งที่คลิป BOS ไม่ได้ระบุ">
+            <li class="facts__gap"><p>เลือก low ล่าสุดอย่างไรเมื่อมี swing ใกล้กันหลายตัว <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>BOS ต้องอยู่บน time frame ไหน (เขาโชว์ 5 นาที ไม่ได้ตั้งกฎ) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>ถ้า break ล้มเหลวหรือราคากลับมายึดระดับเดิมได้ ต้องทำอย่างไร <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          </ul>
+          <p class="hint">กราฟทางขวาเลือกแท่งที่น่าสงสัยมาให้ทีละแท่ง ตอบว่าเป็น BOS หรือไม่ ตัวเลข tick ในกราฟเป็น <span class="sim-lab">ตัวเลขจากกราฟจำลอง</span> ไม่ใช่ที่เขาพูด</p></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m1a" aria-label="กราฟจำลอง S20 ที่ถามทีละแท่งว่าเป็น break of structure หรือไม่">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">ES</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title">S20 · ไส้ทะลุ low ≠ BOS</span>
+            <span class="sim-tag">จำลอง</span>
+          </div>
+          <p class="conf-step" data-k="step" aria-live="polite"></p>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="yes">เป็น BOS</button><button class="ctrl" type="button" data-act="no">ไม่ใช่ BOS</button><button class="ctrl" type="button" data-act="next">แท่งถัดไป ▶</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="score-pill" data-tone=""><span class="score-pill__label">ตอบถูก</span><span class="score-pill__value" data-k="bscore">0</span></span></div>
+          <p class="conf-read" data-k="read" aria-live="polite"></p>
+        </figure></div>
+      </div>
+      <div class="check" data-m="1" role="group" aria-labelledby="m1-ck">
+      <div class="check__bar">
+        <h3 id="m1-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="153" data-clip="11" data-why="ต้องเป็นแท่งที่ปิดใต้ low ล่าสุด ไส้ไม่นับ">
+          <p class="q__t" id="m1-q0">ในขาขึ้น แท่งเทียนแบบไหนทำให้เกิด break of structure ตามคลิป #11</p>
+          <div class="q__opts" role="group" aria-labelledby="m1-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">ไส้เทียนแทงลงใต้ low ล่าสุด</button><button type="button" class="opt" data-i="1" aria-pressed="false">แท่งเทียนที่ปิดใต้ low ล่าสุด</button><button type="button" class="opt" data-i="2" aria-pressed="false">แท่งเทียนที่ปิดพอดีเท่าระดับ low ล่าสุด</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="420" data-clip="11" data-why="lower high อย่างเดียวไม่ใช่ break ต้องดู low ล่าสุด">
+          <p class="q__t" id="m1-q1">ในขาขึ้นเกิด lower high หนึ่งตัว โดยยังไม่มีแท่งปิดใต้ low ล่าสุด นับเป็น BOS ไหม</p>
+          <div class="q__opts" role="group" aria-labelledby="m1-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">นับ เพราะโครงสร้างเริ่มเปลี่ยนแล้ว</button><button type="button" class="opt" data-i="1" aria-pressed="false">ไม่นับ ขาขึ้นเฝ้าเฉพาะ low ล่าสุดว่ามีแท่งปิดใต้หรือไม่</button><button type="button" class="opt" data-i="2" aria-pressed="false">นับ ถ้าเกิด lower high สองตัวติดกัน</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m2" data-m="2" aria-labelledby="m2-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 2</p>
+        <h2 id="m2-h">Fair value gap (FVG)</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=33" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 00:33">#10 00:33</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=251" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 04:11">#10 04:11</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <ul class="facts">
+            <li data-fact="P10.1 P10.3"><p>Fair value gap กับ imbalance คือสิ่งเดียวกัน เป็นรูปแบบสามแท่ง: ช่วงเคลื่อนไหว แล้วแท่งใหญ่ที่พุ่งเร็ว (expansionary candle) แล้วอีกช่วงหนึ่ง ช่องว่างของ orders อยู่ระหว่างแท่งแรกกับแท่งที่สาม</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=33" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 00:33">#10 00:33</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=55" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 00:55">#10 00:55</a></span></li>
+            <li data-fact="P10.9"><p>Bullish gap: มีช่องว่างระหว่าง<b>ไส้บน</b>ของแท่งแรก กับ<b>ไส้ล่าง</b>ของแท่งที่สาม</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=251" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 04:11">#10 04:11</a></span></li>
+            <li data-fact="P10.10"><p>Bearish gap: จาก<b>ไส้ล่าง</b>ของแท่งแรก ถึง<b>ไส้บน</b>ของแท่งที่สาม โดยแท่งกลางเป็นแท่งลง</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=436" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 07:16">#10 07:16</a></span></li>
+            <li data-fact="P10.8"><p>สีของแท่งแรกและแท่งที่สามไม่สำคัญ มีแค่แท่งกลางที่ต้องเป็นสีตามทิศ (ขึ้นสำหรับ bullish ลงสำหรับ bearish)</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=189" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 03:09">#10 03:09</a></span></li>
+            <li data-fact="P10.14"><p>ถ้าไส้ของแท่งแรกกับแท่งที่สามซ้อนกัน ก็ไม่มี imbalance เพราะ orders ฝั่งนั้นซ้อนกันอยู่ ไม่ได้ขาดหายไป</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=606" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 10:06">#10 10:06</a></span></li>
+            <li data-fact="P10.11 P10.13"><p>ที่มาของ imbalance แบบ bullish คือขาด sell orders ในช่วงราคานั้น แท่งใหญ่จึงวิ่งผ่านเร็ว ส่วน bearish คือขาด buy orders</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=271" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 04:31">#10 04:31</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=553" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 09:13">#10 09:13</a></span></li>
+            <li data-fact="P10.15"><p>ใช้เป็น continuation confluence: ในขาขึ้น ราคาย่อลงเข้า gap ถ้ามี buy orders ดันออกจาก gap เทรนด์น่าจะไปต่อ (ขาลงกลับกัน)</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=381" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 06:21">#10 06:21</a></span></li>
+            <li data-fact="P10.22 P10.24"><p>gap ถูก disrespect เมื่อมีแท่งที่<b>ปิด</b>ทะลุมัน เหมือนกฎของ BOS ไส้ที่แทงผ่านแต่แท่งปิดยังอยู่ใน gap ไม่นับ</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=970" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 16:10">#10 16:10</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1036" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 17:16">#10 17:16</a></span></li>
+            <li data-fact="P10.27"><p>"Respected" ในตัวอย่างของเขาคือราคาเข้ามาใน gap แล้วแท่งปิดกลับออกไปตามทิศเทรนด์ (อ่านจากตัวอย่าง ไม่ใช่กฎที่เขาตั้งชื่อไว้)</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1389" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 23:09">#10 23:09</a></span></li>
+            <li data-fact="P10.18 P1.43"><p>gap เดี่ยว ๆ เทรดไม่ได้ ต้องใช้รวมกับ confluence อื่น และไม่เข้าทันทีที่ราคาเพิ่งแตะ gap ให้รอเห็นแท่งปิดกลับออกมาก่อน</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=573" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 09:33">#10 09:33</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1944" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 32:24">#1 32:24</a></span></li>
+          </ul>
+          <ul class="facts facts--gaps" aria-label="สิ่งที่คลิป FVG ไม่ได้ระบุ">
+            <li class="facts__gap"><p>ขนาดต่ำสุดของ gap หรือของแท่ง expansionary <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>นับว่า filled เมื่อไหร่ (บางส่วนหรือทั้ง gap) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>จุดเข้า stop-loss และเป้า <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          </ul>
+          <p class="hint">คลิกแท่งกลางของสามแท่งที่คิดว่ามี gap gap ในกราฟจำลองมีเล็กใหญ่ปนกัน ที่เล็กมากก็นับ คลิปไม่ได้ตั้งขนาดขั้นต่ำ</p></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m2a" aria-label="กราฟจำลอง S15 ให้คลิกหา fair value gap">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">NQ</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title">S15 · ครบสาย</span>
+            <span class="sim-tag">จำลอง</span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="all" aria-pressed="false">แสดงทุก gap</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button><span class="score-pill" data-tone=""><span class="score-pill__label">เจอแล้ว</span><span class="score-pill__value" data-k="fscore">0</span></span></div>
+          <p class="conf-read" data-k="read" aria-live="polite"></p>
+        </figure></div>
+      </div>
+      <div class="module__sub">
+      <div class="module__grid module__grid--flip">
+        <div class="module__text">
+          <h3>gap ซ้อนกัน และเมื่อไหร่ลบ gap</h3>
+          <ul class="facts">
+            <li data-fact="P10.26"><p>gap หลายอันติดกันโดยไม่มีแท่งย่อคั่น ทุกอันใช้ได้หมด ราคาเลือกดันขึ้นจากอันไหนก็ได้</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1097" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 18:17">#10 18:17</a></span></li>
+            <li data-fact="P10.29"><p>ถ้ามีแท่งปิดใต้ gap บนอันเดียว ยังไม่ได้แปลว่าเทรนด์เปลี่ยน เพราะ gap ล่างยังอยู่ ราคาลงไปเข้า gap ล่างแล้วดันต่อได้</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1221" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 20:21">#10 20:21</a></span></li>
+            <li data-fact="P10.28 P10.31"><p>เมื่อราคา respect gap แล้วดันเหนือ high gap ที่ใช้แล้วและที่อยู่ใต้มันหมดหน้าที่ เขาบอกให้ลบออก ไม่ลากทิ้งไว้ให้ราคากลับมาชน</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1152" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 19:12">#10 19:12</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1452" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 24:12">#10 24:12</a></span></li>
+            <li data-fact="P10.33"><p>ข้อผิดที่เขาเตือน: ลาก gap เก่าข้ามชาร์ตแล้ว short ตอนราคากลับมาแตะ จะโดน stop</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/xX5LTSJ5wwM?t=1592" target="_blank" rel="noopener" aria-label="ดูในคลิป #10 Fair Value Gaps Explained ที่ 26:32">#10 26:32</a></span></li>
+          </ul>
+          <p class="hint">เล่นทีละขั้น หรือกดเล่นต่อเนื่อง สังเกตว่ากล่อง gap หยุดต่อไปทางขวาตอนราคาดันเหนือ high</p></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m2b" aria-label="กราฟจำลอง S19 ที่ gap ซ้อนกันสองอันถูกปิดใต้อันบน แล้ว gap ล่างถูก respect และถูกลบ">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">ES</span><span class="chart-frame__tf" data-k="tf">60m</span>
+            <span class="chart-frame__title" data-k="title">S19 · stacked FVG</span>
+            <span class="sim-tag">จำลอง</span>
+          </div>
+          <p class="conf-step" data-k="step" aria-live="polite"></p>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="prev">◀ ก่อนหน้า</button><button class="ctrl" type="button" data-act="next">ถัดไป ▶</button><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่นต่อเนื่อง</span></button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button></div>
+          <p class="conf-read" data-k="read" aria-live="polite"></p>
+        </figure></div>
+      </div>
+      </div>
+      <div class="check" data-m="2" role="group" aria-labelledby="m2-ck">
+      <div class="check__bar">
+        <h3 id="m2-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="1" data-sec="606" data-clip="10" data-why="ไส้ซ้อนกัน = ไม่มี imbalance">
+          <p class="q__t" id="m2-q0">ไส้ของแท่งแรกกับแท่งที่สามซ้อนกัน เกิด FVG ไหม</p>
+          <div class="q__opts" role="group" aria-labelledby="m2-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">เกิด เพราะแท่งกลางเป็นแท่งใหญ่</button><button type="button" class="opt" data-i="1" aria-pressed="false">ไม่เกิด ไส้ซ้อนกันแปลว่า orders ไม่ได้ขาด</button><button type="button" class="opt" data-i="2" aria-pressed="false">เกิด ถ้าแท่งกลางเป็นแท่งสีเขียว</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="1036" data-clip="10" data-why="ไส้ผ่านไม่นับ ต้องมีแท่งที่ปิดทะลุ">
+          <p class="q__t" id="m2-q1">ไส้เทียนแทงลงใต้ bullish gap แต่แท่งปิดอยู่ใน gap ยัง gap ถูก disrespect หรือยัง</p>
+          <div class="q__opts" role="group" aria-labelledby="m2-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">ถูก disrespect แล้ว</button><button type="button" class="opt" data-i="1" aria-pressed="false">ยังไม่ถูก ต้องมีแท่งที่ปิดทะลุ gap</button><button type="button" class="opt" data-i="2" aria-pressed="false">ถูก ถ้าไส้ลึกเกินครึ่ง gap</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m3" data-m="3" aria-labelledby="m3-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 3</p>
+        <h2 id="m3-h">Inverse fair value gap (IFVG)</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=283" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 04:43">#8 04:43</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=356" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 05:56">#8 05:56</a></span>
+      </header>
+      <div class="module__grid module__grid--flip">
+        <div class="module__text">
+          <ul class="facts">
+            <li data-fact="P8.12 P8.13"><p>ถ้า fair value gap ในขาขึ้นถูก disrespect คือราคาลงมาปิดใต้มัน ก็ไม่ใช่สิ่งที่ continuation confluence ควรทำ ราคากำลังเปลี่ยนทิศ จึงเป็น confirmation ว่าเทรนด์เปลี่ยน</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=313" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 05:13">#8 05:13</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=325" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 05:25">#8 05:25</a></span></li>
+            <li data-fact="P8.14"><p>นิยามของเขา: inverse fair value gap คือ fair value gap ที่ถูก disrespect ในเทรนด์ที่มันอยู่ และใช้แทน break of structure เป็น confirmation confluence ได้</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=356" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 05:56">#8 05:56</a></span></li>
+            <li data-fact="P8.15"><p>ทิศทาง: bullish gap ในขาขึ้นที่ถูกปิดใต้ = เปลี่ยนเป็นขาลง bearish gap ในขาลงที่ถูกปิดเหนือ = เปลี่ยนเป็นขาขึ้น</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=313" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 05:13">#8 05:13</a></span></li>
+            <li data-fact="P8.16"><p>gap ตัวเดิมเปลี่ยนบทบาทจาก continuation เป็น confirmation เมื่อถูก inverse</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=439" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 07:19">#8 07:19</a></span></li>
+            <li data-fact="P8.19 P8.20"><p>ต้องมีแท่งที่<b>ปิด</b>เต็มแท่งเลยฝั่งไกลของ gap (ใต้ขอบล่างของ bullish gap เหนือขอบบนของ bearish gap) แท่งที่แค่เข้าไป ไส้ที่แทงผ่าน หรือแท่งที่ปิดอยู่ใน gap ไม่นับ</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=548" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 09:08">#8 09:08</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=1234" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 20:34">#8 20:34</a></span></li>
+            <li data-fact="P8.25 P8.28"><p>ข้อดีเทียบกับ BOS คือเข้าได้เร็วกว่า ในตัวอย่าง ES กราฟ 4 ชั่วโมงของเขา ถ้ารอ BOS ต้องรอแท่ง 4 ชั่วโมงอีกแท่ง ตัวอย่างหนึ่งต่างกัน 68 tick อีกตัวอย่างต่างกัน 123 tick (ตัวเลขจากตัวอย่างของเขา ไม่ใช่ค่าเฉลี่ย)</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=569" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 09:29">#8 09:29</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=705" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 11:45">#8 11:45</a></span></li>
+            <li data-fact="P8.29"><p>เขาใช้ confluence นี้เกือบทุกวัน เพราะมันมักเกิดก่อน BOS</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=683" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 11:23">#8 11:23</a></span></li>
+            <li data-fact="P8.30"><p>ไม่ใช่สัญญาณเข้าเดี่ยว ๆ ไม่ควร sell ทุก bearish inverse หรือ buy ทุก bullish inverse</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=662" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 11:02">#8 11:02</a></span></li>
+            <li data-fact="P8.32 P8.34"><p>ถ้า gap ซ้อนกัน (stack) การ inverse ฝั่งลงต้องปิดใต้ gap <b>ล่างสุด</b> ถ้าปิดใต้แค่ gap บนยังไม่มีความหมาย เพราะราคายังลงไปเข้า gap ล่างแล้วไปต่อได้</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=837" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 13:57">#8 13:57</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/4sRDnVmLcMk?t=922" target="_blank" rel="noopener" aria-label="ดูในคลิป #8 Inverse Fair Value Gaps Explained ที่ 15:22">#8 15:22</a></span></li>
+          </ul>
+          <ul class="facts facts--gaps" aria-label="สิ่งที่คลิป IFVG ไม่ได้ระบุ">
+            <li class="facts__gap" data-fact="P8.37"><p>กฎ stack ฝั่งกลับ: stack ของ bearish gap ต้องปิดเหนือ gap ไหน (เขาพูดแค่ฝั่งลง) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap" data-fact="P8.21"><p>time frame ที่ IFVG ต้องอยู่ (ตัวอย่างของเขาเป็น 4 ชั่วโมงทั้งหมด ไม่มีกฎทั่วไป) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>กฎ stop-loss และจุดเข้าที่แน่นอนของเทรด IFVG <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          </ul>
+          <p class="hint">กราฟทางซ้ายเล่นสองจุดเข้าบนกราฟเดียว จำนวน tick ที่ต่างกันเป็น <span class="sim-lab">ตัวเลขจากกราฟจำลอง</span> ไม่ใช่ตัวเลขที่เขาพูด</p></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m3a" aria-label="กราฟจำลอง S16 ที่เทียบจุดเข้าด้วย inverse fair value gap กับจุดเข้าด้วย break of structure">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">ES</span><span class="chart-frame__tf" data-k="tf">5m</span>
+            <span class="chart-frame__title" data-k="title">S16 · IFVG</span>
+            <span class="sim-tag">จำลอง</span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="play" data-state="off"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6L11.6 7z" fill="currentColor"/></svg><span data-k="lab">เล่น</span></button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button></div>
+          <p class="conf-read" data-k="read" aria-live="polite"></p>
+        </figure></div>
+      </div>
+      <div class="check" data-m="3" role="group" aria-labelledby="m3-ck">
+      <div class="check__bar">
+        <h3 id="m3-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="0" data-sec="356" data-clip="8" data-why="gap ที่ถูกปิดทะลุในเทรนด์ของมัน กลายเป็น confirmation">
+          <p class="q__t" id="m3-q0">ตามนิยามของ TJR inverse fair value gap คืออะไร</p>
+          <div class="q__opts" role="group" aria-labelledby="m3-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">gap ที่ถูก disrespect ในเทรนด์ที่มันอยู่ ใช้เป็น confirmation ได้</button><button type="button" class="opt" data-i="1" aria-pressed="false">gap ที่ราคายังไม่เคยเข้าไปเลย</button><button type="button" class="opt" data-i="2" aria-pressed="false">gap ที่เกิดสองอันติดกัน</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="1234" data-clip="8" data-why="ต้องปิดเต็มแท่งเหนือ gap ไส้หรือปิดในใน gap ไม่นับ">
+          <p class="q__t" id="m3-q1">bearish gap ในขาลง ต้องเกิดอะไรจึงนับเป็น bullish IFVG</p>
+          <div class="q__opts" role="group" aria-labelledby="m3-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">ไส้เทียนแทงขึ้นเหนือ gap</button><button type="button" class="opt" data-i="1" aria-pressed="false">แท่งเทียนปิดเต็มแท่งเหนือขอบบนของ gap</button><button type="button" class="opt" data-i="2" aria-pressed="false">แท่งเทียนที่ปิดอยู่ภายใน gap</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m4" data-m="4" aria-labelledby="m4-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 4</p>
+        <h2 id="m4-h">Equilibrium: premium และ discount</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=66" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 01:06">#7 01:06</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=185" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 03:05">#7 03:05</a></span>
+      </header>
+      <div class="module__grid">
+        <div class="module__text">
+          <ul class="facts">
+            <li data-fact="P7.1"><p>Equilibrium เป็น continuation confluence ชี้ว่าเทรนด์ปัจจุบันมีโอกาสไปต่อ เขาบอกว่าง่ายที่สุด แต่คนลากผิดบ่อย</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=0" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 00:00">#7 00:00</a></span></li>
+            <li data-fact="P7.3 P7.4"><p>Equilibrium คือจุด 50% จาก swing low ล่าสุดถึง swing high ล่าสุดในเทรนด์ มันแบ่ง range เป็น premium (ครึ่งบน) กับ discount (ครึ่งล่าง)</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=66" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 01:06">#7 01:06</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=185" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 03:05">#7 03:05</a></span></li>
+            <li data-fact="P7.5"><p>เครื่องมือบนจอมีสามเส้น 0, 0.5 และ 1 ขาขึ้น 0 อยู่ที่ low และ 1 ที่ high ขาลงกลับกัน <span class="onscreen">ตัวเลขจากเครื่องมือบนจอ ไม่ใช่ที่เขาพูด</span></p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=64" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 01:04">#7 01:04</a></span></li>
+            <li data-fact="P7.7 P7.8"><p>ถ้าจะ buy ในขาขึ้น เขาไม่ซื้อเหนือเส้น equilibrium เขาอยากซื้อในโซน discount เหตุผลของเขาคือ market maker ไม่ซื้อที่ premium แต่ดันราคาลงไปที่ discount ก่อนค่อยพาขึ้น</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=120" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 02:00">#7 02:00</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=152" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 02:32">#7 02:32</a></span></li>
+            <li data-fact="P7.14 P7.15"><p>ขาขึ้น: ลากจาก low <b>ล่าสุด</b>ขึ้นไป high <b>ล่าสุด</b> ไม่ใช่จาก low เก่าที่แค่ต่อกับ high</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=288" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 04:48">#7 04:48</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=343" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 05:43">#7 05:43</a></span></li>
+            <li data-fact="P7.16 P7.17"><p>ขาลงกลับกัน: จาก high ล่าสุดลงมา low ล่าสุด ราคาย่อขึ้นเข้า premium ซึ่งเป็นที่ที่เขาอยาก short</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=411" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 06:51">#7 06:51</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=435" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 07:15">#7 07:15</a></span></li>
+            <li data-fact="P7.29 P7.30"><p>เขาลาก range แบบ real-time: ไม่ลากจาก high เก่าถึง low เก่าเพียงเพราะมีจุดอื่นอยู่ไกลออกไป และรอแท่งขึ้นที่ยืนยัน low ก่อนค่อยวางกล่อง</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=731" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 12:11">#7 12:11</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=784" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 13:04">#7 13:04</a></span></li>
+            <li data-fact="P7.22"><p>ถ้าราคาไม่ลงมาแตะ equilibrium ก็ใช้ fair value gap เป็น continuation แทนได้</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=560" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 09:20">#7 09:20</a></span></li>
+            <li data-fact="P7.20 P7.27"><p>ไม่มี context ก็ใช้ไม่ได้ (เขาว่าไร้ประโยชน์) แต่ใช้ได้ทุก time frame</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=519" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 08:39">#7 08:39</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/joe_XTCn5Bs?t=668" target="_blank" rel="noopener" aria-label="ดูในคลิป #7 Equilibrium Explained ที่ 11:08">#7 11:08</a></span></li>
+            <li data-fact="P1.42"><p>อย่า sell ทันทีที่ราคาแตะ equilibrium ต้องเห็นว่ามัน respect ก่อน ไม่งั้น equilibrium ก็ไม่มีประโยชน์</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1913" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 31:53">#1 31:53</a></span></li>
+          </ul>
+          <ul class="facts facts--gaps" aria-label="สิ่งที่คลิป equilibrium ไม่ได้ระบุ">
+            <li class="facts__gap" data-fact="P7.2"><p>ค่าตั้งของ range box (เขาเรียกว่า Gann box) เขาบอกว่าจะโชว์ให้คัดลอก แต่ในคลิปไม่เคยโชว์ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>ต้องปิดผ่านเส้น 0.5 หรือแค่ไส้แตะก็พอ <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>จะเลือก swing ล่าสุดอย่างไรเมื่อ swing อยู่ใกล้กัน <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          </ul>
+          <p class="hint">เริ่มที่ range ที่ลากผิดจาก high และ low เก่า ลากเส้น A กับ B ไปที่ swing ล่าสุดของขาลง แล้วปล่อย เส้นจะดูดไปที่ swing ที่ใกล้ที่สุด ขาขึ้นใช้กฎเดียวกันกลับด้าน คือจาก low ล่าสุดขึ้นไป high ล่าสุด</p></div>
+        <div class="module__vis"><figure class="chart-frame lc" data-ui="chart" data-slot="m4a" aria-label="กราฟจำลอง S17 ให้ลากสองเส้นเพื่อวาง equilibrium range ในขาลง">
+          <div class="chart-frame__bar">
+            <span class="chart-frame__sym" data-k="sym">ES</span><span class="chart-frame__tf" data-k="tf">15m</span>
+            <span class="chart-frame__title" data-k="title">S17 · equilibrium</span>
+            <span class="sim-tag">จำลอง</span>
+          </div>
+          <div class="chart-frame__canvas"></div>
+          <div class="chart-frame__ctrls"><button class="ctrl" type="button" data-act="answer">ดูเฉลย</button><button class="ctrl" type="button" data-act="wrong">ลากผิดให้ดู</button><button class="ctrl" type="button" data-act="play">เล่นต่อดูจุดเข้า</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button></div>
+          <p class="conf-levels" data-k="levels" aria-live="polite"></p>
+          <p class="conf-read" data-k="read" aria-live="polite"></p>
+        </figure></div>
+      </div>
+      <div class="check" data-m="4" role="group" aria-labelledby="m4-ck">
+      <div class="check__bar">
+        <h3 id="m4-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="0" data-sec="411" data-clip="7" data-why="ขาลงลากจาก high ล่าสุดลงมา low ล่าสุด">
+          <p class="q__t" id="m4-q0">ในขาลง ลาก range จากไหนไปไหน</p>
+          <div class="q__opts" role="group" aria-labelledby="m4-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">จาก high ล่าสุดลงมาถึง low ล่าสุด</button><button type="button" class="opt" data-i="1" aria-pressed="false">จาก high สูงสุดของวันถึง low ต่ำสุดของวัน</button><button type="button" class="opt" data-i="2" aria-pressed="false">จาก low ล่าสุดขึ้นไป high ล่าสุด</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="120" data-clip="7" data-why="เขาไม่ซื้อเหนือ equilibrium อยากซื้อในโซน discount">
+          <p class="q__t" id="m4-q1">ในขาขึ้น ถ้าจะ buy เขาอยากซื้อที่โซนไหนของ range</p>
+          <div class="q__opts" role="group" aria-labelledby="m4-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">premium (เหนือ 0.5)</button><button type="button" class="opt" data-i="1" aria-pressed="false">discount (ใต้ 0.5)</button><button type="button" class="opt" data-i="2" aria-pressed="false">ตรง high ของ range</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="module" id="m5" data-m="5" aria-labelledby="m5-h">
+      <header class="module__head">
+        <p class="module__no">บทที่ 5</p>
+        <h2 id="m5-h">SMT divergence</h2>
+        <span class="module__rule" aria-hidden="true"></span>
+        <span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=21" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 00:21">#6 00:21</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=316" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:16">#6 05:16</a></span>
+      </header>
+      <div class="module__grid module__grid--wide">
+        <div class="module__text">
+          <ul class="facts">
+            <li data-fact="P6.1 P6.2"><p>SMT divergence ใช้กับ S&P 500 (ES) และ Nasdaq (NQ) เท่านั้น ดูสอง index พร้อมกันแล้วเทียบ high กับ low ของกัน เขาบอกว่าคนเทรด forex หรือ commodities จะได้ประโยชน์น้อย</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=21" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 00:21">#6 00:21</a></span></li>
+            <li data-fact="P6.3 P6.4"><p>ใช้ช่วยตัดสินว่าเทรนด์จะเปลี่ยนก่อนที่จะเห็น BOS หรือ IFVG และสำคัญเมื่อเกิดที่ draw on liquidity ระดับ higher time frame</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=31" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 00:31">#6 00:31</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=53" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 00:53">#6 00:53</a></span></li>
+            <li data-fact="P6.15"><p>Bearish SMT: ตัวหนึ่งทำ high แล้ว <b>lower high</b> ขณะที่อีกตัวทำ high แล้ว <b>higher high</b> ไม่สำคัญว่าตัวไหนเป็นตัวไหน</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=316" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:16">#6 05:16</a></span></li>
+            <li data-fact="P6.16 P6.17"><p>ตัวที่ทำ lower high คือตัวนำ (leading) ตัวที่ยังทำ higher high คือตัวตามที่คาดว่าจะลง เป็น bearish confluence ของทั้งสอง Nasdaq หรือ S&P ก็เป็นตัวนำได้</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=338" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:38">#6 05:38</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=380" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 06:20">#6 06:20</a></span></li>
+            <li data-fact="P6.18 P6.19"><p>Bullish SMT กลับกัน: ตัวหนึ่งทำ low แล้ว lower low อีกตัวทำ low แล้ว higher low ตัวที่ทำ higher low คือตัวนำ</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=411" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 06:51">#6 06:51</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=443" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 07:23">#6 07:23</a></span></li>
+            <li data-fact="P6.21 P6.26"><p>เขาเทรดตัวที่นำ (ตัวที่ bearish กว่า) ไม่ short ตัวที่ดันเหนือ high</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=629" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 10:29">#6 10:29</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=813" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 13:33">#6 13:33</a></span></li>
+            <li data-fact="P6.12 P6.14"><p>ถ้าไม่ได้เกิดตอนกวาด draw on liquidity divergence แบบนี้เกิดบ่อยและแทบไร้ประโยชน์</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=281" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 04:41">#6 04:41</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=305" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 05:05">#6 05:05</a></span></li>
+            <li data-fact="P6.22"><p>บน higher time frame เขาใช้เป็น bias เป็นหลัก ส่วน time frame เล็กใช้ประกอบจุดเข้าได้</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/7dTQA0t8SH0?t=669" target="_blank" rel="noopener" aria-label="ดูในคลิป #6 SMT Divergence Explained ที่ 11:09">#6 11:09</a></span></li>
+            <li data-fact="P1.35"><p>แม้มี SMT เขาก็ยังรอให้โครงสร้างเปลี่ยน (BOS หรือ IFVG) ก่อน เพราะสองขาลงยังพิสูจน์ไม่ได้ว่า orders ถูกเติมแล้ว</p><span class="chips"><a class="ts-chip ts-chip--pl" href="https://youtu.be/TEp3a-7GUds?t=1670" target="_blank" rel="noopener" aria-label="ดูในคลิป #1 TJR&#39;s Strategy Explained ที่ 27:50">#1 27:50</a></span></li>
+          </ul>
+          <ul class="facts facts--gaps" aria-label="สิ่งที่คลิป SMT ไม่ได้ระบุ">
+            <li class="facts__gap"><p>high สองตัวของสอง index ห่างกันได้กี่แท่งจึงนับว่าเกิดพร้อมกัน <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap"><p>draw on liquidity ระดับไหนถึงนับว่า significant (เขาพูดแค่ higher time frame) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+            <li class="facts__gap" data-fact="P6.5"><p>ตัวย่อ SMT ย่อมาจากอะไร (เขาบอกเองว่าไม่รู้) <span class="badge-gap">คลิปไม่ได้ระบุ</span></p></li>
+          </ul>
+        </div>
+        <div class="module__vis"><div class="twin-wrap" data-slot="m5a" role="group" aria-label="กราฟจำลอง S21 สองกราฟคู่ ES และ NQ">
+          <div class="twin">
+            <figure class="chart-frame lc" data-ui="chart" aria-label="กราฟซ้าย">
+              <div class="chart-frame__bar"><span class="chart-frame__sym" data-k="symA">ES</span><span class="chart-frame__tf">5m</span><span class="chart-frame__title">S21 · SMT</span><span class="sim-tag">จำลอง</span></div>
+              <div class="chart-frame__canvas" data-k="hostA"></div>
+            </figure>
+            <figure class="chart-frame lc" data-ui="chart" aria-label="กราฟขวา">
+              <div class="chart-frame__bar"><span class="chart-frame__sym" data-k="symB">NQ</span><span class="chart-frame__tf">5m</span><span class="chart-frame__title">S21 · SMT</span><span class="sim-tag">จำลอง</span></div>
+              <div class="chart-frame__canvas" data-k="hostB"></div>
+            </figure>
+          </div>
+          <div class="chart-frame__ctrls conf-ask"><span class="conf-ask__t" id="m5-ask">index ไหนเป็นตัวนำ</span><div class="ctrl-group" role="group" aria-labelledby="m5-ask"><button class="ctrl" type="button" data-pick="ES" aria-pressed="false">ES (S&amp;P 500)</button><button class="ctrl" type="button" data-pick="NQ" aria-pressed="false">NQ (Nasdaq)</button></div><button class="ctrl" type="button" data-act="more" hidden>ดูต่อจนถึง BOS</button><button class="ctrl" type="button" data-act="play">ดูใหม่</button><button class="ctrl" type="button" data-act="reseed">สุ่มกราฟใหม่</button></div>
+          <p class="conf-read" data-k="read" aria-live="polite"></p>
+        </div></div>
+      </div>
+      <div class="check" data-m="5" role="group" aria-labelledby="m5-ck">
+      <div class="check__bar">
+        <h3 id="m5-ck">ตรวจความเข้าใจ</h3>
+        <span class="score-pill" data-k="score" data-tone="">0 / 2</span>
+        <button class="ctrl" type="button" data-act="clear">ล้างคำตอบ</button>
+      </div>
+      <div class="check__grid">
+        <div class="q" data-right="0" data-sec="338" data-clip="6" data-why="ตัวที่ทำ lower high คือตัวนำ">
+          <p class="q__t" id="m5-q0">S&amp;P ทำ high แล้ว lower high ขณะที่ Nasdaq ทำ high แล้ว higher high คือ SMT แบบไหน และใครนำ</p>
+          <div class="q__opts" role="group" aria-labelledby="m5-q0"><button type="button" class="opt" data-i="0" aria-pressed="false">bearish SMT และ S&amp;P ที่ทำ lower high เป็นตัวนำ</button><button type="button" class="opt" data-i="1" aria-pressed="false">bearish SMT และ Nasdaq ที่ทำ higher high เป็นตัวนำ</button><button type="button" class="opt" data-i="2" aria-pressed="false">bullish SMT และ S&amp;P เป็นตัวนำ</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+        <div class="q" data-right="1" data-sec="629" data-clip="6" data-why="เขาเทรดตัวที่นำ ไม่ short ตัวที่ดันเหนือ high">
+          <p class="q__t" id="m5-q1">เมื่อเกิด bearish SMT เขาเทรดตัวไหน</p>
+          <div class="q__opts" role="group" aria-labelledby="m5-q1"><button type="button" class="opt" data-i="0" aria-pressed="false">ตัวที่ยังทำ higher high</button><button type="button" class="opt" data-i="1" aria-pressed="false">ตัวที่นำ (ตัวที่ทำ lower high)</button><button type="button" class="opt" data-i="2" aria-pressed="false">ทั้งสองตัวพร้อมกัน</button></div>
+          <p class="q__fb" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    </section>
+    <section class="next" id="next" aria-labelledby="next-h">
+      <div class="next__text">
+        <h2 id="next-h">ต่อไป</h2>
+        <p class="t-lead">ห้าตัวนี้คือชิ้นส่วน ยังไม่ใช่ระบบ ลำดับที่เขาประกอบมันตั้งแต่ bias จนถึง exit อยู่ในหน้ากลยุทธ์</p>
+        <p>ยังมี imbalance ขั้นสูงอีกชุดคือ opening gaps (NDOG, NWOG, NCOG) และ BPR อยู่ในคลิป #9 ของเพลย์ลิสต์ เขาบอกว่า gap เปิดวันและเปิดสัปดาห์เทรดตามได้ยาก ส่วน gap ของแท่งใหม่แทบไม่มีประโยชน์ เว็บนี้จึงไม่ทำเป็นบทเรียน <span class="chips" data-fact="P9.10 P9.20"><a class="ts-chip ts-chip--pl" href="https://youtu.be/PlsHO33j6B8?t=107" target="_blank" rel="noopener" aria-label="ดูในคลิป #9 Advanced Imbalance Concepts ที่ 01:47">#9 01:47</a><a class="ts-chip ts-chip--pl" href="https://youtu.be/PlsHO33j6B8?t=326" target="_blank" rel="noopener" aria-label="ดูในคลิป #9 Advanced Imbalance Concepts ที่ 05:26">#9 05:26</a></span></p>
+        <div class="next__links"><a class="btn btn--primary" href="strategy.html">ดูหน้ากลยุทธ์</a><a class="btn btn--secondary" href="scenarios.html">ฝึกกับสถานการณ์</a><a class="btn btn--secondary" href="playbook.html">เปิด Playbook</a></div>
+      </div>
+      <dl class="limits__list" aria-label="สิ่งที่เพลย์ลิสต์ตอนนี้ไม่ได้ระบุ">
+        <div><dt>ขนาดต่ำสุดของ FVG</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>stop-loss และจุดเข้าหลัง BOS หรือ IFVG</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>time frame ที่ BOS และ IFVG ต้องอยู่</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>ค่าตั้ง Gann box ของ equilibrium</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>กฎ stack ของ bearish gap</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+        <div><dt>ระยะห่างของ high สองตัวใน SMT</dt><dd><span class="badge-gap">คลิปไม่ได้ระบุ</span></dd></div>
+      </dl>
+    </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/js/core/ns.js"></script>
+<script src="assets/js/core/sources.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/scenario/rng.js"></script>
+<script src="assets/js/scenario/swings.js"></script>
+<script src="assets/js/scenario/gen.js"></script>
+<script src="assets/js/scenario/sessions.js"></script>
+<script src="assets/js/scenario/confluence.js"></script>
+<script src="assets/js/scenario/library.js"></script>
+<script src="assets/js/scenario/system.js"></script>
+<script src="assets/js/scenario/annotate.js"></script>
+<script src="assets/js/scenario/grade.js"></script>
+<script src="assets/js/chart/scale.js"></script>
+<script src="assets/js/chart/render.js"></script>
+<script src="assets/js/chart/overlays.js"></script>
+<script src="assets/js/chart/chart.js"></script>
+<script src="assets/js/core/layout.js"></script>
+<script src="assets/js/core/motion.js"></script>
+<script src="assets/js/pages/confluences.js"></script>
+</body>
+</html>
