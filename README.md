@@ -78,4 +78,10 @@ Thai text, trading terms in English. Prices use tick 0.25 (NQ-like ~30000, ES-li
 - Inline timestamp chips inside running text are 26 px tall; chips in a row (`.chips`) are 44 px on phones and tablets. Cards that are one big link use a stretched `::after` as the target.
 
 ## Deploy
-Static files only: no server code, no secrets, no build. Upload the folder to any static host, or publish as a claude.ai Artifact (private link: `index.html` plus every referenced file). Never push to a remote without asking.
+Static files only: no server code, no secrets, no build.
+
+- **Live site:** https://cipeerapong-ctrl.github.io/tjr-liquidity/ (GitHub Pages, branch `main`, folder `/`; `.nojekyll` makes it serve files as they are). Every push to `main` rebuilds it in about a minute.
+- **Repo:** https://github.com/cipeerapong-ctrl/tjr-liquidity (public; Pages on a free account needs that).
+- **Artifact copy:** https://claude.ai/artifact/7TXef9ojVgxxhLCqpCF3Md (`index.html` plus every referenced file; republish by hand).
+- `docs/source/transcript-de.txt` (the raw caption transcript) stays on this machine only: it is git-ignored and was removed from the history before the first push. Commits use the GitHub no-reply address.
+- Never push without asking.
