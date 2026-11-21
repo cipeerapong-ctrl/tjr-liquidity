@@ -208,7 +208,8 @@
       }
     });
     eq(G.milestones(TJR.scenarios.safeBuild(TJR.scenarios.get('S21'), 1, {}).truth)[0].key, 'smt');
-    eq(G.milestones(TJR.scenarios.safeBuild(TJR.scenarios.get('S01'), 1, {}).truth).map((x) => x.key), ['sweep', 'confirm', 'entry'], 'Level 1 keeps sweep / confirm / entry');
+    eq(G.milestones(TJR.scenarios.safeBuild(TJR.scenarios.get('S01'), 1, {}).truth).map((x) => x.key), ['sweep', 'confirm', 'cont', 'entry'], 'S01 trades the chain: sweep / BOS / gap / entry');
+    eq(G.milestones(TJR.scenarios.safeBuild(TJR.scenarios.get('S02'), 1, {}).truth).map((x) => x.label)[1], 'IFVG', 'S02 confirms with an IFVG');
     eq(G.milestones(TJR.scenarios.safeBuild(TJR.scenarios.get('S05'), 1, {}).truth).map((x) => x.key), ['sweep']);
   });
 

@@ -446,7 +446,8 @@
       });
     });
     ok(L.isLevel2(TJR.scenarios.safeBuild(TJR.scenarios.get('S15'), 1, {})));
-    ok(!L.isLevel2(TJR.scenarios.safeBuild(TJR.scenarios.get('S01'), 1, {})));
+    ok(L.isLevel2(TJR.scenarios.safeBuild(TJR.scenarios.get('S01'), 1, {})), 'S01 now trades BOS + FVG: graded on the chain');
+    ok(!L.isLevel2(TJR.scenarios.safeBuild(TJR.scenarios.get('S04'), 1, {})), 'a no-trade scenario has no chain');
     // v1 behaviour is unchanged when no Level 2 flag is passed
     eq(L.replayFeedback('in-window', 'short').secs, [1530]);
     eq(L.replayFeedback('early', 'long').text.indexOf('HL') > 0, true);

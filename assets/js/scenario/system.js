@@ -170,6 +170,11 @@
     var pts = o.structure.map(function (nm) { var p = sc.pt(nm); return { i: p.i, price: p.price, type: p.side, k: p.k }; });
     var structure = SW.label(pts).map(function (p) { return { bar: p.i, price: p.price, tag: p.tag, known: p.k + 2 }; });
     var K = o.read(cs, sweep);
+    // o.tight: the BOS close and the gap are one push (same rule as the S01-S14 trades); else define() retries the stream
+    if (o.tight && K.cont && Math.abs(K.cont.i - K.confirm.at) > 1) {
+      var er = new Error(d.id + ': the gap (' + K.cont.i + ') is not the confirming push (' + K.confirm.at + ')');
+      er.retry = true; throw er;
+    }
     var side = K.entry ? K.dir : null, conf = null, win = null, tgt = null;
     if (side) {
       var eo = KIT.entryOutcome(cs, side === 'long', K.origin, K.entry.at, K.targets[0].price);
@@ -321,7 +326,7 @@
     sc.run(n);
     var levels = openingLevels(sc);
     return finish(d, seed, sc, {
-      levels: levels, sweepIds: ['L1', 'L2'], structure: ['SW', 'H1', 'M', 'X', 'P'], outcome: outcome,
+      levels: levels, sweepIds: ['L1', 'L2'], structure: ['SW', 'H1', 'M', 'X', 'P'], outcome: outcome, tight: true,
       near: ['L1', 'L2'], poke: ['A1', 'T'], times: KIT.nyTimes(r, n, sc.B('SW')),
       read: function (cs, sw) {
         var cf = firstBos(cs, sw.bar, true), x = respected(cs, sw.bar, cf.at, 'bull');

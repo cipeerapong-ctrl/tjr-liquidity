@@ -7,7 +7,7 @@
       spot          pickSpot / spotPrompt / spotShape
       sessions      sessionStarts / sessionTicks
       quiz          pickQuiz / quizAnswers / quizOverlay
-      Level 2       isLevel2 / l2Chain (Replay on S15 / S16 / S22), gapWindow / gapRound / gapsIn / gapGrade / gapWhy (Gap finder),
+      Level 2       isLevel2 / l2Chain (Replay on every trade: S01-S14 trades and S15 / S16 / S22 all carry truth.confluence), gapWindow / gapRound / gapsIn / gapGrade / gapWhy (Gap finder),
                     pickBos / bosOverlays / bosFeedback (Break or not), smtFacts / smtPanels / smtFeedback (Which index leads)
    2. page: seven modes on ONE live engine chart at a time (the SMT drill uses the twin pair) (a round = TJR.scenarios.random(rng, mode); the chart is
       destroyed and rebuilt every round, so no loop or listener is left behind; a run token drops late callbacks).

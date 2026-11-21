@@ -167,53 +167,158 @@
 
   // ---------------------------------------------------------------- shared scripting
 
-  // Post-sweep reversal prices (long space). top = x of the highest level the sweep takes (the HL holds
-  // above it), sw = x of the sweep extreme. Shape A: a pre-sweep high H0 is the H the HH must clear and
-  // H1 is a minor lower high; shapes B/C: H1 is that H. M = first low after H1 (HL in C), P = pullback low
-  // after the HH = the D2 entry pivot, T = default liquidity target above.
-  function plan(sc, o) {
+  // ---------------------------------------------------------------- v3 confirmation legs (BOS + FVG, IFVG)
+  // The trade scenarios confirm the way the playlist teaches (P1.19, P10.21, P8.14), not with the main clip's loose
+  // H, L, HL, HH (F6.7: his real strategy is stricter). Prices and bar steps are the S15 / S16 ones (system.js); the
+  // truth is read back from the candles with TJR.confluence (readBos / readIfvg), never taken from the script.
+
+  function lpass(sc, bar, x) { sc.at(null, bar, x, 'pass'); }
+  // bull gap with middle candle d (long space): closes d-2..d+1 = g.c0, g.c1, g.top, g.end (null = left free);
+  // candle d-1 stays under g.lo, candle d+1 over g.hi -> the gap holds [lo, hi]
+  function bullGapL(sc, d, g) {
+    if (g.c0 != null) lpass(sc, d - 2, g.c0);
+    if (g.c1 != null) lpass(sc, d - 1, g.c1);
+    lpass(sc, d, g.top);
+    lpass(sc, d + 1, g.end);
+    sc.keep(d - 1, d - 1, null, g.lo);
+    sc.keep(d + 1, d + 1, g.hi, null);
+  }
+  // BOS + FVG after the sweep low SW (x o.sw): H1 = the high to break, M = higher low (above o.top, the highest swept
+  // level), a displacement closing above H1 that leaves the gap [lo, hi], HH = the new high, P = pullback into the gap
+  function planBos(sc, o) {
     var r = sc.r, q = {};
-    q.M = o.top + r.range(0.3, 0.7);
-    q.P = q.M + r.range(0.25, 0.6);
-    if (o.shape === 'A') { q.H0 = q.M + r.range(2.6, 3.0); q.H1 = q.H0 - r.range(0.5, 0.8); }
-    else q.H1 = Math.max(o.sw + 2.6, q.M + 2.6) + r.range(0, 0.4);
-    q.HH = Math.max(q.P + 2.6, (o.shape === 'A' ? q.H0 : q.H1) + r.range(0.4, 1.0), o.minHH || -Infinity) + r.range(0, 0.5);
+    q.M = Math.max(o.sw + r.range(0.6, 1.1), o.top != null ? o.top + r.range(0.3, 0.7) : -Infinity);
+    q.H1 = q.M + r.range(2.7, 3.0);                 // > 2.5u after tick rounding (an ES tick is ~0.1u)
+    q.lo = q.H1 - r.range(0.7, 0.9);
+    q.hi = q.H1 + r.range(0.2, 0.35);
+    q.c1 = q.lo - r.range(0.4, 0.6);
+    q.c0 = q.c1 + r.range(0.15, 0.3);              // candle d-1 bearish: no bull gap one bar earlier
+    q.top = q.hi + r.range(0.4, 0.7);
+    q.end = q.top + r.range(0.2, 0.5);
+    q.HH = Math.max(q.end + r.range(2.6, 3.0), o.minHH || -Infinity);
+    q.P = q.lo + r.range(0.2, 0.35);
+    q.V = q.P + r.range(0.3, 0.4);
+    q.B2 = q.P + r.range(3.0, 3.3);
     q.T = q.HH + r.range(1.0, 1.6);
     return q;
   }
-
-  // Place H1, M, HH, P after the sweep low 'SW', then the outcome leg (D4), with the bands that keep the
-  // truth: the sweep low holds to the HH, the HH is the first break of the H, the pullback stays between
-  // P and the HH, the target (a named long-space high) stays untaken until the run (win) or for good (fail).
-  // o: {shape, outcome, target, gap:[lo,hi], run:[lo,hi]}
-  function reverse(sc, q, o) {
-    var r = sc.r, g = o.gap || [5, 8], run = o.run || [8, 14];
-    var s = sc.B('SW');
-    sc.go('H1', q.H1, 'high', g[0], g[1]);
-    sc.go('M', q.M, 'low', g[0], g[1]);
-    sc.go('HH', q.HH, 'high', g[0], g[1]);
-    sc.go('P', q.P, 'low', g[0], g[1]);
-    var hh = sc.B('HH'), p = sc.B('P');
-    sc.keep(s + 2, hh + 1, 'SW', null);                                // through the HH pair: its wicks too
-    if (o.shape === 'A') sc.keep(sc.B('H0') + 2, hh - 1, null, 'H0');
-    else sc.keep(sc.B('H1') + 2, hh - 1, null, 'H1');
-    sc.keep(sc.B('M') + 2, hh + 1, 'M', null);
-    sc.keep(hh + 2, p - 1, 'P', null);
-    sc.keep(hh + 2, p + 1, null, 'HH');                                 // the pivot pair stays under the HH too
+  // the outcome after the entry pivot P (bar p): run to the target (win) or back under the sweep low (fail)
+  function tailL(sc, o, p, keepFrom) {
+    var r = sc.r, run = o.run || [8, 14];
     if (o.outcome === 'fail') {
-      sc.go('B2', q.P + r.range(1.6, 2.1), 'high', g[0], g[1]);          // weak bounce under the HH
-      sc.go('F', sc.X('SW') - r.range(0.5, 1.5), 'low', g[0], g[1] + 2);  // back through the sweep extreme
-      sc.keep(p + 2, sc.B('F') - 1, 'SW', null);
-      sc.keep(hh + 2, END, null, 'HH');
+      sc.go('F', sc.X('SW') - r.range(0.5, 1.5), 'low', 5, 8);
+      sc.keep(sc.B('SW') + 2, sc.B('F') - 1, 'SW', null);
       sc.keep(sc.B(o.target) + 2, END, null, o.target);
+      if (sc.by.HH) sc.keep(sc.B('HH') + 2, END, null, 'HH');
       sc.go(null, sc.X('F') + r.range(0.6, 1.6), 'pass', 3, 5);
     } else {
       sc.go('R', sc.X(o.target) + r.range(0.4, 1.0), 'high', run[0], run[1]);
       var R = sc.B('R');
+      sc.keep(sc.B('SW') + 2, keepFrom, 'SW', null);
       sc.keep(p + 2, R - 1, 'P', null);
       sc.keep(sc.B(o.target) + 2, R - 1, null, o.target);
       sc.go(null, sc.X('R') - r.range(1.0, 2.2), 'pass', 4, 7);
     }
+  }
+  // o: {outcome, target (a named long-space high), gap:[lo,hi] bars between swings, run:[lo,hi]}
+  function reverseBos(sc, q, o) {
+    var r = sc.r, g = o.gap || [5, 8];
+    sc.go('H1', q.H1, 'high', g[0], g[1]);
+    sc.go('M', q.M, 'low', g[0], g[1]);
+    var d = sc.B('M') + r.int(4, 6);
+    bullGapL(sc, d, { c0: q.c0, c1: q.c1, top: q.top, end: q.end, lo: q.lo, hi: q.hi });
+    sc.keep(sc.B('H1') + 2, d - 2, null, 'H1');        // H1 stays the high to break until the displacement
+    sc.at('HH', d + r.int(3, 5), q.HH, 'high');
+    var hh = sc.B('HH'), p = hh + r.int(3, 5);
+    sc.keep(d + 2, p - 2, q.top, null);                 // nobody trades back into the gap before the pullback
+    lpass(sc, p - 1, q.V);
+    sc.at('P', p, q.P, 'low');
+    sc.keep(hh + 2, p + 1, null, 'HH');
+    sc.keep(sc.B('M') + 2, p + 1, 'M', null);
+    sc.keep(sc.B('SW') + 2, sc.B('M') + 1, 'SW', null);
+    sc.at('B2', p + 3, q.B2, 'high');                   // the bounce out of the gap (the entry), in both outcomes
+    tailL(sc, o, p, sc.B('B2') + 1);
+  }
+  // IFVG (long space): the drop into the sweep leaves a bear gap [gl, gh]; after the sweep one push closes above it
+  // (the inverse) and leaves the bull gap [lo, hi]; P = pullback into that gap. A = the lowest x the last high before the
+  // drop may have (it must sit above the bear gap's first candle).
+  function planIfvgL(sc, sw) {
+    var r = sc.r, q = {};
+    q.SW = sw;
+    q.lo = q.SW + r.range(2.7, 2.9);
+    q.hi = q.lo + r.range(0.9, 1.2);
+    q.P = q.lo + r.range(0.2, 0.35);
+    q.V = q.P + r.range(0.3, 0.4);
+    q.gl = q.hi + r.range(0.0, 0.3);
+    q.gh = q.gl + r.range(0.6, 0.9);
+    q.q1 = q.gh + r.range(0.2, 0.4);
+    q.q0 = q.q1 + r.range(0.2, 0.5);
+    q.q2 = q.gl - r.range(0.15, 0.3);
+    q.q3 = q.q2 - r.range(0.1, 0.4);
+    q.top = Math.max(q.q1, q.hi) + r.range(0.3, 0.6);  // the inverse: a close above the bear gap
+    q.end = q.top + r.range(0.2, 0.5);
+    q.K7 = q.top + r.range(0.3, 0.6);
+    q.A = q.q0 + r.range(0.8, 1.2);
+    return q;
+  }
+  // from the last pre-sweep high (bar `after`): the bear gap, then the sweep low SW
+  function ifvgDrop(sc, q, after) {
+    var r = sc.r, g = after + r.int(4, 5);
+    lpass(sc, g - 2, q.q0); lpass(sc, g - 1, q.q1); lpass(sc, g, q.q2); lpass(sc, g + 1, q.q3);
+    sc.keep(g - 1, g - 1, q.gh, null);
+    sc.keep(g + 1, g + 1, null, q.gl);
+    var s = g + r.int(4, 6);
+    sc.at('SW', s, q.SW, 'low');
+    sc.keep(g + 2, s - 2, null, q.gl);                  // no close above the bear gap before the sweep
+    return g;
+  }
+  function reverseIfvg(sc, q, o) {
+    var s = sc.B('SW');
+    bullGapL(sc, s + 2, { c0: null, c1: null, top: q.top, end: q.end, lo: q.lo, hi: q.hi });
+    lpass(sc, s + 4, q.V);
+    sc.at('P', s + 5, q.P, 'low');
+    lpass(sc, s + 7, q.K7);
+    tailL(sc, o, s + 5, s + 6);
+  }
+
+  // read-back (TJR.confluence only), the S15 / S16 rules: the first BOS (or inversed gap) after the sweep, then the gap
+  // that is respected first after it; its respecting close is the entry
+  function CF() { return TJR.confluence; }
+  function firstBos(cs, ref, L) {
+    var ev = CF().bos(cs, { trend: L ? 'down' : 'up', from: ref + 1 })[0];
+    if (!ev) throw new Error('no BOS after bar ' + ref);
+    return { kind: 'bos', at: ev.at, dir: ev.dir, level: { i: ev.level.i, price: ev.level.price } };
+  }
+  function firstIfvg(cs, ref, L) {
+    var opp = L ? 'bear' : 'bull', first = null;
+    CF().fvgs(cs).forEach(function (g) {
+      if (g.dir === opp && g.state === 'disrespected' && g.stateAt > ref &&
+          (!first || g.stateAt < first.stateAt || (g.stateAt === first.stateAt && g.i < first.i))) first = g;
+    });
+    if (!first) throw new Error('no inversed gap after bar ' + ref);
+    return { kind: 'ifvg', at: first.stateAt, i: first.i, low: first.low, high: first.high };
+  }
+  function respected(cs, ref, after, want) {
+    for (var k = after + 1; k < cs.length; k++) {
+      var pv = CF().fvgs(cs.slice(0, k + 1)), best = null;
+      for (var q = 0; q < pv.length; q++) {
+        var g = pv[q];
+        if (g.dir === want && g.to > ref && g.state === 'respected' && g.stateAt === k && (!best || g.i > best.i)) best = g;
+      }
+      if (best) return { cont: { kind: 'fvg', i: best.i, at: best.to, low: best.low, high: best.high, dir: best.dir },
+                         entry: { at: k, price: cs[k].c } };
+    }
+    throw new Error('no respected ' + want + ' gap after bar ' + after);
+  }
+  // kind 'bos' | 'ifvg'; side 'long' | 'short'; target = the level id price runs to
+  function reader(kind, side, levels, targetId) {
+    var L = side === 'long';
+    return function (cs, sw) {
+      var cf = kind === 'ifvg' ? firstIfvg(cs, sw.bar, L) : firstBos(cs, sw.bar, L);
+      var x = respected(cs, sw.bar, cf.at, L ? 'bull' : 'bear');
+      var t = levels.filter(function (l) { return l.id === targetId; })[0];
+      return { dir: side, origin: sw.bar, confirm: cf, cont: x.cont, entry: x.entry, targets: [{ price: t.price, levelId: t.id }] };
+    };
   }
 
   // ---------------------------------------------------------------- time
@@ -318,8 +423,9 @@
     });
   }
 
-  // Assemble the built scenario. o: {levels, sweepIds, structure:[[name, longTag]], side, target (level id),
-  // outcome, sessions, times, near:[a,b], poke:[name, levelId], htf, notes(truth) -> [[bar, fact, text]]}
+  // Assemble the built scenario. o: {levels, sweepIds, structure, side, outcome, read(cs, sweep) -> confluence
+  // (trades only), sessions, times, near:[a,b], poke:[name, levelId], htf, notes(truth) -> [[bar, fact, text]]}.
+  // structure: trade -> scripted names (tagged by the swing rule); no trade -> [[name, longTag]]
   function finish(d, seed, sc, o) {
     var cs = sc.cs, n = cs.length;
     o.levels.forEach(function (l) { l.sweptAt = firstThrough(cs, l.bar + 1, l.side, l.price); });
@@ -333,28 +439,29 @@
       throw new Error(d.id + ': first sweep is ' + (first && first.id) + ', expected one of ' + o.sweepIds.join(','));
     }
     var sweep = { bar: first.sweptAt, levelId: first.id };
-    var structure = (o.structure || []).map(function (s) {
-      var p = sc.pt(s[0]);
-      return { bar: p.i, price: p.price, tag: sc.dir > 0 ? s[1] : MIRROR[s[1]], known: p.k + 2 };
-    });
-    var confirmBar = null, win = null, target = null;
-    if (o.side) {
-      var long = o.side === 'long', ct = long ? 'HH' : 'LL';
-      var c = structure.filter(function (p) { return p.tag === ct && p.bar > sweep.bar; })[0];
-      confirmBar = c.bar;
-      var ext = long ? Infinity : -Infinity;
-      for (var j = sweep.bar; j <= confirmBar; j++) ext = long ? Math.min(ext, cs[j].l) : Math.max(ext, cs[j].h);
-      var from = c.known, to = n - 1;
-      for (j = from; j < n; j++) {
-        if (long ? cs[j].h > c.price : cs[j].l < c.price) { to = j - 1; break; }
-      }
-      if (to === n - 1) {
-        for (j = from; j < n; j++) if (long ? cs[j].l < ext : cs[j].h > ext) { to = j - 1; break; }
-      }
-      win = { from: from, to: to };
-      var tl = o.levels.filter(function (l) { return l.id === o.target; })[0];
-      target = { price: tl.price, levelId: tl.id };
+    var structure, K = null;
+    if (o.read) {        // v3 legs: tags as the swing rule labels them, the trade read back from the candles
+      var pts = o.structure.map(function (nm) { var p = sc.pt(nm); return { i: p.i, price: p.price, type: p.side, k: p.k }; });
+      structure = SW.label(pts).map(function (p) { return { bar: p.i, price: p.price, tag: p.tag, known: p.k + 2 }; });
+    } else {
+      structure = (o.structure || []).map(function (s) {
+        var p = sc.pt(s[0]);
+        return { bar: p.i, price: p.price, tag: sc.dir > 0 ? s[1] : MIRROR[s[1]], known: p.k + 2 };
+      });
     }
+    var confirmBar = null, win = null, target = null;
+    if (o.read) {
+      K = o.read(cs, sweep);
+      if (K.dir !== o.side) throw new Error(d.id + ': reads ' + K.dir + ', scripted ' + o.side);
+      // a clear pattern: the confirming candle is the push that leaves the gap (the BOS / IFVG close and the gap are one
+      // move), not a small early break with the gap coming much later; otherwise define() retries another stream
+      var gapOff = K.cont.i - K.confirm.at;
+      if (gapOff < -1 || gapOff > 1) throw retry(d.id + ': the gap (' + K.cont.i + ') is not the confirming push (' + K.confirm.at + ')');
+      var eo = entryOutcome(cs, K.dir === 'long', K.origin, K.entry.at, K.targets[0].price);
+      if (eo.outcome !== o.outcome) throw new Error(d.id + ': outcome reads ' + eo.outcome + ', scripted ' + o.outcome);
+      confirmBar = K.confirm.at; win = { from: K.entry.at, to: eo.to };
+      target = { price: K.targets[0].price, levelId: K.targets[0].levelId };
+    } else if (o.side) throw new Error(d.id + ': a trade reads its confirmation back (o.read)');
     resistanceOf(o.levels, first.side, sweep.bar, confirmBar).forEach(function (r, i) {
       o.levels[i].resistance = r[0]; o.levels[i].resistanceAfter = r[1];
     });
@@ -364,6 +471,7 @@
       structure: structure, confirmBar: confirmBar, entryWindow: win, target: target,
       sessions: (o.sessions || []).map(function (s) { return box(cs, s[0], s[1]); }), notes: []
     };
+    if (K) truth.confluence = K;
     truth.notes = o.notes(truth, cs).map(function (x) { return { bar: x[0], fact: x[1], text: x[2] }; });
     var meta = { id: d.id, instrument: d.instrument, tf: d.tf, tick: TICK, seed: seed, vol: sc.u, chop: sc.chop,
                  mess: { nearEqual: [mpt(sc, o.near[0]), mpt(sc, o.near[1])],
@@ -379,58 +487,80 @@
     for (var j = T.entryWindow.from; j < cs.length; j++) if (L ? cs[j].h >= T.target.price : cs[j].l <= T.target.price) return j;
     return cs.length - 1;
   }
-  function failBar(cs, T) {
-    var L = T.side === 'long', ext = L ? Infinity : -Infinity, j;
-    for (j = T.sweep.bar; j <= T.confirmBar; j++) ext = L ? Math.min(ext, cs[j].l) : Math.max(ext, cs[j].h);
-    for (j = T.entryWindow.from; j < cs.length; j++) if (L ? cs[j].l < ext : cs[j].h > ext) return j;
-    return cs.length - 1;
-  }
+  function retry(msg) { var e = new Error(msg); e.retry = true; return e; }
   function swept(T, id) { return T.levels.filter(function (l) { return l.id === id; })[0].sweptAt; }
-  // Generic trade-note texts. Each one paraphrases every fact it may be cited with:
+  // Generic sweep / target texts. Each one paraphrases every fact it may be cited with:
   //   sweep  - long: F6.3 (do not blindly buy when a low is taken, drawdown); short: F6.4 (no blind sell above a
   //            high, wait for confirmation; F6.3 only speaks of buying)
-  //   confirm - F6.5 / F6.6 / F7.14 (long), F6.8 / F6.9 (short): the new trend's structure forms
-  //   entry  - long: F6.5 / F6.6 / F7.14 (average entry around the higher low once the uptrend has formed); short:
-  //            F6.8 / F6.9 (around the lower high once the downtrend has formed). No exact entry rule (F9.2 gap)
   //   target - F8.4: liquidity acts as the price target (where positions are closed). F8.4 words only the long
   //            side (above stacked highs); the short text says so and applies it mirrored
   var NOTE = {
     sweep: { long: ['F6.3', 'ราคาลงกวาด low แล้ว — อย่าเพิ่งกด buy ทันที ถ้าราคายังลงต่อจะติด drawdown'],
              short: ['F6.4', 'ราคาขึ้นกวาด high แล้ว — ไม่ sell เหนือ high แบบไม่คิด ต้องรอ confirmation ก่อน'] },
-    confirm: { long: 'HH เกิดแล้ว: เทรนด์ขาขึ้นใหม่เริ่มก่อตัว (confirmation)', short: 'LL เกิดแล้ว: เทรนด์ขาลงใหม่เริ่มก่อตัว (confirmation)' },
-    entry: { long: 'โครงสร้างขาขึ้นก่อตัวครบแล้ว คลิปชี้ว่าบริเวณ higher low คือจุดเข้าเฉลี่ย (average entry) — จุดเข้าแบบเป๊ะ ๆ: คลิปไม่ได้ระบุ',
-             short: 'โครงสร้างขาลงก่อตัวครบแล้ว คลิปชี้ว่าบริเวณ lower high คือจุดเข้าเฉลี่ย (average entry) — จุดเข้าแบบเป๊ะ ๆ: คลิปไม่ได้ระบุ' },
     target: { long: 'ราคาวิ่งขึ้นถึง liquidity ด้านบน — liquidity เป็นเป้าราคา (ที่ปิดกำไร) ได้',
-              short: 'ราคาลงถึง liquidity ด้านล่าง — เป็นหลักเดียวกับ F8.4 กลับด้าน (คลิปพูดถึงเป้าด้านบนเท่านั้น ฝั่ง short คลิปไม่ได้ระบุ)' },
-    fail: ['F9.2', 'setup ล้ม: ราคากลับไปทะลุจุด sweep — วิธีจัดการเมื่อ confirmation ล้ม: คลิปไม่ได้ระบุ']
+              short: 'ราคาลงถึง liquidity ด้านล่าง — เป็นหลักเดียวกับ F8.4 กลับด้าน (คลิปพูดถึงเป้าด้านบนเท่านั้น ฝั่ง short คลิปไม่ได้ระบุ)' }
   };
-  // f: {sweep, confirm, entry, target, more(T, cs) -> extra notes}. A slot is a fact id (that fact with the
-  // slot's generic text) or [fact, text] for a scenario-specific paraphrase (sweep: [fact, text] only, since its
-  // generic text belongs to F6.3 / F6.4). sweep defaults to F6.3 / F6.4,
-  // entry to the confirm fact, target to F8.4; confirm is required.
-  function tradeNotes(f) {
+
+  // v3 chain notes. Each text paraphrases the fact it cites: P10.21 (sweep -> BOS -> FVG), P10.20 (the bearish run of
+  // the same: BOS down, bearish gap, push into it, red candle, lower), P8.14 (an inverse gap works as a BOS), P8.25 (it
+  // can come before the BOS), P1.19 (the four parts), P1.43 (wait for the fill, then a confirmation out of the gap),
+  // F6.7 (the main clip: his real strategy has stricter confluences)
+  var CHAIN = {
+    confirm: {
+      bos: { long: ['P10.21', 'แท่งนี้ปิดเหนือ high ล่าสุด = break of structure ขึ้น: สัญญาณว่า orders ถูกเติมแล้ว (confirmation)'],
+             short: ['P10.20', 'แท่งนี้ปิดใต้ low ล่าสุด = break of structure ลง: สัญญาณว่า orders ถูกเติมแล้ว (confirmation)'] },
+      ifvg: { long: ['P8.14', 'แท่งนี้ปิดเหนือ bearish gap ของขาลง = inverse fair value gap ใช้เป็น confirmation แทน break of structure ได้'],
+              short: ['P8.14', 'แท่งนี้ปิดใต้ bullish gap ของขาขึ้น = inverse fair value gap ใช้เป็น confirmation แทน break of structure ได้'] }
+    },
+    gap: {
+      bos: { long: ['P10.21', 'ขาที่ break ทิ้ง bullish fair value gap ไว้: ลำดับ sweep → BOS → FVG (continuation)'],
+             short: ['P10.20', 'ขาที่ break ลงทิ้ง bearish fair value gap ไว้ = continuation'] },
+      ifvg: { long: ['P1.19', 'ขาเดียวกันทิ้ง bullish fair value gap ไว้ = continuation confluence'],
+              short: ['P1.19', 'ขาเดียวกันทิ้ง bearish fair value gap ไว้ = continuation confluence'] }
+    },
+    entry: { long: ['P1.43', 'ราคาย่อเข้า gap แล้วแท่งปิดกลับขึ้นเหนือ gap = จุดเข้า ไม่เข้าตอนราคาเพิ่งแตะ gap'],
+             short: ['P1.43', 'ราคาเด้งขึ้นเข้า gap แล้วแท่งปิดกลับลงใต้ gap = จุดเข้า ไม่เข้าตอนราคาเพิ่งแตะ gap'] },
+    chain: ['P1.19', 'ครบแล้ว: sweep → confirmation → continuation จึงเข้า และออกที่ liquidity ฝั่งตรงข้าม'],
+    real: ['F6.7', 'คลิปหลักบอกว่ากลยุทธ์จริงของเขามี confluence เข้มกว่านี้ เว็บนี้จึงยืนยันด้วย BOS / FVG จากเพลย์ลิสต์'],
+    fail: ['F9.2', 'setup ล้ม: ราคากลับไปทะลุจุด sweep — วิธีจัดการเมื่อ setup ล้ม: คลิปไม่ได้ระบุ']
+  };
+  // P8.25: an inverse gap can let you in before the BOS; the note says what this chart shows
+  function headStart(cs, T) {
+    var L = T.side === 'long', at = T.confluence.confirm.at;
+    var bos = CF().bos(cs, { trend: L ? 'down' : 'up', from: T.sweep.bar + 1 })[0], w = L ? 'เหนือ high' : 'ใต้ low';
+    if (!bos) return 'กราฟนี้ยังไม่มีแท่งปิด' + w + 'ล่าสุดเลย IFVG จึงมาก่อน break of structure: เข้าได้เร็วกว่า';
+    if (bos.at > at) return 'IFVG มาก่อน break of structure ' + (bos.at - at) + ' แท่ง จึงเข้าได้เร็วกว่ารอแท่งปิด' + w + 'ล่าสุด';
+    return 'กราฟนี้ break of structure มาพร้อมหรือก่อน IFVG จึงไม่ได้เข้าเร็วกว่า (คลิปว่าข้อดีของ IFVG คือบางครั้งได้เข้าก่อน BOS)';
+  }
+  // f: {kind 'bos'|'ifvg', sweep [fact, text] (default F6.3 / F6.4), target fact or [fact, text] (default F8.4),
+  //     more(T, cs) -> extra notes}
+  function chainNotes(f) {
     return function (T, cs) {
-      var side = T.side;
+      var side = T.side, K = T.confluence;
       function slot(v, text) { return typeof v === 'string' ? [v, text] : v; }
-      var c = slot(f.confirm, NOTE.confirm[side]);
       var out = [
         [T.sweep.bar].concat(f.sweep || NOTE.sweep[side]),
-        [T.confirmBar].concat(c),
-        [T.entryWindow.from].concat(slot(f.entry || c[0], NOTE.entry[side]))
+        [K.confirm.at].concat(CHAIN.confirm[f.kind][side]),
+        [K.confirm.at].concat(CHAIN.real),
+        [K.cont.at].concat(CHAIN.gap[f.kind][side]),
+        [K.entry.at].concat(CHAIN.entry[side]),
+        [K.entry.at].concat(CHAIN.chain)
       ];
-      if (T.outcome === 'win') out.push([reachBar(cs, T)].concat(slot(f.target || 'F8.4', NOTE.target[side])));
-      else out.push([failBar(cs, T)].concat(NOTE.fail));
+      if (f.kind === 'ifvg') out.splice(2, 0, [K.confirm.at, 'P8.25', headStart(cs, T)]);
+      var eo = entryOutcome(cs, side === 'long', K.origin, K.entry.at, K.targets[0].price);
+      if (T.outcome === 'win') out.push([eo.reach].concat(slot(f.target || 'F8.4', NOTE.target[side])));
+      else out.push([eo.brk].concat(CHAIN.fail));
       return out.concat(f.more ? f.more(T, cs) : []);
     };
   }
 
   // ---------------------------------------------------------------- scenarios S01-S07
 
-  // S01 bullish (F6.5): rising near-equal lows swept -> H, L, HL, HH -> entry on the pullback -> up.
+  // S01 bullish: rising near-equal lows swept -> BOS up -> pullback into the bull FVG -> long -> the high above.
   function S01(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'NQ', 5, 1), r = sc.r;
     var L2 = r.range(0.12, 0.4), L3 = L2 + r.range(0.12, 0.4), SWx = -r.range(0.8, 1.5);
-    var q = plan(sc, { shape: 'A', top: L3, sw: SWx });
+    var q = planBos(sc, { top: L3, sw: SWx });
     sc.at(null, 0, q.T - r.range(1.2, 2.0));
     sc.at('T', r.int(4, 7), q.T, 'high');                       // liquidity high above = target
     sc.go('L1', 0, 'low');
@@ -438,29 +568,30 @@
     sc.go('L2', L2, 'low');
     sc.go('A2', q.T - r.range(0.5, 1.0), 'high');
     sc.go('L3', L3, 'low');
-    sc.go('H0', q.H0, 'high');                                  // the H the HH must clear
+    sc.go('H0', q.H1 + r.range(0.5, 0.9), 'high');              // above H1: the bounce off the sweep is no BOS yet
     sc.go('SW', SWx, 'low', 6, 9);
     ['L1', 'L2', 'L3'].forEach(function (nm) { sc.keep(sc.B(nm) + 2, sc.B('SW') - 1, nm, null); });
     sc.keep(0, sc.B('T') - 1, null, 'T');
-    reverse(sc, q, { shape: 'A', outcome: outcome, target: 'T' });
+    reverseBos(sc, q, { outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
     var g = { group: 'lows' };
+    var levels = [lev(sc, 'L1', 'stack', 'L1', g), lev(sc, 'L2', 'stack', 'L2', g), lev(sc, 'L3', 'stack', 'L3', g), lev(sc, 'T', 'liq', 'T')];
     return finish(d, seed, sc, {
-      levels: [lev(sc, 'L1', 'stack', 'L1', g), lev(sc, 'L2', 'stack', 'L2', g), lev(sc, 'L3', 'stack', 'L3', g), lev(sc, 'T', 'liq', 'T')],
-      sweepIds: ['L1', 'L2', 'L3'], structure: [['H0', 'H'], ['SW', 'L'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, sc.B('SW')),
-      near: ['L1', 'L2'], poke: ['A1', 'T'], notes: tradeNotes({ confirm: 'F6.5', target: 'F8.4' })
+      levels: levels, sweepIds: ['L1', 'L2', 'L3'], structure: ['H0', 'SW', 'H1', 'M', 'HH', 'P'],
+      side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, sc.B('SW')), read: reader('bos', 'long', levels, 'T'),
+      near: ['L1', 'L2'], poke: ['A1', 'T'], notes: chainNotes({ kind: 'bos', target: 'F8.4' })
     });
   }
 
-  // S02 bullish deep sweep (F6.6, F5.4): a long drop takes low after low, then above a high, HH, HL.
+  // S02 bullish deep sweep (F6.6, F5.4): a long drop takes low after low and leaves a bear gap; after the deep low a
+  // close above that gap (IFVG) -> pullback into the bull gap of the same push -> long.
   function S02(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'NQ', 5, 1), r = sc.r;
     var L2 = r.range(0.8, 1.4), L3 = L2 + r.range(0.8, 1.4), SWx = -r.range(2.0, 3.0);
-    var q = plan(sc, { shape: 'B', top: L3 + 4 * TICK / sc.u, sw: SWx });
-    sc.at(null, 0, q.T - r.range(1.0, 1.8));
-    sc.at('T', r.int(4, 7), q.T, 'high');
+    var q = planIfvgL(sc, SWx), Tx = Math.max(L3 + 3.2, q.A) + r.range(1.0, 1.6);
+    sc.at(null, 0, Tx - r.range(1.0, 1.8));
+    sc.at('T', r.int(4, 7), Tx, 'high');
     sc.go('L1', 0, 'low');
     sc.go('a1', r.range(2.6, 3.0), 'high');
     sc.go('L2', L2, 'low');
@@ -468,52 +599,52 @@
     sc.go('L3', L3, 'low');
     sc.go('a3', L3 + r.range(2.6, 3.0), 'high');
     sc.go('L4', sc.near('L3', r.int(1, 4)), 'low');             // false poke: a hair above L3
-    sc.go('a4', sc.X('L4') + r.range(2.6, 3.0), 'high');
-    sc.go('SW', SWx, 'low', 10, 14);                            // the deep low after the run
+    sc.go('a4', Math.max(sc.X('L4') + r.range(2.6, 3.0), q.A), 'high');
     var a4 = sc.B('a4');
+    ifvgDrop(sc, q, a4);                                        // the deep drop leaves the bear gap, then the low
     ['L1', 'L2', 'L3', 'L4'].forEach(function (nm) { sc.keep(sc.B(nm) + 2, a4 + 1, nm, null); });
     sc.keep(a4 + 2, sc.B('SW') - 1, 'SW', 'a4');
     sc.keep(0, sc.B('T') - 1, null, 'T');
-    reverse(sc, q, { shape: 'B', outcome: outcome, target: 'T' });
+    reverseIfvg(sc, q, { outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
     var g = { group: 'lows' };
+    var levels = ['L1', 'L2', 'L3', 'L4'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'T', 'liq', 'T')]);
     return finish(d, seed, sc, {
-      levels: ['L1', 'L2', 'L3', 'L4'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'T', 'liq', 'T')]),
-      sweepIds: ['L1', 'L2', 'L3', 'L4'], structure: [['SW', 'L'], ['H1', 'H'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, sc.B('a4') + 4),
+      levels: levels, sweepIds: ['L1', 'L2', 'L3', 'L4'], structure: ['a4', 'SW', 'P'],
+      side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, a4 + 4), read: reader('ifvg', 'long', levels, 'T'),
       near: ['L3', 'L4'], poke: ['L4', 'L3'],
-      notes: tradeNotes({ confirm: 'F6.6', more: function (T) {
+      notes: chainNotes({ kind: 'ifvg', more: function (T) {
         return [[T.sweep.bar + 1, 'F6.6', 'ราคาลงลึกจนน่ากลัว ไม่ต้องกด buy — เรายังไม่รู้ว่า buy orders จะถูกเติมไหม'],
                 [T.confirmBar, 'F5.4', 'ย้อนดู: การทิ้งตัวแรงที่กิน low ทีละตัว ก็เพื่อดันราคาขึ้นต่อ']];
       } })
     });
   }
 
-  // S03 bearish (F6.8, F6.9): the S01-style script mirrored: highs swept -> H, L, LL, LH -> entry -> down.
+  // S03 bearish: the S01-style script mirrored: highs swept -> BOS down -> pullback into the bear FVG -> short.
   function S03(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'ES', 5, -1), r = sc.r;
     var L2 = r.range(0.12, 0.4), SWx = -r.range(0.6, 1.3);
-    var q = plan(sc, { shape: 'B', top: L2, sw: SWx });
+    var q = planBos(sc, { top: L2, sw: SWx });
     sc.at(null, 0, q.T - r.range(1.2, 2.0));
     sc.at('T', r.int(4, 7), q.T, 'high');
     sc.go('L1', 0, 'low');
     sc.go('A1', sc.near('T', r.int(1, 4)), 'high');
     sc.go('L2', L2, 'low');
-    sc.go('A2', L2 + r.range(2.6, 3.0), 'high');
+    sc.go('A2', Math.max(L2 + r.range(2.6, 3.0), q.H1 + r.range(0.5, 0.9)), 'high');
     sc.go('SW', SWx, 'low', 6, 9);
     ['L1', 'L2'].forEach(function (nm) { sc.keep(sc.B(nm) + 2, sc.B('SW') - 1, nm, null); });
     sc.keep(0, sc.B('T') - 1, null, 'T');
-    reverse(sc, q, { shape: 'B', outcome: outcome, target: 'T' });
+    reverseBos(sc, q, { outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
     var g = { group: 'highs' };
+    var levels = [lev(sc, 'SH1', 'stack', 'L1', g), lev(sc, 'SH2', 'stack', 'L2', g), lev(sc, 'T', 'liq', 'T')];
     return finish(d, seed, sc, {
-      levels: [lev(sc, 'SH1', 'stack', 'L1', g), lev(sc, 'SH2', 'stack', 'L2', g), lev(sc, 'T', 'liq', 'T')],
-      sweepIds: ['SH1', 'SH2'], structure: [['SW', 'L'], ['H1', 'H'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'short', target: 'T', outcome: outcome, times: nyTimes(r, n, sc.B('SW')),
+      levels: levels, sweepIds: ['SH1', 'SH2'], structure: ['A2', 'SW', 'H1', 'M', 'HH', 'P'],
+      side: 'short', target: 'T', outcome: outcome, times: nyTimes(r, n, sc.B('SW')), read: reader('bos', 'short', levels, 'T'),
       near: ['L1', 'L2'], poke: ['A1', 'T'],
-      notes: tradeNotes({ confirm: 'F6.8', entry: 'F6.9' })
+      notes: chainNotes({ kind: 'bos' })
     });
   }
 
@@ -734,12 +865,12 @@
     });
   }
 
-  // S09 LTF entry (F7.14), 1m: NY pre-market takes the London low -> L, H, HL, HH, HL -> entry -> London high.
+  // S09 LTF entry (F7.14), 1m: NY pre-market takes the London low -> BOS up -> pullback into the FVG -> London high.
   function S09(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'NQ', 1, 1), r = sc.r;
     var d0 = pickDay(r, [1, 2, 3, 4]), day = sessionDay(d0, 1, 0), A = day.asia, Lw = day.london;
     var n = day.times.length, SWx = -r.range(0.6, 1.3);
-    var q = plan(sc, { shape: 'C', top: 0, sw: SWx });
+    var q = planBos(sc, { top: 0, sw: SWx });
     sc.at(null, 0, r.range(0.5, 3.0));
     sc.at('LoH', Lw[0] + r.int(20, 100), q.T, 'high');
     sc.at('LoL', sc.B('LoH') + r.int(40, 120), 0, 'low');
@@ -748,54 +879,52 @@
     sc.keep(Lw[0], sc.B('LoH') - 1, null, 'LoH');
     sc.keep(Lw[0], sc.B('LoL') - 1, 'LoL', null);
     sc.keep(sc.B('LoL') + 2, sc.B('SW') - 1, 'LoL', null);
-    reverse(sc, q, { shape: 'C', outcome: outcome, target: 'LoH', gap: [6, 12], run: [15, 40] });
+    reverseBos(sc, q, { outcome: outcome, target: 'LoH', gap: [6, 12], run: [15, 40] });
     sc.fill(A[0], A[1] - 6, -1.0, q.T + 1.0);
     sc.fill(Lw[0], Lw[1], 0, q.T);
     sc.run(n);
+    var levels = [
+      lev(sc, 'london-high', 'session', 'LoH', { label: 'London high', session: 'london', known: Lw[1] }),
+      lev(sc, 'london-low', 'session', 'LoL', { label: 'London low', session: 'london', known: Lw[1] })
+    ];
     return finish(d, seed, sc, {
-      levels: [
-        lev(sc, 'london-high', 'session', 'LoH', { label: 'London high', session: 'london', known: Lw[1] }),
-        lev(sc, 'london-low', 'session', 'LoL', { label: 'London low', session: 'london', known: Lw[1] })
-      ],
-      sweepIds: ['london-low'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'long', target: 'london-high', outcome: outcome, times: day.times,
+      levels: levels, sweepIds: ['london-low'], structure: ['SW', 'H1', 'M', 'HH', 'P'],
+      side: 'long', target: 'london-high', outcome: outcome, times: day.times, read: reader('bos', 'long', levels, 'london-high'),
       sessions: [['asia', A], ['london', Lw], ['ny', day.ny]], near: ['LoL', 'LoL2'], poke: ['LoL2', 'london-low'],
-      notes: tradeNotes({ sweep: ['F7.14', 'London low โดนกวาด — ไม่ได้แปลว่าให้กด buy ทันที ต้องรอสัญญาณว่าขาขึ้นกำลังก่อตัว'],
-                             confirm: 'F7.14',
-                             target: ['F7.12', 'ราคาขึ้นไปเก็บ London high — high/low ของ session ก่อนหน้าเป็นแม่เหล็ก liquidity'] })
+      notes: chainNotes({ kind: 'bos', sweep: ['F7.14', 'London low โดนกวาด — ไม่ได้แปลว่าให้กด buy ทันที ต้องรอสัญญาณว่าขาขึ้นกำลังก่อตัว'],
+                          target: ['F7.12', 'ราคาขึ้นไปเก็บ London high — high/low ของ session ก่อนหน้าเป็นแม่เหล็ก liquidity'] })
     });
   }
 
-  // S10 (F7.6): three 4H highs (stacked, from the 4H rollup) swept on day 3, seen on 5m; turn -> HTF move down.
+  // S10 (F7.6): three 4H highs (stacked, from the 4H rollup) swept on day 3, seen on 5m; BOS down + FVG -> HTF move down.
   function S10(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'NQ', 5, -1), r = sc.r;
     var d0 = pickDay(r, [0, 1, 2]), times = threeDays(d0), n = times.length;
     var Q2 = r.range(0.3, 0.9), Q3 = Q2 + r.range(0.3, 0.9), SWx = -r.range(0.6, 1.4);
-    var q = plan(sc, { shape: 'B', top: Q3, sw: SWx });
+    var q = planBos(sc, { top: Q3, sw: SWx });
     var T = Math.max(q.T, Q3 + 5.5) + r.range(0, 1.5);
     sc.at(null, 0, T - r.range(2.0, 3.0));
     var kT = htf4(sc, 'T', bucket(0, 1), bucket(0, 2), T, 'high');
     var Q = [['Q1', bucket(0, 4), bucket(0, 5), 0], ['Q2', bucket(1, 1), bucket(1, 2), Q2], ['Q3', bucket(1, 4), bucket(1, 5), Q3]];
     Q.forEach(function (x) { htf4(sc, x[0], x[1], x[2], x[3], 'low'); });
     sc.at('PK', 552 + r.int(30, 120), sc.near('Q3', r.int(1, 4)), 'low');
-    sc.at('A', sc.B('PK') + r.int(8, 30), Q3 + r.range(2.6, 3.2), 'high');
+    sc.at('A', sc.B('PK') + r.int(8, 30), Math.max(Q3 + r.range(2.6, 3.2), q.H1 + r.range(0.5, 0.9)), 'high');
     sc.at('SW', 552 + 186 + r.int(0, 6), SWx, 'low');                  // day 3, NY open
     sc.keep(0, kT - 1, null, 'T');
     Q.forEach(function (x) { sc.keep(sc.B(x[0]) + 2, sc.B('SW') - 1, x[0], null); });
-    reverse(sc, q, { shape: 'B', outcome: outcome, target: 'T', run: [20, 40] });
+    reverseBos(sc, q, { outcome: outcome, target: 'T', run: [20, 40] });
     sc.fill(1, sc.B('SW') - 8, Q3 + 0.8, T - 0.8);
     sc.run(n);
     var g = function (x) { return { group: 'htf4', known: x[2][1] + 1 }; };
+    var levels = Q.map(function (x) { return lev(sc, x[0], 'htf', x[0], g(x)); })
+      .concat([lev(sc, 'T', 'htf', 'T', { known: bucket(0, 2)[1] + 1 })]);
     return finish(d, seed, sc, {
-      levels: Q.map(function (x) { return lev(sc, x[0], 'htf', x[0], g(x)); })
-        .concat([lev(sc, 'T', 'htf', 'T', { known: bucket(0, 2)[1] + 1 })]),
-      sweepIds: ['Q1', 'Q2', 'Q3'], structure: [['SW', 'L'], ['H1', 'H'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'short', target: 'T', outcome: outcome, times: times, htf: 240,
+      levels: levels, sweepIds: ['Q1', 'Q2', 'Q3'], structure: ['SW', 'H1', 'M', 'HH', 'P'],
+      side: 'short', target: 'T', outcome: outcome, times: times, htf: 240, read: reader('bos', 'short', levels, 'T'),
       near: ['Q3', 'PK'], poke: ['PK', 'Q3'],
-      notes: tradeNotes({ confirm: 'F6.8',
-        entry: ['F7.6', 'ทะลุ 4H highs หลายตัวแล้วเริ่มกลับตัวบน 5m — เข้าบน LTF เพื่อขี่ move ใหญ่ของ HTF ได้ทั้งขา'],
-        more: function (T) {
-        return [[T.sweep.bar, 'F7.4', 'HTF liquidity ของ TJR = high/low ของ 1H หรือ 4H; หาจุดเข้าบน 5m หรือ 1m']];
+      notes: chainNotes({ kind: 'bos', more: function (T) {
+        return [[T.sweep.bar, 'F7.4', 'HTF liquidity ของ TJR = high/low ของ 1H หรือ 4H; หาจุดเข้าบน 5m หรือ 1m'],
+                [T.confluence.entry.at, 'F7.6', 'ทะลุ 4H highs หลายตัวแล้วเริ่มกลับตัวบน 5m — เข้าบน LTF เพื่อขี่ move ใหญ่ของ HTF ได้ทั้งขา']];
       } })
     });
   }
@@ -845,8 +974,8 @@
   // price runs the stacked highs as its target, then is pushed down.
   function S12(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'ES', 5, 1), r = sc.r;
-    var SWx = -r.range(0.6, 1.3), C = r.range(2.6, 2.9);
-    var q = plan(sc, { shape: 'C', top: 0, sw: SWx, minHH: C + 0.4 });
+    var SWx = -r.range(0.6, 1.3);
+    var q = planBos(sc, { top: 0, sw: SWx }), C = q.H1 + r.range(0.5, 0.9);   // C above H1: the bounce is no BOS yet
     var SH3 = q.HH + r.range(0.6, 1.0), SH1 = SH3 + r.range(0.25, 0.6) + 4 * TICK / sc.u;   // SH2 = SH1 - 1..4 ticks stays above SH3
     sc.at(null, 0, SH1 - r.range(1.2, 2.0));
     sc.at('SH1', r.int(4, 7), SH1, 'high');
@@ -859,53 +988,54 @@
     sc.go('SW', SWx, 'low', 6, 9);
     sc.keep(0, sc.B('SH1') - 1, null, 'SH1');
     sc.keep(sc.B('LQ') + 2, sc.B('SW') - 1, 'LQ', null);
-    reverse(sc, q, { shape: 'C', outcome: outcome, target: 'SH1' });
+    reverseBos(sc, q, { outcome: outcome, target: 'SH1' });
     sc.keep(sc.B('SH2') + 2, sc.B('P') + 1, null, 'SH2');
     sc.keep(sc.B('SH3') + 2, sc.B('P') + 1, null, 'SH3');
     var n = sc.bar + 2;
     sc.run(n);
     var g = { group: 'highs' };
+    var levels = ['SH1', 'SH2', 'SH3'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'LQ', 'liq', 'LQ')]);
     return finish(d, seed, sc, {
-      levels: ['SH1', 'SH2', 'SH3'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'LQ', 'liq', 'LQ')]),
-      sweepIds: ['LQ'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'long', target: 'SH1', outcome: outcome, times: nyTimes(r, n, sc.B('SW')),
+      levels: levels, sweepIds: ['LQ'], structure: ['C', 'SW', 'H1', 'M', 'HH', 'P'],
+      side: 'long', target: 'SH1', outcome: outcome, times: nyTimes(r, n, sc.B('SW')), read: reader('bos', 'long', levels, 'SH1'),
       near: ['SH1', 'SH2'], poke: ['SH2', 'SH1'],
-      notes: tradeNotes({ confirm: 'F6.5', target: 'F8.4', more: function (T, cs) {
+      notes: chainNotes({ kind: 'bos', target: 'F8.4', more: function (T, cs) {
         return [[Math.min(cs.length - 1, reachBar(cs, T) + 2), 'F8.5', 'เก็บ low-resistance liquidity (stacked highs) แล้วราคาถูกกดลง']];
       } })
     });
   }
 
-  // S13 (F8.3): trendline liquidity - rising lows never taken; price runs them all, then goes higher.
+  // S13 (F8.3): trendline liquidity - rising lows never taken; price runs them all (leaving a bear gap), closes back
+  // above that gap (IFVG), pulls back into the new bull gap, then goes higher.
   function S13(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'NQ', 5, 1), r = sc.r;
-    var L2 = r.range(0.6, 1.2), L3 = L2 + r.range(0.6, 1.2), SWx = -r.range(0.4, 1.0);
-    var q = plan(sc, { shape: 'C', top: L3, sw: SWx });
+    var L2 = r.range(0.3, 0.6), L3 = L2 + r.range(0.3, 0.6), SWx = -r.range(0.4, 1.0);   // the bear gap sits above L3
+    var q = planIfvgL(sc, SWx), Tx = Math.max(L3 + 3.2, q.A) + r.range(1.0, 1.6);
     sc.at(null, 0, r.range(1.0, 2.0));
     sc.at('L1', r.int(4, 7), 0, 'low');
     sc.go('a1', r.range(2.6, 3.0), 'high');
     sc.go('L2', L2, 'low');
     sc.go('a2', L2 + r.range(2.6, 3.0), 'high');
     sc.go('L3', L3, 'low');
-    sc.go('T', q.T, 'high');
+    sc.go('T', Tx, 'high');
     sc.go('L3b', sc.near('L3', r.int(1, 4)), 'low');
-    sc.go('a4', L3 + r.range(2.6, 3.0), 'high');
-    sc.go('SW', SWx, 'low', 6, 9);
+    sc.go('a4', Math.max(sc.X('L3b') + r.range(2.6, 3.0), q.A), 'high');
+    ifvgDrop(sc, q, sc.B('a4'));                                    // the run down leaves a bear gap, then the low
     var s = sc.B('SW');
     sc.keep(sc.B('L1') + 2, s - 1, 'L1', null);                     // the run takes L3, then L2, then L1
     sc.keep(sc.B('L2') + 2, s - 2, 'L2', null);
     sc.keep(sc.B('L3') + 2, s - 3, 'L3', null);
     sc.keep(0, sc.B('T') - 1, null, 'T');
-    reverse(sc, q, { shape: 'C', outcome: outcome, target: 'T' });
+    reverseIfvg(sc, q, { outcome: outcome, target: 'T' });
     var n = sc.bar + 2;
     sc.run(n);
     var g = { group: 'trend', label: 'trendline low' };
+    var levels = ['L1', 'L2', 'L3'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'T', 'liq', 'T')]);
     return finish(d, seed, sc, {
-      levels: ['L1', 'L2', 'L3'].map(function (nm) { return lev(sc, nm, 'stack', nm, g); }).concat([lev(sc, 'T', 'liq', 'T')]),
-      sweepIds: ['L1', 'L2', 'L3'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, s),
+      levels: levels, sweepIds: ['L1', 'L2', 'L3'], structure: ['a4', 'SW', 'P'],
+      side: 'long', target: 'T', outcome: outcome, times: nyTimes(r, n, s), read: reader('ifvg', 'long', levels, 'T'),
       near: ['L3', 'L3b'], poke: ['L3b', 'L3'],
-      notes: tradeNotes({ confirm: 'F6.5', more: function (T) {
+      notes: chainNotes({ kind: 'ifvg', more: function (T) {
         var last = Math.max(swept(T, 'L1'), swept(T, 'L2'), swept(T, 'L3'));
         return [[last, 'F8.3', 'trendline liquidity: lows ที่ยกตัวและยังไม่เคยโดนเก็บ — ราคาวิ่งเก็บทั้งแถวเพื่อเติม buy orders']];
       } })
@@ -917,7 +1047,7 @@
   function S14(d, seed, outcome) {
     var sc = new Script(d.id, seed, d.salt, 'NQ', 5, 1), r = sc.r;
     var SWx = -r.range(0.6, 1.3);
-    var q = plan(sc, { shape: 'C', top: 4 * TICK / sc.u, sw: SWx });
+    var q = planBos(sc, { top: 4 * TICK / sc.u, sw: SWx });
     var SH3 = q.HH + r.range(0.6, 1.0), SH2 = SH3 + r.range(0.25, 0.6), SH1 = SH2 + r.range(0.25, 0.6);
     sc.at(null, 0, SH1 - r.range(1.2, 2.0));
     sc.at('SH1', r.int(4, 7), SH1, 'high');
@@ -930,22 +1060,23 @@
     sc.keep(0, sc.B('SH1') - 1, null, 'SH1');
     sc.keep(sc.B('LA') + 2, s - 1, 'LA', null);
     sc.keep(sc.B('LB') + 2, s - 1, 'LB', null);
-    reverse(sc, q, { shape: 'C', outcome: outcome, target: 'SH1' });
+    reverseBos(sc, q, { outcome: outcome, target: 'SH1' });
     sc.keep(sc.B('SH2') + 2, sc.B('P') + 1, null, 'SH2');
     sc.keep(sc.B('SH3') + 2, sc.B('P') + 1, null, 'SH3');
     var n = sc.bar + 2;
     sc.run(n);
     var gh = { group: 'highs' }, gl = { group: 'lows' };
+    var levels = ['SH1', 'SH2', 'SH3'].map(function (nm) { return lev(sc, nm, 'stack', nm, gh); })
+      .concat([lev(sc, 'LA', 'liq', 'LA', gl), lev(sc, 'LB', 'liq', 'LB', gl)]);
     return finish(d, seed, sc, {
-      levels: ['SH1', 'SH2', 'SH3'].map(function (nm) { return lev(sc, nm, 'stack', nm, gh); })
-        .concat([lev(sc, 'LA', 'liq', 'LA', gl), lev(sc, 'LB', 'liq', 'LB', gl)]),
-      sweepIds: ['LA', 'LB'], structure: [['SW', 'L'], ['H1', 'H'], ['M', 'HL'], ['HH', 'HH'], ['P', 'HL']],
-      side: 'long', target: 'SH1', outcome: outcome, times: nyTimes(r, n, s),
+      levels: levels, sweepIds: ['LA', 'LB'], structure: ['SH3', 'SW', 'H1', 'M', 'HH', 'P'],
+      side: 'long', target: 'SH1', outcome: outcome, times: nyTimes(r, n, s), read: reader('bos', 'long', levels, 'SH1'),
       near: ['LA', 'LB'], poke: ['LB', 'LA'],
-      notes: tradeNotes({ confirm: ['F8.8', 'HH ยืนยันขาขึ้นหลังเก็บ lows — มองไปที่ stacked highs (low-resistance) ด้านบน'],
-        entry: ['F8.7', 'เทรดไปทาง low-resistance (stacked highs) และออกห่างจาก high-resistance (low ที่เพิ่งโดนกวาด)'],
-        more: function (T) {
-        return [[T.confirmBar, 'F8.6', 'กลับตัวแรงจากจุด sweep → low ที่โดนกวาดกลายเป็น high-resistance']];
+      notes: chainNotes({ kind: 'bos', more: function (T) {
+        var K = T.confluence;
+        return [[K.confirm.at, 'F8.8', 'BOS ยืนยันขาขึ้นหลังเก็บ lows — มองไปที่ stacked highs (low-resistance) ด้านบน'],
+                [K.confirm.at, 'F8.6', 'กลับตัวแรงจากจุด sweep → low ที่โดนกวาดกลายเป็น high-resistance'],
+                [K.entry.at, 'F8.7', 'เทรดไปทาง low-resistance (stacked highs) และออกห่างจาก high-resistance (low ที่เพิ่งโดนกวาด)']];
       } })
     });
   }
@@ -953,16 +1084,21 @@
   // ---------------------------------------------------------------- definitions
 
   var LAB = function (replay, spot, sessions, quiz) { return { replay: replay, spot: spot, sessions: sessions, quiz: quiz }; };
+  // a playlist chip in a def's clip list (same order as its facts): ▶ #<clip> MM:SS; a number is a main-clip second
+  var PL = function (clip, sec) { return { clip: clip, sec: sec }; };
   var DEFS = [
-    ['S01', 'Bullish: กวาด stacked lows แล้วกลับตัวขึ้น',
-      'ราคาลงกวาด low ที่เรียงซ้อนกัน จากนั้นเกิด H, L, HL, HH — เข้าที่ pullback หลัง HH แล้วราคาขึ้น',
-      ['F6.5'], [1410], 5, 'NQ', LAB(true, true, false, true), ['win', 'fail'], S01],
-    ['S02', 'Bullish deep sweep: ลงลึกกิน low ทีละตัว',
-      'ราคาทิ้งตัวกวาด low หลายชั้นจนลึกน่ากลัว ไม่ต้องรีบกด buy — รอให้ขึ้นเหนือ high เกิด HH แล้ว HL ก่อนเข้า',
-      ['F6.6', 'F5.4'], [1440, 1215], 5, 'NQ', LAB(true, true, false, true), ['win'], S02],
-    ['S03', 'Bearish: กวาด high แล้วกลับตัวลง',
-      'ราคาขึ้นเหนือ high (buy orders ถูกเติม) แล้วเกิด H, L, LL, LH — เข้าที่ pullback หลัง LL แล้วราคาลง',
-      ['F6.8', 'F6.9'], [1530, 1575], 5, 'ES', LAB(true, true, false, true), ['win', 'fail'], S03],
+    ['S01', 'Long: กวาด stacked lows → BOS ขึ้น → ย่อเข้า FVG → เข้า',
+      'ราคาลงกวาด low ที่เรียงซ้อนกัน แล้วแท่งปิดเหนือ high ล่าสุด (BOS) ขาที่ขึ้นทิ้ง FVG ไว้ ราคาย่อเข้า gap แล้วปิดกลับขึ้น — เข้า long เป้าคือ high ด้านบน',
+      ['F6.3', 'P10.21', 'P1.43', 'P1.19'], [1350, PL(10, 816), PL(1, 1944), PL(1, 2144)],
+      5, 'NQ', LAB(true, true, false, true), ['win', 'fail'], S01],
+    ['S02', 'Long ด้วย IFVG: ลงลึกกิน low ทีละตัว → ปิดเหนือ gap ขาลง → เข้า',
+      'ราคาทิ้งตัวกวาด low หลายชั้นจนลึกน่ากลัว ขาลงทิ้ง bearish gap ไว้ พอแท่งปิดเหนือ gap นั้น (IFVG) ก็คือสัญญาณกลับตัว ราคาย่อเข้า bullish gap ของขาเดียวกันแล้วปิดกลับขึ้น — เข้า long',
+      ['F6.6', 'F5.4', 'P8.14', 'P8.25'], [1440, 1215, PL(8, 356), PL(8, 569)],
+      5, 'NQ', LAB(true, true, false, true), ['win'], S02],
+    ['S03', 'Short: กวาด highs → BOS ลง → เด้งเข้า FVG → เข้า',
+      'ราคาขึ้นเหนือ high ที่ซ้อนกัน (buy orders ถูกเติม) แล้วแท่งปิดใต้ low ล่าสุด (BOS ลง) ขาลงทิ้ง FVG ไว้ ราคาเด้งขึ้นเข้า gap แล้วปิดกลับลง — เข้า short',
+      ['F6.4', 'P10.20', 'P1.43', 'P1.19'], [1395, PL(10, 816), PL(1, 1944), PL(1, 2144)],
+      5, 'ES', LAB(true, true, false, true), ['win', 'fail'], S03],
     ['S04', 'Sweep แต่ไม่กลับตัว: ซื้อทันที = ติด drawdown',
       'low โดนกวาดแล้วราคายังลงต่อ ไม่มีเทรนด์ขาขึ้นใหม่จึงไม่มี confirmation และไม่มีเทรด — sweep เป็นแค่โอกาส',
       ['F6.3', 'F5.5'], [1350, 1230], 5, 'NQ', LAB(false, true, false, true), [], S04],
@@ -978,24 +1114,24 @@
     ['S08', 'วันจันทร์: NY open พุ่งเหนือ London high แล้วทิ่มใต้ London low',
       'NY เปิดราคาพุ่งเหนือ London high ทันที แล้วลงใต้ London low ก่อนตลาดจะขึ้น',
       ['F7.15'], [2295], 5, 'NQ', LAB(false, true, true, true), [], S08],
-    ['S09', 'เข้าใน 1m หลังกวาด London low',
-      'London low โดนกวาดตอน NY pre-market แล้วบน 1m เกิด L, H, HL, HH, HL → จุดเข้า → ราคาขึ้น',
-      ['F7.14'], [2250], 1, 'NQ', LAB(true, true, true, true), ['win', 'fail'], S09],
-    ['S10', 'กวาด 4H highs ดูบน 5m: กลับตัวเป็นขาลงขนาด HTF',
-      'ราคาทะลุ 4H highs หลายตัว แล้วบน 5m เริ่มกลับตัว (H, L, LL, LH) — เข้าบน LTF เพื่อขี่ move ของ HTF',
-      ['F7.6'], [1785], 5, 'NQ', LAB(true, true, false, true), ['win', 'fail'], S10],
+    ['S09', 'เข้าใน 1m: กวาด London low → BOS → ย่อเข้า FVG → เข้า',
+      'London low โดนกวาดตอน NY pre-market บน 1m แท่งปิดเหนือ high ล่าสุด (BOS) ราคาย่อเข้า FVG แล้วปิดกลับขึ้น — เข้า long เป้าคือ London high',
+      ['F7.14', 'P10.21', 'P1.43'], [2250, PL(10, 816), PL(1, 1944)], 1, 'NQ', LAB(true, true, true, true), ['win', 'fail'], S09],
+    ['S10', 'กวาด 4H highs ดูบน 5m: BOS ลง → เด้งเข้า FVG → ขี่ขาลงของ HTF',
+      'ราคาทะลุ 4H highs หลายตัว แล้วบน 5m แท่งปิดใต้ low ล่าสุด (BOS ลง) ราคาเด้งเข้า FVG แล้วปิดกลับลง — เข้า short บน LTF เพื่อขี่ move ของ HTF',
+      ['F7.6', 'F7.4', 'P10.20'], [1785, 1710, PL(10, 816)], 5, 'NQ', LAB(true, true, false, true), ['win', 'fail'], S10],
     ['S11', 'High ของ 5m แตก: reaction สั้น ๆ (ทำไม HTF สำคัญ)',
       'high ที่มีแค่บน 5m โดนกวาด ขาลงเริ่มก่อตัวแต่ไม่ยืน ราคากลับขึ้นไปเก็บ 4H high ที่มีน้ำหนักกว่า',
       ['F7.5'], [1755], 5, 'NQ', LAB(false, true, false, true), [], S11],
-    ['S12', 'Stacked highs (low-resistance) เป็นเป้าราคาหลังกวาดด้านล่าง',
-      'กวาด low ด้านล่าง เทรนด์ขาขึ้นยืนยัน แล้วราคาวิ่งเก็บ stacked highs เป็นเป้า ก่อนถูกกดลง',
-      ['F8.4', 'F8.5'], [2565, 2655], 5, 'ES', LAB(true, true, false, true), ['win'], S12],
-    ['S13', 'Trendline liquidity: lows ที่ยกตัวโดนวิ่งเก็บแล้วขึ้น',
-      'lows ที่ยกตัวขึ้นไม่เคยโดนเก็บ (ลาก trendline ได้) ราคาวิ่งเก็บทั้งแถว เติม buy orders แล้วขึ้นต่อ',
-      ['F8.3'], [2520], 5, 'NQ', LAB(true, true, false, true), ['win'], S13],
-    ['S14', 'Low-resistance กลายเป็น high-resistance: เทรดไปทาง stacked highs',
-      'ราคาลงเก็บ lows แล้วกลับตัวแรง low นั้นกลายเป็น high-resistance — เทรดไปหา stacked highs ที่ยังไม่โดนเก็บ',
-      ['F8.6', 'F8.7', 'F8.8'], [2700, 2790, 2835], 5, 'NQ', LAB(true, true, false, true), ['win'], S14]
+    ['S12', 'Stacked highs เป็นเป้า: กวาด low → BOS → ย่อเข้า FVG → วิ่งเก็บ highs',
+      'กวาด low ด้านล่าง แท่งปิดเหนือ high ล่าสุด (BOS) ราคาย่อเข้า FVG แล้วปิดกลับขึ้น — เข้า long ราคาวิ่งเก็บ stacked highs เป็นเป้า ก่อนถูกกดลง',
+      ['F8.4', 'F8.5', 'P10.21'], [2565, 2655, PL(10, 816)], 5, 'ES', LAB(true, true, false, true), ['win'], S12],
+    ['S13', 'Trendline liquidity: เก็บ lows ที่ยกตัว → IFVG → ย่อเข้า FVG → เข้า',
+      'lows ที่ยกตัวขึ้นไม่เคยโดนเก็บ (ลาก trendline ได้) ราคาวิ่งเก็บทั้งแถว ขาลงทิ้ง bearish gap ไว้ แท่งปิดเหนือ gap นั้น (IFVG) ราคาย่อเข้า bullish gap แล้วปิดกลับขึ้น — เข้า long',
+      ['F8.3', 'P8.14', 'P8.25'], [2520, PL(8, 356), PL(8, 569)], 5, 'NQ', LAB(true, true, false, true), ['win'], S13],
+    ['S14', 'Low-resistance → high-resistance: เก็บ lows → BOS → FVG → ไปหา stacked highs',
+      'ราคาลงเก็บ lows แล้วแท่งปิดเหนือ high ล่าสุด (BOS) low นั้นกลายเป็น high-resistance ราคาย่อเข้า FVG แล้วปิดกลับขึ้น — เข้า long ไปทาง stacked highs ที่ยังไม่โดนเก็บ',
+      ['F8.6', 'F8.7', 'F8.8', 'P10.21'], [2700, 2790, 2835, PL(10, 816)], 5, 'NQ', LAB(true, true, false, true), ['win'], S14]
   ];
 
   // a def row -> the public def; salt = its 1-based place in the library (fixes each scenario's random stream)
@@ -1007,7 +1143,13 @@
       var outcome = opts && opts.outcome != null ? opts.outcome : null;
       if (outcome != null && d.outcomes.indexOf(outcome) < 0) throw new Error(d.id + ': outcome "' + outcome + '" not supported');
       if (outcome == null && d.outcomes.length) outcome = 'win';
-      return script(d, seed, outcome, opts);
+      // a script may refuse an unclear chart (retry error): the same seed then tries the next stream, so a seed
+      // still always gives the same chart
+      for (var k = 0; ; k++) {
+        var dk = d;
+        if (k) { dk = Object.create(d); dk.salt = d.salt + 7919 * k; }
+        try { return script(dk, seed, outcome, opts); } catch (e) { if (!e.retry || k >= 40) throw e; }
+      }
     };
     return d;
   }
@@ -1151,9 +1293,7 @@
     if (side == null) {
       ['confirmBar', 'entryWindow', 'target', 'outcome'].forEach(function (k) { if (T[k] != null) e.push(k + ' must be null without a side'); });
     } else if (side !== 'long' && side !== 'short') e.push('side ' + side);
-    else if (T.confluence) { /* Level 2: the confluence chain below replaces the H/L/HL/HH trade check */ }
-    else if (!sl) e.push('a trade needs a sweep');
-    else tradeCheck(e, cs, T, sl, typed, side === 'long');
+    else if (!T.confluence) e.push('a trade needs truth.confluence (BOS + FVG or IFVG)');
     if (T.confluence) confluenceCheck(e, cs, T, m, byId);
     if (T.twin || T.smt) smtCheck(e, cs, T, m);
     if (T.windows) windowCheck(e, cs, T);
@@ -1179,59 +1319,7 @@
     return e;
   }
 
-  function tradeCheck(e, cs, T, sl, typed, L) {
-    var n = cs.length, pts = T.structure, sb = T.sweep.bar;
-    var ct = L ? 'HH' : 'LL', pt = L ? 'HL' : 'LH';
-    var ci = -1;
-    for (var i = 0; i < pts.length; i++) if (pts[i].tag === ct && pts[i].bar > sb) { ci = i; break; }
-    if (ci < 0) { e.push('no ' + ct + ' after the sweep'); return; }
-    var c = pts[ci];
-    if (T.confirmBar !== c.bar) e.push('confirmBar ' + T.confirmBar + ' != ' + ct + ' bar ' + c.bar);
-    // every HL (long) / LH (short) after the sweep holds beyond the whole swept stack: the highest (long) / lowest
-    // (short) same-side level taken between the sweep and the confirm swing, not just the deepest one
-    var edge = sl.price;
-    reversedFrom(T.levels, sl.side, sb, c.bar).forEach(function (l) { edge = L ? Math.max(edge, l.price) : Math.min(edge, l.price); });
-    pts.forEach(function (p) {
-      if (p.tag === pt && p.bar > sb && (L ? !(p.price > edge) : !(p.price < edge))) {
-        e.push(pt + ' at ' + p.bar + ' does not hold beyond the swept levels (' + edge + ')');
-      }
-    });
-    // the confirm swing is the first break of the H (L) before it
-    var ref = null;
-    for (i = ci - 1; i >= 0; i--) if (highTag(pts[i].tag) === L) { ref = pts[i]; break; }
-    var pair = typed[ci].pair;
-    if (!ref) e.push(ct + ' has no ' + (L ? 'H' : 'L') + ' before it');
-    else if (pair) {
-      for (var j = ref.bar + 1; j < pair[0]; j++) {
-        if (L ? cs[j].h > ref.price : cs[j].l < ref.price) { e.push(ct + ' is not the first break: bar ' + j + ' already broke ' + ref.price); break; }
-      }
-    }
-    var w = T.entryWindow;
-    if (!w || !pair) { e.push('entryWindow missing'); return; }
-    if (w.from !== pair[1] + 1 || !(w.from > T.confirmBar)) e.push('entryWindow.from ' + w.from + ' != first bar after the ' + ct + ' pair');
-    // D2: the window runs until price clears the confirm swing again (or, failing that, takes the sweep extreme)
-    var ext = L ? Infinity : -Infinity;
-    for (j = sb; j <= c.bar; j++) ext = L ? Math.min(ext, cs[j].l) : Math.max(ext, cs[j].h);
-    var to = null;
-    for (j = w.from; j < n && to == null; j++) if (L ? cs[j].h > c.price : cs[j].l < c.price) to = j - 1;
-    for (j = w.from; j < n && to == null; j++) if (L ? cs[j].l < ext : cs[j].h > ext) to = j - 1;
-    if (to == null) to = n - 1;
-    if (w.to !== to || w.to < w.from) e.push('entryWindow.to ' + w.to + ' != ' + to);
-    if (!pts.some(function (p) { return p.tag === pt && p.bar >= w.from && p.bar <= w.to; })) e.push('no entry pivot ' + pt + ' inside the entry window');
-    // target and outcome (D4)
-    var tg = T.target, tl = tg && T.levels.filter(function (l) { return l.id === tg.levelId; })[0];
-    if (!tl || tl.price !== tg.price) { e.push('target must name a level at its price'); return; }
-    if (L ? !(tg.price > c.price) : !(tg.price < c.price)) e.push('target is not beyond the ' + ct);
-    function reach(k) { return L ? k.h >= tg.price : k.l <= tg.price; }
-    for (j = sb; j < w.from; j++) if (reach(cs[j])) { e.push('target reached before the entry window, bar ' + j); break; }
-    var hit = false, broke = false;
-    for (j = w.from; j < n; j++) { if (reach(cs[j])) hit = true; if (L ? cs[j].l < ext : cs[j].h > ext) broke = true; }
-    if (T.outcome === 'win' && !hit) e.push('outcome win but the target is never reached');
-    else if (T.outcome === 'fail' && (hit || !broke)) e.push('outcome fail needs no target and a break of the sweep extreme');
-    else if (T.outcome !== 'win' && T.outcome !== 'fail') e.push('outcome ' + T.outcome);
-  }
-
-  // ---------------------------------------------------------------- check: Level 2 (S15-S22)
+  // ---------------------------------------------------------------- check: the confluence chain (every trade)
 
   // A Level 2 trade after its entry (shared with system.js): stop = the setup's extreme from `origin` to the entry bar;
   // reach / brk = the first bar after the entry that touches the target / trades beyond the stop. win = the target

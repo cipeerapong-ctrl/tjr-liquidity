@@ -237,7 +237,10 @@
     var b = s01(7), cs = b.candles, C = TJR.confluence, list = TJR.annotate.confluence(b, {});
     var g = C.fvgs(cs)[0], o = list.filter(function (x) { return x.id === 'fvg:' + g.i; })[0];
     eq([o.type, o.from, o.to, o.low, o.high, o.dir, o.appearAt], ['fvg', g.from, g.to, g.low, g.high, g.dir, g.to]);
-    var e = C.bos(cs)[0], bo = list.filter(function (x) { return x.type === 'bos'; })[0];
+    // S01 now trades a BOS + FVG, so the BOS overlays are scanned from the setup (the sweep) like S15
+    var K = b.truth.confluence, e = C.bos(cs, { trend: K.dir === 'long' ? 'down' : 'up', from: K.origin + 1 })[0];
+    var bo = list.filter(function (x) { return x.type === 'bos'; })[0];
+    eq([e.at, e.dir], [K.confirm.at, 'up'], 'the first BOS from the sweep is the confirmation');
     eq([bo.price, bo.from, bo.at, bo.dir, bo.appearAt], [e.level.price, e.level.i, e.at, e.dir, e.at]);
     var eqs = list.filter(function (x) { return x.type === 'eq'; });
     ok(eqs.length > 0, 'an equilibrium box exists');

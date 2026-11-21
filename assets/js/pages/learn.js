@@ -232,7 +232,8 @@
       }
     }
     function chipsHtml(secs) {
-      return (secs || []).map(function (s) { return TJR.layout.chip(s); }).join('');
+      // a trade scenario's def.clip mixes main-clip seconds and playlist chips {clip, sec}
+      return (secs || []).map(function (s) { return s && typeof s === 'object' ? TJR.layout.chip(s.sec, s.clip) : TJR.layout.chip(s); }).join('');
     }
     function load(id) {
       S.id = id;

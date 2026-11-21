@@ -432,7 +432,7 @@
   });
 
   test('playbook.biasSample: nothing for a scenario without a Level 2 truth', () => {
-    eq(P.biasSample(TJR.scenarios.safeBuild(TJR.scenarios.get('S01'), 1, {})), null);
+    eq(P.biasSample(TJR.scenarios.safeBuild(TJR.scenarios.get('S04'), 1, {})), null);
   });
 
   test('playbook.biasVerdict: the four-question decision tree', () => {
