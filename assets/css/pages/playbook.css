@@ -257,6 +257,33 @@ html:not([data-motion="off"]) .ses__tbl tr { transition: background-color 240ms 
   .ses__tbl td .ts-chip { margin-left: 0; margin-top: var(--s-1); height: 44px; padding-inline: var(--s-3); }
 }
 
+/* ================================================================ traps (all clip-backed) */
+.traps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-4); counter-reset: trap; }
+@media (min-width: 768px) { .traps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trap:last-child { grid-column: 1 / -1; } }
+@media (min-width: 1200px) { .traps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.trap {
+  counter-increment: trap; position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: var(--s-3); min-width: 0;
+  padding: var(--s-5) var(--s-4) var(--s-4); background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  border-top: 3px solid color-mix(in srgb, var(--c-bear) 70%, transparent);
+  transition: transform .2s ease, border-color .2s ease;
+}
+.trap:hover { transform: translateY(-2px); border-color: var(--line-strong); border-top-color: var(--c-bear); }
+.trap__t { margin: 0; font-size: var(--t-h3, 20px); line-height: 1.4; display: flex; gap: var(--s-3); align-items: baseline; }
+.trap__t::before {
+  content: counter(trap); flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: var(--r-sm);
+  font: 500 var(--t-small)/1 var(--font-mono); color: var(--c-bear); background: color-mix(in srgb, var(--c-bear) 14%, transparent);
+}
+.trap p { margin: 0; font-size: var(--t-body); line-height: 1.75; color: var(--ink); }
+.trap p .chips { display: inline-flex; flex-wrap: wrap; vertical-align: middle; margin-left: var(--s-1); }
+.trap__go {
+  justify-self: start; display: inline-flex; align-items: center; min-height: 44px; color: var(--c-liq); font-size: var(--t-small);
+  text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 calc(100% - 10px) / 0 1px no-repeat; transition: background-size .25s ease;
+}
+.trap__go::after { content: "→"; margin-left: var(--s-2); transition: transform .2s ease; }
+.trap__go:hover, .trap__go:focus-visible { background-size: 100% 1px; }
+.trap__go:hover::after { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) { .trap, .trap__go, .trap__go::after { transition: none; } .trap:hover { transform: none; } }
+
 /* ================================================================ what the clip does not say */
 .gaps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--gutter); }
 @media (min-width: 1024px) { .gaps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -560,6 +560,36 @@
     ok(html.indexOf('คลิปไม่ได้ระบุ') >= 0);
   });
 
+  test('playbook.html: the traps section holds the 7 clip-backed traps, each with its facts and a real lesson link', () => {
+    var a = html.indexOf('id="traps"'), sec = html.slice(a, html.indexOf('</section>', a));
+    ok(a > html.indexOf('id="checklist"') && a < html.indexOf('id="sessions"'), 'between the checklist and the sessions');
+    var want = {
+      sweep: [['F4.6'], 'learn.html#m4'],
+      wick: [['P11.13', 'P8.20'], 'confluences.html#m1'],
+      stack: [['P8.34'], 'confluences.html#m3'],
+      'old-gap': [['P10.31', 'P10.35'], 'confluences.html#m2'],
+      eq: [['P7.14', 'P7.16'], 'confluences.html#m4'],
+      smt: [['P1.35', 'P1.36'], 'confluences.html#m5'],
+      time: [['P5.13', 'P5.17', 'P5.26'], '#sessions']
+    };
+    var items = sec.split('<li class="trap"').slice(1);
+    eq(items.length, 7, 'seven traps');
+    items.forEach((li) => {
+      var k = /^ data-trap="([\w-]+)"/.exec(li)[1], w = want[k];
+      ok(w, 'trap ' + k + ' is one of the seven');
+      var facts = (li.match(/data-fact="([FP]\d+\.\d+)"/g) || []).map((x) => x.slice(11, -1));
+      eq(facts, w[0], k + ' cites exactly its facts');
+      ok(li.indexOf('class="trap__go" href="' + w[1] + '"') >= 0, k + ' links ' + w[1]);
+      ok(li.indexOf('<h3 class="trap__t">') >= 0, k + ' has a heading');
+    });
+    var learn = readText('learn.html'), conf = readText('confluences.html');
+    ok(learn.indexOf('id="m4"') >= 0 && learn.indexOf('t=945') > learn.indexOf('id="m4"') && learn.indexOf('t=945') < learn.indexOf('id="m5"'), 'learn #m4 teaches F4.6');
+    [1, 2, 3, 4, 5].forEach((m) => ok(conf.indexOf('id="m' + m + '"') >= 0, 'confluences #m' + m));
+    // the two traps no clip says stay out (the user chose clip-backed only)
+    ['Major High', 'shallow', 'กวาดตื้น', 'SL แคบ'].forEach((w) => ok(sec.indexOf(w) < 0, 'not in the clips: ' + w));
+    ok(sec.indexOf('ขั้น 1') >= 0 && sec.indexOf('ขั้น 2') >= 0, 'pointers name path steps');
+  });
+
   test('playbook.html: every main-clip chip is the start second of a fact in clip-facts.md', () => {
     var starts = {};
     readText('docs/source/clip-facts.md').split('\n').forEach((l) => {
